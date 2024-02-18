@@ -1,17 +1,18 @@
+import 'package:coup_boardgame/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/route_manager.dart';
-import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:responsive_framework/responsive_framework.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'package:coup_boardgame/app/themes/app_theme.dart';
 import 'package:coup_boardgame/app/translations/app_translations.dart';
 import 'package:coup_boardgame/app/utils/common.dart';
 import 'package:coup_boardgame/app/utils/extensions.dart';
-import 'package:responsive_framework/responsive_framework.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  //set up firebase
+   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -34,6 +35,7 @@ class MyApp extends StatelessWidget {
             const Breakpoint(start: 801, end: 1920, name: DESKTOP),
             const Breakpoint(start: 1921, end: double.infinity, name: '4K'),
           ],
+          
         ),
         initialRoute: AppRoutes.initial,
         theme: AppThemes.themData,

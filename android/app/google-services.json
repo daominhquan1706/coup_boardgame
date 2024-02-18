@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "89031302087",
+    "project_id": "coup-boardgame",
+    "storage_bucket": "coup-boardgame.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:89031302087:android:8f931c7ed2992a045c57e2",
+        "android_client_info": {
+          "package_name": "com.example.coup_boardgame"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCW6bAAsNNT1Wz_Fdanrnj_6b-4YXEKXpg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

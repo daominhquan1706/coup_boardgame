@@ -38,6 +38,25 @@
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
+  <script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBY84nvrbzfFZee1VtCeQp-PR1rFRNM-5k",
+    authDomain: "coup-boardgame.firebaseapp.com",
+    projectId: "coup-boardgame",
+    storageBucket: "coup-boardgame.appspot.com",
+    messagingSenderId: "89031302087",
+    appId: "1:89031302087:web:03175f82642eae035c57e2"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
 </head>
 <body>
   <script>

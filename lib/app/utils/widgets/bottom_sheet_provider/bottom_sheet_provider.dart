@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-import 'package:coup_boardgame/app/themes/app_text_theme.dart';
-
 class BottomSheetProvider {
   static showDatePicker(BuildContext context, DateTime now, Function(DateTime) callback,
       {LocaleType locale = LocaleType.en, int minusTime = 1}) {
