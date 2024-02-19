@@ -38,3 +38,10 @@ class ServerResError extends ApiErrors {
   final String message;
   ServerResError(this.message) : super(name: 'ServerResError');
 }
+
+class JoinRoomError extends ApiErrors {
+  @override
+  // ignore: overridden_fields
+  final String message;
+  JoinRoomError(this.message) : super(name: 'CoupRoomIsFull');
+}

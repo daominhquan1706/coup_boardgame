@@ -1,6 +1,7 @@
 import 'package:coup_boardgame/app/data/model/abstract_model.dart';
 import 'package:flutter/material.dart';
-
+import 'package:json_annotation/json_annotation.dart';
+part 'coup_card_model.g.dart';
 enum CoupRoleType {
   duke,
   assassin,
@@ -10,9 +11,7 @@ enum CoupRoleType {
   inquisitor,
 }
 
-
 extension CoupCardTypeExtension on CoupRoleType {
-
   String get name {
     switch (this) {
       case CoupRoleType.duke:
@@ -28,8 +27,6 @@ extension CoupCardTypeExtension on CoupRoleType {
       case CoupRoleType.inquisitor:
         return 'Inquisitor';
     }
-
-    
   }
 
   String get description {
@@ -69,7 +66,8 @@ extension CoupCardTypeExtension on CoupRoleType {
 }
 
 
-class CoupCardModel implements IModel{
+@JsonSerializable()
+class CoupCardModel implements BaseModel {
   final CoupRoleType roleType;
   final bool isRevealed;
 
@@ -78,18 +76,7 @@ class CoupCardModel implements IModel{
     required this.isRevealed,
   });
 
-  @override
-  Map<String, dynamic> toJson() {
-    return {
-      'roleType': roleType.toString(),
-      'isRevealed': isRevealed,
-    };
-  }
+  factory CoupCardModel.fromJson(Map<String, dynamic> json) => _$CoupCardModelFromJson(json);
 
-  factory CoupCardModel.fromJson(Map<String, dynamic> json) {
-    return CoupCardModel(
-      roleType: CoupRoleType.values.firstWhere((e) => e.toString() == json['roleType']),
-      isRevealed: json['isRevealed'],
-    );
-  }
+  Map<String, dynamic> toJson() => _$CoupCardModelToJson(this);
 }

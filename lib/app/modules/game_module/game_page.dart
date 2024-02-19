@@ -1,6 +1,6 @@
-import 'package:coup_boardgame/app/data/model/coup_action_model.dart';
-import 'package:coup_boardgame/app/data/model/coup_card_model.dart';
-import 'package:coup_boardgame/app/data/model/coup_player_model.dart';
+import 'package:coup_boardgame/app/data/model/firestore_model/coup_action_model.dart';
+import 'package:coup_boardgame/app/data/model/firestore_model/coup_card_model.dart';
+import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/modules/game_module/widgets/card_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,10 +16,10 @@ class GamePage extends GetWidget<GameStartController> {
         child: Column(
           children: [
             // Player information section
-            buildPlayerInfo(controller.currentPlayer),
+            buildPlayerInfo(controller.currentPlayer.value),
             const SizedBox(height: 16.0),
             // Card display section
-            buildCardDisplay(controller.currentPlayer.cards),
+            buildCardDisplay(controller.currentPlayer.value.cards),
             const SizedBox(height: 16.0),
             // Action buttons section
             // buildActionButtons(controller.actions),
@@ -100,7 +100,7 @@ class GamePage extends GetWidget<GameStartController> {
     return Column(
       children: [
         Text(
-          'Current Turn: ${controller.currentPlayer.name}',
+          'Current Turn: ${controller.currentPlayer.value.name}',
           style: Get.theme.textTheme.titleLarge,
         ),
         const SizedBox(height: 16.0),

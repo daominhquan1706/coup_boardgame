@@ -1,4 +1,5 @@
 import 'package:coup_boardgame/app/routes/app_pages.dart';
+import 'package:coup_boardgame/app/utils/widgets/app_divider/app_divider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../app/modules/home_module/home_controller.dart';
@@ -18,31 +19,45 @@ class HomePage extends GetWidget<HomeController> {
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: TextField(
-                controller: controller.nameController,
+                onChanged: controller.name.call,
                 decoration: const InputDecoration(
-                  labelText: 'Enter your name',
+                  labelText: 'User name',
                   border: OutlineInputBorder(),
                 ),
               ),
             ),
-            Column(
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    // route to the lobby room page
-                    Get.toNamed(AppRoutes.lobbyRoom);
-                  },
-                  child: const Text('Create Room'),
+            Obx(
+              () => ElevatedButton(
+                onPressed: controller.name.isNotEmpty == true
+                    ? () {
+                        // route to the lobby room page
+                        controller.onTapCreateRoom();
+                      }
+                    : null,
+                child: const Text('Create Room'),
+              ),
+            ),
+            const SizedBox(height: 16.0),
+            const AppDivider(),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: TextField(
+                onChanged: controller.roomCode.call,
+                decoration: const InputDecoration(
+                  labelText: 'Room code',
+                  border: OutlineInputBorder(),
                 ),
-                const SizedBox(height: 16.0),
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle "Join room" button press
-                    // Navigate to room joining page or logic
-                  },
-                  child: const Text('Join Room'),
-                ),
-              ],
+              ),
+            ),
+            Obx(
+              () => ElevatedButton(
+                onPressed: controller.roomCode.isNotEmpty == true
+                    ? () {
+                        controller.onTapJoinRoom();
+                      }
+                    : null,
+                child: const Text('Join Room'),
+              ),
             ),
           ],
         ),

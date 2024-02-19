@@ -4,6 +4,7 @@ publish_to: 'none'
 version: 1.0.0+1
 environment:
   sdk: '>=3.3.0 <4.0.0'
+
 dependencies:
   flutter:
     sdk: flutter
@@ -17,9 +18,14 @@ dependencies:
   firebase_auth: ^4.17.4
   cloud_firestore: ^4.15.4
   get_storage: ^2.1.1
+  flutter_easyloading: ^3.0.5
+  json_annotation: ^4.8.1
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  build_runner: ^2.3.3
+  json_serializable: ^6.6.2
+
 flutter:
   uses-material-design: true

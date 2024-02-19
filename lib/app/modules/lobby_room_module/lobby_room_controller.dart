@@ -1,4 +1,11 @@
+import 'dart:async';
+
+import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
+import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
+import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import '../../../app/data/provider/lobby_room_provider.dart';
 
@@ -10,33 +17,57 @@ class LobbyRoomController extends GetxController {
   set text(text) => _text.value = text;
   get text => _text.value;
 
-  late final Rx<String> roomCode;
+  String get roomCode => Get.parameters['roomCode']!;
 
+  final Rx<CoupRoomModel?> room = Rx<CoupRoomModel?>(null);
 
-  late final RxList<String> players; // List of player names in the room
+  late StreamSubscription? _roomStreamSubscription;
 
-  bool get allReady => true; // Flag to indicate if all players are ready
+  FirestoreService get _firestoreService => Get.find<FirestoreService>();
 
   @override
-  void onInit() {
-    super.onInit();
-    roomCode = generateRoomCode().obs;
-    players = <String>[
-      'Player 1',
-      'Player 2',
-      'Player 3',
-    ].obs;
+  void onReady() {
+    super.onReady();
+
+    _firestoreService.getRoom(roomCode).then((value) {
+      room.value = value;
+    });
+
+    _roomStreamSubscription = _firestoreService.getRoomStream(roomCode).listen(room.call);
+
+    _firestoreService.addPlayerToRoom(
+      roomCode,
+      CoupPlayer(
+        name: Get.parameters['userName'] ?? '',
+        cards: [],
+        isHost: true,
+      ),
+    );
   }
 
-  String generateRoomCode() {
-    // Implement your logic to generate a unique room code
-    // This is a placeholder example
-    return 'ABCD-1234';
+  @override
+  void onClose() {
+    super.onClose();
+    _roomStreamSubscription?.cancel();
   }
 
   //start game
   void startGame() {
-    // Implement your logic to start the game
-    Get.toNamed(AppRoutes.gameStart);
+    if (room.value?.players.every((element) => element.isReady) == true) {
+      Get.toNamed(
+        AppRoutes.gameStart,
+        parameters: {
+          'userName': Get.parameters['userName'] ?? '',
+          'roomCode': roomCode,
+        },
+      );
+    } else {
+      EasyLoading.showError('All players must be ready');
+    }
+  }
+
+  Future<void> copyCode() async {
+    await Clipboard.setData(ClipboardData(text: roomCode));
+    EasyLoading.showSuccess('Room code copied', duration: const Duration(milliseconds: 500));
   }
 }
