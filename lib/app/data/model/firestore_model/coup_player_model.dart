@@ -5,21 +5,23 @@ import 'package:json_annotation/json_annotation.dart';
 part 'coup_player_model.g.dart';
 
 @JsonSerializable()
-class CoupPlayer implements BaseModel {
-  final String name;
+class CoupPlayerModel implements BaseModel {
+  String name;
   List<CoupCardModel> cards;
-  bool isAlive = true;
-  final bool isHost;
-  bool isReady = false;
+  bool isAlive;
+  bool isReady;
+  int coins;
 
-  CoupPlayer({
+  CoupPlayerModel({
     required this.name,
+    required this.isReady,
     required this.cards,
-    required this.isHost,
+    required this.isAlive,
+    required this.coins,
   });
 
-  factory CoupPlayer.fromJson(Map<String, dynamic> json) => _$CoupPlayerFromJson(json);
+  factory CoupPlayerModel.fromJson(Map<String, dynamic> json) => _$CoupPlayerModelFromJson(json);
 
   @override
-  Map<String, dynamic> toJson() => _$CoupPlayerToJson(this);
+  Map<String, dynamic> toJson() => _$CoupPlayerModelToJson(this);
 }

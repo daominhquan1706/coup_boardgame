@@ -4,7 +4,7 @@ import 'package:coup_boardgame/app/data/api/api_error.dart';
 import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_action_model.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+// import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -21,9 +21,9 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    FirebaseAuth.instance.signInAnonymously().then((value) {
-      Get.log('User ID: ${value.user!.uid}');
-    });
+    // FirebaseAuth.instance.signInAnonymously().then((value) {
+    //   Get.log('User ID: ${value.user!.uid}');
+    // });
   }
 
   Future<void> onTapCreateRoom() async {

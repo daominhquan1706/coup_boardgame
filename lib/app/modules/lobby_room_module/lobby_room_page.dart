@@ -28,10 +28,10 @@ class LobbyRoomPage extends GetWidget<LobbyRoomController> {
                     'Your room code: ${controller.roomCode}',
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
-                  ElevatedButton(
-                    onPressed: controller.copyCode,
-                    child: const Text('Copy Code'),
-                  ),
+                  // ElevatedButton(
+                  //   onPressed: controller.copyCode,
+                  //   child: const Text('Copy Code'),
+                  // ),
 
                   const SizedBox(height: 16.0),
                   const AppDivider(), const SizedBox(height: 16.0),
@@ -52,7 +52,7 @@ class LobbyRoomPage extends GetWidget<LobbyRoomController> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(width: 16.0),
-                      if (controller.room.value!.players.length >
+                      if ((controller.room.value?.players.length ?? 0) >=
                           1) // Only show button if multiple players
                         ElevatedButton(
                           onPressed: controller.startGame, // Disable if not all ready
@@ -69,7 +69,7 @@ class LobbyRoomPage extends GetWidget<LobbyRoomController> {
     );
   }
 
-  Widget _buildPlayer(CoupPlayer player) {
+  Widget _buildPlayer(CoupPlayerModel player) {
     return ListTile(
       title: Text(player.name),
       trailing: player.isReady ? const Text('Ready') : const Text('Not ready'),

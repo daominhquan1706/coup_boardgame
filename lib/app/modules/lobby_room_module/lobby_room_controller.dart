@@ -17,7 +17,9 @@ class LobbyRoomController extends GetxController {
   set text(text) => _text.value = text;
   get text => _text.value;
 
-  String get roomCode => Get.parameters['roomCode']!;
+  String? get roomCode => Get.parameters['roomCode'] ?? '';
+  // user name
+  String? get userName => Get.parameters['userName'] ?? '';
 
   final Rx<CoupRoomModel?> room = Rx<CoupRoomModel?>(null);
 
@@ -28,21 +30,37 @@ class LobbyRoomController extends GetxController {
   @override
   void onReady() {
     super.onReady();
+    if (roomCode != null && userName != null) {
+      _firestoreService.getRoom(roomCode!).then((value) {
+        room.value = value;
+      });
 
-    _firestoreService.getRoom(roomCode).then((value) {
-      room.value = value;
-    });
+      _roomStreamSubscription = _firestoreService.getRoomStream(roomCode!).listen((value) {
+        room.value = value;
+        if (value.roomState == GameState.playing) {
+          Get.offNamed(
+            AppRoutes.gameStart,
+            arguments: {
+              'roomCode': roomCode,
+              'userName': userName,
+            },
+          );
+        }
+      });
 
-    _roomStreamSubscription = _firestoreService.getRoomStream(roomCode).listen(room.call);
-
-    _firestoreService.addPlayerToRoom(
-      roomCode,
-      CoupPlayer(
-        name: Get.parameters['userName'] ?? '',
-        cards: [],
-        isHost: true,
-      ),
-    );
+      _firestoreService.joinRoom(
+        roomCode!,
+        CoupPlayerModel(
+          name: userName!,
+          isReady: true,
+          cards: [],
+          isAlive: true,
+          coins: 2,
+        ),
+      );
+    } else {
+      Get.offAllNamed(AppRoutes.home);
+    }
   }
 
   @override
@@ -52,22 +70,16 @@ class LobbyRoomController extends GetxController {
   }
 
   //start game
-  void startGame() {
+  Future<void> startGame() async {
     if (room.value?.players.every((element) => element.isReady) == true) {
-      Get.toNamed(
-        AppRoutes.gameStart,
-        parameters: {
-          'userName': Get.parameters['userName'] ?? '',
-          'roomCode': roomCode,
-        },
-      );
+      await _firestoreService.startGame(roomCode!);
     } else {
       EasyLoading.showError('All players must be ready');
     }
   }
 
   Future<void> copyCode() async {
-    await Clipboard.setData(ClipboardData(text: roomCode));
+    await Clipboard.setData(ClipboardData(text: roomCode!));
     EasyLoading.showSuccess('Room code copied', duration: const Duration(milliseconds: 500));
   }
 }

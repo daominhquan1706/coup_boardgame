@@ -10,9 +10,12 @@ CoupRoomModel _$CoupRoomModelFromJson(Map<String, dynamic> json) =>
     CoupRoomModel(
       roomId: json['roomId'] as String,
       players: (json['players'] as List<dynamic>)
-          .map((e) => CoupPlayer.fromJson(e as Map<String, dynamic>))
+          .map((e) => CoupPlayerModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       roomState: $enumDecode(_$GameStateEnumMap, json['roomState']),
+      deck: (json['deck'] as List<dynamic>)
+          .map((e) => CoupCardModel.fromJson(e as Map<String, dynamic>))
+          .toList(),
       lastAction:
           $enumDecodeNullable(_$CoupActionTypeEnumMap, json['lastAction']),
     );
@@ -31,6 +34,7 @@ Map<String, dynamic> _$CoupRoomModelToJson(CoupRoomModel instance) {
   }
 
   writeNotNull('lastAction', _$CoupActionTypeEnumMap[instance.lastAction]);
+  val['deck'] = instance.deck.map((e) => e.toJson()).toList();
   return val;
 }
 
