@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
-import '../../../app/data/provider/home_provider.dart';
-import '../../../app/modules/home_module/home_controller.dart';
+import '../../data/provider/home_provider.dart';
+import 'controller.dart';
 
 class HomeBinding implements Bindings {
   @override

@@ -1,31 +1,17 @@
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_card_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:flutter/material.dart';
+
 enum CoupActionType {
   income,
   foreignAid,
   coup,
-  tax,
-  assassinate,
-  exchange,
-  steal,
-  challenge,
-  blockForeignAid,
-  blockAssassinate,
-  blockSteal,
-  blockExchange,
-  blockCoup,
-  blockTax,
-  blockIncome,
-  blockChallenge,
-  blockBlockForeignAid,
-  blockBlockAssassinate,
-  blockBlockSteal,
-  blockBlockExchange,
-  blockBlockCoup,
-  blockBlockTax,
-  blockBlockIncome,
-  blockBlockChallenge,
+  duke,
+  captain,
+  ambassador,
+  assassin,
+  contessa,
+  inquisitor,  
 }
 
 enum CoupRoleType {
@@ -91,7 +77,6 @@ extension CoupCardTypeExtension on CoupRoleType {
   }
 }
 
-
 class CoupFunction {
   static int numCardsPerRole(int numPlayers) {
     switch (numPlayers) {
@@ -152,5 +137,86 @@ class CoupFunction {
     }
     return actions;
   }
-    
+
+  static List<CoupActionType> normalAction() {
+    return [
+      CoupActionType.taxByDuke,
+      CoupActionType.stealByCaptain,
+      CoupActionType.assassinate,
+      CoupActionType.exchangeByAmbassador,
+      CoupActionType.income,
+      CoupActionType.foreignAid,
+      CoupActionType.coup,
+    ];
+  }
+
+  static bool isNeedPlayerTarget(CoupActionType action) {
+    switch (action) {
+      case CoupActionType.assassinate:
+      case CoupActionType.stealByCaptain:
+      case CoupActionType.exchangeUserCardInquisitor:
+      case CoupActionType.coup:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  static List<CoupActionType> nextActions(CoupActionType action) {
+    switch (action) {
+      case CoupActionType.foreignAid:
+        return [
+          CoupActionType.blockForeignAidByDuke,
+        ];
+
+      case CoupActionType.assassinate:
+        return [
+          CoupActionType.challengeAssassinate,
+          CoupActionType.blockAssassinateByContessa,
+        ];
+      case CoupActionType.stealByCaptain:
+        return [
+          CoupActionType.challengeSteal,
+          CoupActionType.blockStealByAmbassador,
+          CoupActionType.blockStealByCaptain,
+          CoupActionType.blockStealByInquisitor,
+        ];
+      case CoupActionType.exchangeUserCardInquisitor:
+        return [
+          CoupActionType.challengeExchangeByInquisitor,
+        ];
+      case CoupActionType.exchangeByAmbassador:
+        return [
+          CoupActionType.challengeExchangeByAmbassador,
+        ];
+      case CoupActionType.taxByDuke:
+        return [
+          CoupActionType.challengeTax,
+        ];
+      default:
+        return [];
+    }
+  }
+
+  static List<CoupCardModel> exchangeCards(List<CoupCardModel> cards, List<CoupCardModel> deck) {
+    final newCards = <CoupCardModel>[];
+    final newDeck = List<CoupCardModel>.from(deck);
+    for (var i = 0; i < cards.length; i++) {
+      final card = cards[i];
+      if (card.isRevealed) {
+        newCards.add(newDeck.removeLast());
+      } else {
+        newCards.add(card);
+      }
+    }
+    return newCards;
+  }
+
+  static List<CoupCardModel> drawCards(List<CoupCardModel> newDeck, int i) {
+    return newDeck.sublist(0, i);
+  }
+
+  static bool hasRole(CoupPlayerModel coupPlayerModel, CoupRoleType role) {
+    return coupPlayerModel.cards.any((element) => element.roleType == role);
+  }
 }

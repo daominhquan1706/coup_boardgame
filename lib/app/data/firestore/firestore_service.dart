@@ -1,5 +1,8 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:coup_boardgame/app/data/api/api_error.dart';
+import 'package:coup_boardgame/app/data/model/firestore_model/coup_action_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
 import 'package:coup_boardgame/app/utils/constants.dart';
@@ -126,11 +129,14 @@ class FirestoreService extends GetxService {
           )
           .toList();
 
+      final pickRandomPlayer = _pickRandom(players);
+
       await _firestore.collection('rooms').doc(roomId).update(
             (room
                   ..deck = listCards
                   ..players = players
-                  ..roomState = GameState.playing)
+                  ..roomState = GameState.playing
+                  ..currentTurn = pickRandomPlayer.name)
                 .toJson(),
           );
     } catch (e) {
@@ -158,5 +164,98 @@ class FirestoreService extends GetxService {
                 ..deck = [])
               .toJson(),
         );
+  }
+
+  void performAction(String roomCode, CoupActionModel actionModel) {
+    if (actionModel.actionType == CoupActionType.income) {
+      _performIncome(roomCode, actionModel);
+    } else if (actionModel.actionType == CoupActionType.foreignAid) {
+      _performForeignAid(roomCode, actionModel);
+    } else if (actionModel.actionType == CoupActionType.taxByDuke) {
+      _performTax(roomCode, actionModel);
+    } else if (actionModel.actionType == CoupActionType.exchangeByAmbassador) {
+      _performExchange(roomCode, actionModel);
+    } else if (actionModel.actionType == CoupActionType.stealByCaptain) {
+      _performSteal(roomCode, actionModel.source, actionModel);
+    } else if (actionModel.actionType == CoupActionType.assassinate) {
+      _performAssassinate(roomCode, actionModel.source, actionModel);
+    } else if (actionModel.actionType == CoupActionType.coup) {
+      _performCoup(roomCode, actionModel.source, actionModel);
+    }
+  }
+
+  Future<void> _performIncome(String roomCode, CoupActionModel action) async {
+    final player = action.source;
+    final room = await getRoom(roomCode);
+    final players = room.players;
+    final index = players.indexOf(player);
+    players[index] = player..coins += 1;
+
+    _firestore.collection('rooms').doc(roomCode).update({
+      'players': players.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  Future<void> _performForeignAid(String roomCode, CoupActionModel action) async {
+    final player = action.source;
+    final room = await getRoom(roomCode);
+    final players = room.players;
+    final index = players.indexOf(player);
+    players[index] = player..coins += 2;
+
+    _firestore.collection('rooms').doc(roomCode).update({
+      'players': players.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  Future<void> _performTax(String roomCode, CoupActionModel actionModel) async {
+    final player = actionModel.source;
+    final room = await getRoom(roomCode);
+    final players = room.players;
+    final index = players.indexWhere((element) => element.name == player.name);
+    players[index] = player..coins += 3;
+
+    _firestore.collection('rooms').doc(roomCode).update({
+      'players': players.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  Future<void> _performExchange(String roomCode, CoupActionModel actionModel) async {
+    final player = actionModel.source;
+    final room = await getRoom(roomCode);
+    final players = room.players;
+    final index = players.indexOf(player);
+    final newDeck = room.deck;
+    final newCards = [
+      ...player.cards,
+      newDeck.removeLast(),
+      newDeck.removeLast(),
+    ];
+
+    players[index] = player..cards = newCards;
+
+    _firestore.collection('rooms').doc(roomCode).update({
+      'players': players.map((e) => e.toJson()).toList(),
+      'deck': room.deck.map((e) => e.toJson()).toList(),
+    });
+  }
+
+  Future<void> _performSteal(String roomCode, CoupPlayerModel source, CoupActionModel actionModel) {
+    throw UnimplementedError();
+  }
+
+  Future<void> _performAssassinate(
+      String roomCode, CoupPlayerModel source, CoupActionModel actionModel) {
+    throw UnimplementedError();
+  }
+
+  Future<void> _performCoup(String roomCode, CoupPlayerModel source, CoupActionModel actionModel) {
+    throw UnimplementedError();
+  }
+
+  CoupPlayerModel _pickRandom(List<CoupPlayerModel> players) {
+    final random = Random();
+    final index = random.nextInt(players.length);
+    return players[index];
   }
 }

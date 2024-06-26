@@ -8,7 +8,7 @@ import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import '../../../app/data/provider/home_provider.dart';
+import '../../data/provider/home_provider.dart';
 
 class HomeController extends GetxController {
   final HomeProvider? provider;

@@ -10,7 +10,6 @@ part 'coup_room_model.g.dart';
 enum GameState {
   waiting,
   playing,
-  finished,
 }
 
 extension GameStateExtension on GameState {
@@ -20,8 +19,6 @@ extension GameStateExtension on GameState {
         return 'waiting';
       case GameState.playing:
         return 'playing';
-      case GameState.finished:
-        return 'finished';
     }
   }
 }
@@ -33,6 +30,30 @@ class CoupRoomModel implements BaseModel {
   GameState roomState;
   CoupActionType? lastAction;
   List<CoupCardModel> deck;
+  String? currentTurn;
+  CoupActionModel? currentAction;
+
+  CoupPlayerModel get currentPlayerTurn {
+    final playersAliveInRoom = players.where((player) => player.isAlive).toList();
+
+    return playersAliveInRoom.firstWhere((element) => element.name == currentTurn);
+  }
+
+  List<CoupPlayerModel> get playersAlive {
+    return players.where((player) => player.isAlive).toList();
+  }
+
+  int get voteNeeded {
+    return playersAlive.length - 1;
+  }
+
+  bool get isWaitingVote {
+    return (currentAction?.listVoted.length ?? 0) < voteNeeded;
+  }
+
+  bool get isFullyVoted {
+    return isWaitingVote == false;
+  }
 
   CoupRoomModel({
     required this.roomId,

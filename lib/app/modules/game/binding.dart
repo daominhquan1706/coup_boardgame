@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 
 import '../../data/provider/game_provider.dart';
-import 'game_controller.dart';
+import 'controller.dart';
 
 class GameStartBinding implements Bindings {
   @override

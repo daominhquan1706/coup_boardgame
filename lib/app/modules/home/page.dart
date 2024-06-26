@@ -2,9 +2,9 @@ import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'package:coup_boardgame/app/utils/widgets/app_divider/app_divider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../app/modules/home_module/home_controller.dart';
+import 'controller.dart';
 
-class HomePage extends GetWidget<HomeController> {
+class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
   @override
   Widget build(BuildContext context) {

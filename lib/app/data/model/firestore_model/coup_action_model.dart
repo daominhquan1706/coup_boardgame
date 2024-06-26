@@ -5,16 +5,24 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'coup_action_model.g.dart';
 
-
 @JsonSerializable()
-class ActionModel implements BaseModel {
+class CoupActionModel implements BaseModel {
   final CoupPlayerModel source; // Player performing the action
   final CoupActionType actionType; // Type of action being taken (e.g., income, challenge)
   final CoupPlayerModel? target; // Optional target player if the action requires one
+  List<String> listNeedVote = []; // List of players who need to vote on the action
+  List<String> listVoted = []; // List of players who have voted on the action
+  String? preventedBy; // Name of the player who prevented the action
+  bool? isFakeAction; // Whether the action is a fake action
 
-  ActionModel({required this.source, required this.actionType, this.target});
+  CoupActionModel({
+    required this.source,
+    required this.actionType,
+    this.target,
+  });
 
-  factory ActionModel.fromJson(Map<String, dynamic> json) => _$ActionModelFromJson(json);
+  factory CoupActionModel.fromJson(Map<String, dynamic> json) => _$CoupActionModelFromJson(json);
 
-  Map<String, dynamic> toJson() => _$ActionModelToJson(this);
+  @override
+  Map<String, dynamic> toJson() => _$CoupActionModelToJson(this);
 }

@@ -6,15 +6,22 @@ part of 'coup_action_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-ActionModel _$ActionModelFromJson(Map<String, dynamic> json) => ActionModel(
+CoupActionModel _$CoupActionModelFromJson(Map<String, dynamic> json) =>
+    CoupActionModel(
       source: CoupPlayerModel.fromJson(json['source'] as Map<String, dynamic>),
       actionType: $enumDecode(_$CoupActionTypeEnumMap, json['actionType']),
       target: json['target'] == null
           ? null
           : CoupPlayerModel.fromJson(json['target'] as Map<String, dynamic>),
-    );
+    )
+      ..listNeedVote = (json['listNeedVote'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList()
+      ..listVoted =
+          (json['listVoted'] as List<dynamic>).map((e) => e as String).toList()
+      ..preventedBy = json['preventedBy'] as String?;
 
-Map<String, dynamic> _$ActionModelToJson(ActionModel instance) {
+Map<String, dynamic> _$CoupActionModelToJson(CoupActionModel instance) {
   final val = <String, dynamic>{
     'source': instance.source.toJson(),
     'actionType': _$CoupActionTypeEnumMap[instance.actionType]!,
@@ -27,6 +34,9 @@ Map<String, dynamic> _$ActionModelToJson(ActionModel instance) {
   }
 
   writeNotNull('target', instance.target?.toJson());
+  val['listNeedVote'] = instance.listNeedVote;
+  val['listVoted'] = instance.listVoted;
+  writeNotNull('preventedBy', instance.preventedBy);
   return val;
 }
 
@@ -34,25 +44,20 @@ const _$CoupActionTypeEnumMap = {
   CoupActionType.income: 'income',
   CoupActionType.foreignAid: 'foreignAid',
   CoupActionType.coup: 'coup',
-  CoupActionType.tax: 'tax',
+  CoupActionType.taxByDuke: 'taxByDuke',
   CoupActionType.assassinate: 'assassinate',
-  CoupActionType.exchange: 'exchange',
-  CoupActionType.steal: 'steal',
-  CoupActionType.challenge: 'challenge',
-  CoupActionType.blockForeignAid: 'blockForeignAid',
-  CoupActionType.blockAssassinate: 'blockAssassinate',
-  CoupActionType.blockSteal: 'blockSteal',
-  CoupActionType.blockExchange: 'blockExchange',
-  CoupActionType.blockCoup: 'blockCoup',
-  CoupActionType.blockTax: 'blockTax',
-  CoupActionType.blockIncome: 'blockIncome',
-  CoupActionType.blockChallenge: 'blockChallenge',
-  CoupActionType.blockBlockForeignAid: 'blockBlockForeignAid',
-  CoupActionType.blockBlockAssassinate: 'blockBlockAssassinate',
-  CoupActionType.blockBlockSteal: 'blockBlockSteal',
-  CoupActionType.blockBlockExchange: 'blockBlockExchange',
-  CoupActionType.blockBlockCoup: 'blockBlockCoup',
-  CoupActionType.blockBlockTax: 'blockBlockTax',
-  CoupActionType.blockBlockIncome: 'blockBlockIncome',
-  CoupActionType.blockBlockChallenge: 'blockBlockChallenge',
+  CoupActionType.exchangeByAmbassador: 'exchangeByAmbassador',
+  CoupActionType.exchangeDeskCardByInquisitor: 'exchangeDeskCardByInquisitor',
+  CoupActionType.exchangeUserCardInquisitor: 'exchangeUserCardInquisitor',
+  CoupActionType.stealByCaptain: 'stealByCaptain',
+  CoupActionType.challengeAssassinate: 'challengeAssassinate',
+  CoupActionType.challengeSteal: 'challengeSteal',
+  CoupActionType.challengeExchangeByAmbassador: 'challengeExchangeByAmbassador',
+  CoupActionType.challengeExchangeByInquisitor: 'challengeExchangeByInquisitor',
+  CoupActionType.challengeTax: 'challengeTax',
+  CoupActionType.blockForeignAidByDuke: 'blockForeignAidByDuke',
+  CoupActionType.blockAssassinateByContessa: 'blockAssassinateByContessa',
+  CoupActionType.blockStealByAmbassador: 'blockStealByAmbassador',
+  CoupActionType.blockStealByCaptain: 'blockStealByCaptain',
+  CoupActionType.blockStealByInquisitor: 'blockStealByInquisitor',
 };

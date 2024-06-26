@@ -15,7 +15,7 @@ class CardWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
@@ -32,14 +32,13 @@ class CardWidget extends StatelessWidget {
         children: [
           Icon(
             icon,
-            size: 48,
+            size: 24,
             color: Colors.black,
           ),
-          const SizedBox(height: 16),
           Text(
             title,
             style: const TextStyle(
-              fontSize: 18,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
             ),
           ),

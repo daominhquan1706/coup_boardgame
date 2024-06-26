@@ -4,9 +4,9 @@ import 'package:coup_boardgame/app/utils/widgets/app_divider/app_divider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
-import '../../../app/modules/lobby_room_module/lobby_room_controller.dart';
+import 'controller.dart';
 
-class LobbyRoomPage extends GetWidget<LobbyRoomController> {
+class LobbyRoomPage extends GetView<LobbyRoomController> {
   const LobbyRoomPage({super.key});
 
   @override
@@ -58,6 +58,11 @@ class LobbyRoomPage extends GetWidget<LobbyRoomController> {
                           onPressed: controller.startGame, // Disable if not all ready
                           child: const Text('Start Game'),
                         ),
+
+                        ElevatedButton(
+                        onPressed: controller.addAI, // Disable if not all ready
+                        child: const Text('Add AI'),
+                      )
                     ],
                   ),
                 ],

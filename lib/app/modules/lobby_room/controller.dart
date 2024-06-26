@@ -7,7 +7,7 @@ import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
-import '../../../app/data/provider/lobby_room_provider.dart';
+import '../../data/provider/lobby_room_provider.dart';
 
 class LobbyRoomController extends GetxController {
   final LobbyRoomProvider? provider;
@@ -81,5 +81,20 @@ class LobbyRoomController extends GetxController {
   Future<void> copyCode() async {
     await Clipboard.setData(ClipboardData(text: roomCode!));
     EasyLoading.showSuccess('Room code copied', duration: const Duration(milliseconds: 500));
+  }
+
+  void addAI() {
+    final randomName = 'AI${DateTime.now().millisecondsSinceEpoch}';
+
+    _firestoreService.joinRoom(
+      roomCode!,
+      CoupPlayerModel(
+        name: randomName,
+        isReady: true,
+        cards: [],
+        isAlive: true,
+        coins: 2,
+      ),
+    );
   }
 }
