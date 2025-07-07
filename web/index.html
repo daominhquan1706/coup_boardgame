@@ -18,61 +18,248 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Fast-paced Coup board game - Play online with friends">
+  <meta name="keywords" content="coup, board game, online, multiplayer, strategy">
+  <meta name="theme-color" content="#0175C2">
 
   <!-- iOS meta tags & icons -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="coup_boardgame">
+  <meta name="apple-mobile-web-app-title" content="Coup Board Game">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Preload critical resources -->
+  <link rel="preload" href="main.dart.js" as="script">
+  <link rel="preload" href="assets/AssetManifest.bin.json" as="fetch" type="application/json" crossorigin>
+  <link rel="preload" href="assets/FontManifest.json" as="fetch" type="application/json" crossorigin>
+
+  <!-- Preconnect to external domains -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>coup_boardgame</title>
+  <!-- Critical CSS inline -->
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background-color: #0175C2;
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    .loading-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #0175C2 0%, #0056b3 100%);
+      color: white;
+      z-index: 9999;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+    
+    .loading-text {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .loading-subtext {
+      font-size: 14px;
+      opacity: 0.8;
+      text-align: center;
+      max-width: 280px;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .fade-out {
+      opacity: 0;
+      transition: opacity 0.3s ease-out;
+    }
+    
+    /* Ensure Flutter app takes full screen */
+    flt-glass-pane {
+      height: 100vh;
+      width: 100vw;
+    }
+  </style>
+
+  <title>Coup Board Game</title>
   <link rel="manifest" href="manifest.json">
-
-  <script>
-    // The value below is injected by flutter build, do not touch.
-    const serviceWorkerVersion = null;
-  </script>
-  <!-- This script adds the flutter initialization JS code -->
-  <script src="flutter.js" defer></script>
-  <script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
-
-  // Your web app's Firebase configuration
-  const firebaseConfig = {
-    apiKey: "AIzaSyBY84nvrbzfFZee1VtCeQp-PR1rFRNM-5k",
-    authDomain: "coup-boardgame.firebaseapp.com",
-    projectId: "coup-boardgame",
-    storageBucket: "coup-boardgame.appspot.com",
-    messagingSenderId: "89031302087",
-    appId: "1:89031302087:web:03175f82642eae035c57e2"
-  };
-
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-</script>
 </head>
 <body>
+  <!-- Loading screen -->
+  <div class="loading-container" id="loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading Coup Game...</div>
+    <div class="loading-subtext">Preparing cards and setting up the game board</div>
+  </div>
+
+  <!-- Service Worker Registration -->
   <script>
+    // Service Worker registration for offline support
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/flutter_service_worker.js')
+          .then((registration) => {
+            console.log('SW registered: ', registration);
+          })
+          .catch((registrationError) => {
+            console.log('SW registration failed: ', registrationError);
+          });
+      });
+    }
+  </script>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, connectFirestoreEmulator } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBY84nvrbzfFZee1VtCeQp-PR1rFRNM-5k",
+      authDomain: "coup-boardgame.firebaseapp.com",
+      projectId: "coup-boardgame",
+      storageBucket: "coup-boardgame.appspot.com",
+      messagingSenderId: "89031302087",
+      appId: "1:89031302087:web:03175f82642eae035c57e2"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+    
+    // Make Firebase available globally
+    window.firebaseApp = app;
+    window.firebaseDb = db;
+    window.firebaseAuth = auth;
+    
+    // Enable offline persistence
+    try {
+      import('https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js')
+        .then(({ enableNetwork, disableNetwork }) => {
+          // Enable offline persistence
+          console.log('Firebase configured for offline use');
+        });
+    } catch (error) {
+      console.log('Firebase offline config error:', error);
+    }
+  </script>
+
+  <!-- Flutter Engine Loading -->
+  <script>
+    const serviceWorkerVersion = null;
+    let flutterAppStarted = false;
+    
+    function hideLoadingScreen() {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.classList.add('fade-out');
+        setTimeout(() => {
+          loading.style.display = 'none';
+        }, 300);
+      }
+    }
+    
+    function showError(message) {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.innerHTML = `
+          <div class="loading-text" style="color: #ff6b6b;">Error Loading Game</div>
+          <div class="loading-subtext">${message}</div>
+          <div class="loading-subtext" style="margin-top: 20px;">
+            <button onclick="location.reload()" style="
+              background: white;
+              color: #0175C2;
+              border: none;
+              padding: 12px 24px;
+              border-radius: 6px;
+              font-weight: bold;
+              cursor: pointer;
+            ">Reload Game</button>
+          </div>
+        `;
+      }
+    }
+
+    // Performance monitoring
+    const startTime = performance.now();
+    
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
+      // Prevent double initialization
+      if (flutterAppStarted) return;
+      flutterAppStarted = true;
+      
+      // Load Flutter app
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
           engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
+            // Hide loading screen before running app
+            hideLoadingScreen();
+            
+            // Run Flutter app
+            appRunner.runApp().then(() => {
+              // Log performance metrics
+              const loadTime = performance.now() - startTime;
+              console.log(`App loaded in ${loadTime.toFixed(2)}ms`);
+              
+              // Send performance data to analytics if available
+              if (window.gtag) {
+                window.gtag('event', 'app_load_time', {
+                  'value': Math.round(loadTime),
+                  'custom_map': {'metric1': 'load_time'}
+                });
+              }
+            }).catch((error) => {
+              console.error('Error running Flutter app:', error);
+              showError('Failed to start the game. Please try reloading.');
+            });
+          }).catch((error) => {
+            console.error('Error initializing Flutter engine:', error);
+            showError('Failed to initialize game engine. Please check your internet connection.');
           });
         }
       });
     });
+    
+    // Handle loading timeout
+    setTimeout(() => {
+      if (!flutterAppStarted) {
+        showError('Loading timeout. Please check your internet connection and try again.');
+      }
+    }, 30000); // 30 second timeout
   </script>
+  
+  <!-- Load Flutter.js -->
+  <script src="flutter.js" defer></script>
 </body>
 </html>

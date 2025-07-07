@@ -77,36 +77,40 @@ class GameStartController extends GetxController {
   GameStartController({this.provider});
 
   final _text = 'GameStart'.obs;
-  set text(text) => _text.value = text;
-  get text => _text.value;
+  final _currentRoom = Rx<CoupRoomModel?>(null);
+  final _mePlayer = Rx<CoupPlayerModel?>(null);
+  final _isLoading = false.obs;
 
-  //get firebase service
+  String get text => _text.value;
+  CoupRoomModel? get currentRoom => _currentRoom.value;
+  CoupPlayerModel? get mePlayer => _mePlayer.value;
+  bool get isLoading => _isLoading.value;
+
+  Timer? _updateTimer;
+  StreamSubscription? _roomStreamSubscription;
+
   FirestoreService get _firestoreService => Get.find<FirestoreService>();
-
-  late StreamSubscription? _roomStreamSubscription;
-
-  final Rx<CoupRoomModel?> currentRoom = Rx<CoupRoomModel?>(null);
-  late Rx<CoupPlayerModel?> mePlayer = Rx<CoupPlayerModel?>(null);
 
   late String roomCode;
   late String userName;
 
   CoupPlayerModel? get currentPlayerTurn {
-    final playersAliveInRoom =
-        currentRoom.value!.players.where((player) => player.isAlive).toList();
-
-    return playersAliveInRoom
-        .firstWhereOrNull((element) => element.name == currentRoom.value!.currentTurn);
+    final room = _currentRoom.value;
+    if (room == null) return null;
+    
+    final playersAliveInRoom = room.players.where((player) => player.isAlive).toList();
+    return playersAliveInRoom.firstWhereOrNull(
+      (element) => element.name == room.currentTurn,
+    );
   }
 
   GamePlayingState get gamePlayingState {
-    if (currentRoom.value == null) {
-      return GamePlayingState.waitingGameStart;
-    }
+    final room = _currentRoom.value;
+    if (room == null) return GamePlayingState.waitingGameStart;
 
-    final player = mePlayer.value;
-    final currentAction = currentRoom.value?.currentAction;
-    final currentPlayerTurn = currentRoom.value?.currentPlayerTurn;
+    final player = _mePlayer.value;
+    final currentAction = room.currentAction;
+    final currentPlayerTurn = currentPlayerTurn;
     
     if (player == currentPlayerTurn) {
       if (currentAction == null) {
@@ -116,25 +120,25 @@ class GameStartController extends GetxController {
       switch (currentAction.actionType) {
           case CoupActionType.duke:
             if (gamePlayingState == GamePlayingState.myTurnWaitingVote) {
-              if (currentRoom.value!.isFullyVoted) {
+              if (room.isFullyVoted) {
                 // Get 3 coins
-                mePlayer.value!.coins += 3;
+                _mePlayer.value!.coins += 3;
                 // Update player's coins in Firestore
-                _firestoreService.updatePlayerCoins(roomCode, mePlayer.value!);
-              } else if (currentRoom.value!.isChallenged) {
-                if (currentRoom.value!.isChallengerDuke) {
+                _firestoreService.updatePlayerCoins(roomCode, _mePlayer.value!);
+              } else if (room.isChallenged) {
+                if (room.isChallengerDuke) {
                   // Duke gets 3 coins
                   currentPlayerTurn!.coins += 3;
                   // Challenger loses 1 influence
-                  currentRoom.value!.challenger!.influence -= 1;
+                  room.challenger!.influence -= 1;
                   // Update player's coins and influence in Firestore
                   _firestoreService.updatePlayerCoins(roomCode, currentPlayerTurn!);
-                  _firestoreService.updatePlayerInfluence(roomCode, currentRoom.value!.challenger!);
+                  _firestoreService.updatePlayerInfluence(roomCode, room.challenger!);
                 } else {
                   // Lose 1 influence
-                  mePlayer.value!.influence -= 1;
+                  _mePlayer.value!.influence -= 1;
                   // Update player's influence in Firestore
-                  _firestoreService.updatePlayerInfluence(roomCode, mePlayer.value!);
+                  _firestoreService.updatePlayerInfluence(roomCode, _mePlayer.value!);
                 }
               }
             }
@@ -146,12 +150,13 @@ class GameStartController extends GetxController {
       }
       
     }
+    
+    return GamePlayingState.waitingGameStart;
   }
 
   @override
   void onInit() {
     super.onInit();
-
     final args = Get.arguments as Map<String, String?>;
     roomCode = args['roomCode']!;
     userName = args['userName']!;
@@ -169,24 +174,60 @@ class GameStartController extends GetxController {
 
   @override
   void onClose() {
-    super.onClose();
     _roomStreamSubscription?.cancel();
+    _updateTimer?.cancel();
+    super.onClose();
   }
 
-  // get room info
   Future<void> getRoomInfo(String roomId) async {
-    EasyLoading.show(status: 'Starting...');
-    final room = await _firestoreService.getRoom(roomId);
-    mePlayer.value = room.players.firstWhere((element) => element.name == userName);
+    try {
+      _isLoading.value = true;
+      EasyLoading.show(status: 'Starting...');
+      
+      final room = await _firestoreService.getRoom(roomId);
+      final player = room.players.firstWhereOrNull(
+        (element) => element.name == userName,
+      );
+      
+      if (player == null) {
+        EasyLoading.dismiss();
+        Get.offAllNamed(AppRoutes.home);
+        return;
+      }
+      
+      _mePlayer.value = player;
+      _currentRoom.value = room;
+      
+      EasyLoading.dismiss();
+      _isLoading.value = false;
+      
+      _roomStreamSubscription = _firestoreService
+          .getRoomStream(roomCode)
+          .listen(_onRoomUpdate);
+          
+    } catch (e) {
+      EasyLoading.dismiss();
+      _isLoading.value = false;
+      Get.snackbar('Error', 'Failed to load game: $e');
+      Get.offAllNamed(AppRoutes.home);
+    }
+  }
 
-    EasyLoading.dismiss();
-    _roomStreamSubscription = _firestoreService.getRoomStream(roomCode).listen((value) {
-      currentRoom.value = value;
-      mePlayer.value = value.players.firstWhere((element) => element.name == userName);
+  void _onRoomUpdate(CoupRoomModel room) {
+    _updateTimer?.cancel();
+    _updateTimer = Timer(const Duration(milliseconds: 100), () {
+      _currentRoom.value = room;
+      
+      final updatedPlayer = room.players.firstWhereOrNull(
+        (element) => element.name == userName,
+      );
+      
+      if (updatedPlayer != null) {
+        _mePlayer.value = updatedPlayer;
+      }
 
-      switch (value.roomState) {
+      switch (room.roomState) {
         case GameState.waiting:
-          // Back to lobby if room is waiting
           Get.offNamed(
             AppRoutes.lobbyRoom,
             parameters: {
@@ -194,61 +235,118 @@ class GameStartController extends GetxController {
               'userName': userName,
             },
           );
-          return;
+          break;
         case GameState.playing:
+          update(['players', 'gameState', 'actions']);
           break;
         default:
+          break;
       }
     });
   }
 
-  //end game
   Future<void> endGame() async {
-    await _firestoreService.endGame(roomCode);
+    try {
+      _isLoading.value = true;
+      EasyLoading.show(status: 'Ending game...');
+      
+      await _firestoreService.endGame(roomCode);
+      
+      EasyLoading.dismiss();
+      _isLoading.value = false;
+    } catch (e) {
+      EasyLoading.dismiss();
+      _isLoading.value = false;
+      Get.snackbar('Error', 'Failed to end game: $e');
+    }
   }
 
   Future<void> performAction(CoupActionType action) async {
-    final isNeedTarget = CoupFunction.isNeedPlayerTarget(action);
-    CoupPlayerModel? targetPlayer;
-    if (isNeedTarget) {
-      targetPlayer = await _buildDialogTargetPlayer(action);
-    }
+    try {
+      final player = _mePlayer.value;
+      if (player == null) return;
 
-    final player = mePlayer.value;
-    if (player != null) {
+      _isLoading.value = true;
+      
+      final isNeedTarget = CoupFunction.isNeedPlayerTarget(action);
+      CoupPlayerModel? targetPlayer;
+      
+      if (isNeedTarget) {
+        targetPlayer = await _buildDialogTargetPlayer(action);
+        if (targetPlayer == null) {
+          _isLoading.value = false;
+          return; // User cancelled
+        }
+      }
+
       final actionModel = CoupActionModel(
         source: player,
         target: targetPlayer,
         actionType: action,
       );
-      _firestoreService.performAction(roomCode, actionModel);
+      
+      await _firestoreService.performAction(roomCode, actionModel);
+      
+      _isLoading.value = false;
+      
+      update(['actions', 'gameState']);
+      
+    } catch (e) {
+      _isLoading.value = false;
+      Get.snackbar('Error', 'Failed to perform action: $e');
     }
   }
 
   Future<CoupPlayerModel?> _buildDialogTargetPlayer(CoupActionType action) async {
+    final room = _currentRoom.value;
+    if (room == null) return null;
+    
+    final availablePlayers = room.players
+        .where((player) => player != _mePlayer.value && player.isAlive)
+        .toList();
+    
+    if (availablePlayers.isEmpty) return null;
+    
     return await Get.dialog<CoupPlayerModel?>(
       AlertDialog(
-        title: const Text('Select Target Player'),
-        content: Column(
-          children: currentRoom.value!.players
-              .where((player) => player != mePlayer.value)
-              .map(
-                (player) => ListTile(
-                  title: Text(player.name),
-                  onTap: () {
-                    final actionModel = CoupActionModel(
-                      source: mePlayer.value!,
-                      actionType: action,
-                      target: player,
-                    );
-                    _firestoreService.performAction(roomCode, actionModel);
-                    Get.back();
-                  },
-                ),
-              )
-              .toList(),
+        title: Text('Select Target Player for ${action.name}'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: availablePlayers
+                .map(
+                  (player) => ListTile(
+                    title: Text(player.name),
+                    subtitle: Text('Coins: ${player.coins}'),
+                    leading: CircleAvatar(
+                      child: Text(player.name.substring(0, 1).toUpperCase()),
+                    ),
+                    onTap: () => Get.back(result: player),
+                  ),
+                )
+                .toList(),
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancel'),
+          ),
+        ],
       ),
     );
   }
+
+  bool get isMyTurn => currentPlayerTurn?.name == userName;
+  bool get canPerformAction => isMyTurn && !isLoading;
+  
+  List<CoupPlayerModel> get alivePlayers =>
+      _currentRoom.value?.players.where((p) => p.isAlive).toList() ?? [];
+  
+  List<CoupPlayerModel> get otherPlayers =>
+      alivePlayers.where((p) => p.name != userName).toList();
+
+  void updatePlayers() => update(['players']);
+  void updateGameState() => update(['gameState']);
+  void updateActions() => update(['actions']);
 }
