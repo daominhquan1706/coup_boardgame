@@ -7,14 +7,18 @@ part 'coup_player_model.g.dart';
 @JsonSerializable()
 class CoupPlayerModel implements BaseModel {
   String name;
+  String? displayName;
   List<CoupCardModel> cards;
   bool isAlive;
   bool isReady;
   int coins;
   bool isBot;
 
+  String get shownName => (displayName?.trim().isNotEmpty ?? false) ? displayName!.trim() : name;
+
   CoupPlayerModel({
     required this.name,
+    this.displayName,
     required this.isReady,
     required this.cards,
     required this.isAlive,

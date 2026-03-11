@@ -6,9 +6,9 @@ part of 'coup_player_model.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-CoupPlayerModel _$CoupPlayerModelFromJson(Map<String, dynamic> json) =>
-    CoupPlayerModel(
+CoupPlayerModel _$CoupPlayerModelFromJson(Map<String, dynamic> json) => CoupPlayerModel(
       name: json['name'] as String,
+      displayName: json['displayName'] as String?,
       isReady: json['isReady'] as bool,
       cards: (json['cards'] as List<dynamic>)
           .map((e) => CoupCardModel.fromJson(e as Map<String, dynamic>))
@@ -18,9 +18,9 @@ CoupPlayerModel _$CoupPlayerModelFromJson(Map<String, dynamic> json) =>
       isBot: json['isBot'] as bool? ?? false,
     );
 
-Map<String, dynamic> _$CoupPlayerModelToJson(CoupPlayerModel instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$CoupPlayerModelToJson(CoupPlayerModel instance) => <String, dynamic>{
       'name': instance.name,
+      'displayName': instance.displayName,
       'cards': instance.cards.map((e) => e.toJson()).toList(),
       'isAlive': instance.isAlive,
       'isReady': instance.isReady,

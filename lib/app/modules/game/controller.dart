@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
+import 'package:coup_boardgame/app/data/model/game_history_entry.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_action_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
@@ -20,11 +21,13 @@ class GameStartController extends GetxController {
 
   final Rx<CoupRoomModel?> currentRoom = Rx<CoupRoomModel?>(null);
   final Rx<CoupPlayerModel?> mePlayer = Rx<CoupPlayerModel?>(null);
+  final RxList<GameHistoryEntry> historyEntries = <GameHistoryEntry>[].obs;
 
   StreamSubscription<CoupRoomModel>? _roomStreamSubscription;
+  StreamSubscription<List<GameHistoryEntry>>? _historyStreamSubscription;
 
-  late final String roomCode;
-  late final String userName;
+  String roomCode = '';
+  String userName = '';
 
   bool _isProcessingBots = false;
 
@@ -42,12 +45,31 @@ class GameStartController extends GetxController {
     return room.roomState == GameState.playing && room.phase == GamePhase.action && isMyTurn;
   }
 
+  String displayNameOf(String? playerId) {
+    if (playerId == null || playerId.isEmpty) return '...';
+    final player = currentRoom.value?.players.firstWhereOrNull((p) => p.name == playerId);
+    return player?.shownName ?? playerId;
+  }
+
   @override
   void onInit() {
     super.onInit();
-    final args = Get.arguments as Map<String, String?>;
-    roomCode = args['roomCode'] ?? '';
-    userName = args['userName'] ?? '';
+
+    // Accept both Get.arguments and URL query parameters to avoid null-cast crashes.
+    final dynamic args = Get.arguments;
+    if (args is Map) {
+      final roomFromArgs = args['roomCode'];
+      final userFromArgs = args['userName'];
+      if (roomFromArgs is String && roomFromArgs.isNotEmpty) {
+        roomCode = roomFromArgs;
+      }
+      if (userFromArgs is String && userFromArgs.isNotEmpty) {
+        userName = userFromArgs;
+      }
+    }
+
+    roomCode = roomCode.isNotEmpty ? roomCode : (Get.parameters['roomCode'] ?? '');
+    userName = userName.isNotEmpty ? userName : (Get.parameters['userName'] ?? '');
   }
 
   @override
@@ -59,16 +81,24 @@ class GameStartController extends GetxController {
     }
 
     _subscribeRoom();
+    _subscribeHistory();
   }
 
   @override
   void onClose() {
     _roomStreamSubscription?.cancel();
+    _historyStreamSubscription?.cancel();
     super.onClose();
   }
 
+  void _subscribeHistory() {
+    _historyStreamSubscription = _firestoreService.getActionHistoryStream(roomCode).listen((items) {
+      historyEntries.assignAll(items);
+    });
+  }
+
   void _subscribeRoom() {
-    EasyLoading.show(status: 'Loading game...');
+    EasyLoading.show(status: 'msgLoadingGame'.tr);
     _roomStreamSubscription = _firestoreService.getRoomStream(roomCode).listen((room) async {
       currentRoom.value = room;
       mePlayer.value = room.players.firstWhereOrNull((element) => element.name == userName);
@@ -87,7 +117,7 @@ class GameStartController extends GetxController {
       }
 
       if (room.roomState == GameState.finished && room.winnerId != null) {
-        EasyLoading.showInfo('Winner: ${room.winnerId}');
+        EasyLoading.showInfo('msgWinner'.trParams({'name': room.winnerId!}));
       }
 
       await _processBots(room);
@@ -95,6 +125,8 @@ class GameStartController extends GetxController {
   }
 
   Future<void> _processBots(CoupRoomModel room) async {
+    // Only the host client processes bots to prevent race conditions
+    if (room.hostId != userName) return;
     if (_isProcessingBots) return;
     _isProcessingBots = true;
     try {
@@ -110,7 +142,7 @@ class GameStartController extends GetxController {
 
   Future<void> performAction(CoupActionType action) async {
     if (!canAct) {
-      EasyLoading.showInfo('Not your turn');
+      EasyLoading.showInfo('gameNotYourTurn'.tr);
       return;
     }
 
@@ -171,7 +203,7 @@ class GameStartController extends GetxController {
 
     return Get.dialog<CoupPlayerModel>(
       AlertDialog(
-        title: const Text('Select Target Player'),
+        title: Text('gameSelectTarget'.tr),
         content: SizedBox(
           width: 360,
           child: ListView(
@@ -180,7 +212,7 @@ class GameStartController extends GetxController {
                 .where((player) => player.name != userName && player.isAlive)
                 .map(
                   (player) => ListTile(
-                    title: Text(player.name),
+                    title: Text(player.shownName),
                     onTap: () => Get.back(result: player),
                   ),
                 )

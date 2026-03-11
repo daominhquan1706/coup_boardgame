@@ -26,7 +26,13 @@ class AppTranslationKey {
 class AppTranslation {
   AppTranslation._();
 
-  static final Locale locale = Get.deviceLocale!;
+  static Locale get locale {
+    final device = Get.deviceLocale;
+    final code = device?.languageCode;
+    if (code == 'vi') return const Locale('vi');
+    return const Locale('en');
+  }
+
   static final Map<String, Map<String, String>> translations = {
     'en': enUS,
     'vi': viVN,

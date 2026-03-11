@@ -1,7 +1,9 @@
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_action_model.dart';
+import 'package:coup_boardgame/app/data/model/game_history_entry.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
 import 'package:coup_boardgame/app/modules/game/widgets/card_widget.dart';
+import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -37,7 +39,7 @@ class GamePage extends GetView<GameStartController> {
               children: [
                 const CircularProgressIndicator(color: _kGold, strokeWidth: 2),
                 const SizedBox(height: 16),
-                Text('Loading game…',
+                Text('msgLoadingGame'.tr,
                     style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 14)),
               ],
             ),
@@ -56,11 +58,15 @@ class GamePage extends GetView<GameStartController> {
                     children: [
                       _PlayerGrid(room: room, controller: controller),
                       const SizedBox(height: 12),
-                      _GameStatusCard(room: room),
+                      _GameStatusCard(room: room, controller: controller),
                     ],
                   ),
                 ),
               ),
+              Obx(() {
+                final entries = controller.historyEntries.toList(growable: false);
+                return _HistoryPanel(entries: entries, controller: controller);
+              }),
               _ActionPanel(room: room, controller: controller),
             ],
           ),
@@ -88,13 +94,16 @@ class _TopBar extends StatelessWidget {
       child: Row(
         children: [
           // Logo
-          Text(
-            'COUP',
-            style: GoogleFonts.rajdhani(
-              color: _kGold,
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 4,
+          GestureDetector(
+            onTap: () => Get.offAllNamed(AppRoutes.home),
+            child: Text(
+              'COUP',
+              style: GoogleFonts.rajdhani(
+                color: _kGold,
+                fontSize: 22,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 4,
+              ),
             ),
           ),
           const SizedBox(width: 14),
@@ -116,7 +125,7 @@ class _TopBar extends StatelessWidget {
             const Icon(Icons.person_outline, size: 14, color: _kTextSecondary),
             const SizedBox(width: 4),
             Text(
-              room.currentTurn!,
+              controller.displayNameOf(room.currentTurn),
               style: GoogleFonts.rajdhani(
                 color: _kTextPrimary,
                 fontSize: 14,
@@ -134,7 +143,8 @@ class _TopBar extends StatelessWidget {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: Text('End Game', style: GoogleFonts.rajdhani(fontSize: 12, letterSpacing: 0.5)),
+            child: Text('gameEndGame'.tr,
+                style: GoogleFonts.rajdhani(fontSize: 12, letterSpacing: 0.5)),
           ),
         ],
       ),
@@ -299,7 +309,7 @@ class _PlayerSeat extends StatelessWidget {
                           ),
                         Expanded(
                           child: Text(
-                            '${player.name}${player.isBot ? ' 🤖' : ''}${isMe ? ' (you)' : ''}',
+                            '${player.shownName}${player.isBot ? ' 🤖' : ''}${isMe ? ' (${'you'.tr})' : ''}',
                             style: GoogleFonts.rajdhani(
                               color: isCurrentTurn ? _kGoldLight : _kTextPrimary,
                               fontSize: 14,
@@ -366,9 +376,9 @@ class _OutBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(4),
         border: Border.all(color: _kRed.withOpacity(0.4), width: 0.5),
       ),
-      child: const Text(
-        'OUT',
-        style: TextStyle(
+      child: Text(
+        'out'.tr,
+        style: const TextStyle(
           color: _kRed,
           fontSize: 9,
           fontWeight: FontWeight.bold,
@@ -382,12 +392,14 @@ class _OutBadge extends StatelessWidget {
 // ─── Game status card ────────────────────────────────────────────────────────
 class _GameStatusCard extends StatelessWidget {
   final CoupRoomModel room;
-  const _GameStatusCard({required this.room});
+  final GameStartController controller;
+  const _GameStatusCard({required this.room, required this.controller});
 
   @override
   Widget build(BuildContext context) {
     if (room.roomState == GameState.finished) {
-      return _FinishedBanner(winnerId: room.winnerId);
+      final winner = room.players.firstWhereOrNull((p) => p.name == room.winnerId)?.shownName;
+      return _FinishedBanner(winnerName: winner);
     }
     final action = room.currentAction;
     if (action == null) return const SizedBox.shrink();
@@ -396,8 +408,8 @@ class _GameStatusCard extends StatelessWidget {
 }
 
 class _FinishedBanner extends StatelessWidget {
-  final String? winnerId;
-  const _FinishedBanner({this.winnerId});
+  final String? winnerName;
+  const _FinishedBanner({this.winnerName});
 
   @override
   Widget build(BuildContext context) {
@@ -419,15 +431,15 @@ class _FinishedBanner extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Game Over',
+              Text('gameOver'.tr,
                   style: GoogleFonts.rajdhani(
                     color: _kGoldLight,
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1,
                   )),
-              if (winnerId != null)
-                Text('$winnerId wins!',
+              if (winnerName != null)
+                Text('gameWinner'.trParams({'name': winnerName!}),
                     style: GoogleFonts.rajdhani(
                         color: _kTextPrimary, fontSize: 15, fontWeight: FontWeight.w500)),
             ],
@@ -445,7 +457,7 @@ class _ActionBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final label = action.actionType.firestoreType.replaceAll('_', ' ').toUpperCase();
-    final target = action.target?.name;
+    final target = action.target?.shownName;
     final claimedRole = action.actionType.claimedRole;
 
     return Container(
@@ -466,10 +478,10 @@ class _ActionBanner extends StatelessWidget {
                     color: _kTextSecondary, fontSize: 13, fontWeight: FontWeight.w500),
                 children: [
                   TextSpan(
-                    text: action.source.name,
+                    text: action.source.shownName,
                     style: const TextStyle(color: _kTextPrimary, fontWeight: FontWeight.w700),
                   ),
-                  const TextSpan(text: ' plays '),
+                  TextSpan(text: ' ${'gameUsedAction'.tr} '),
                   TextSpan(
                     text: label,
                     style: TextStyle(
@@ -495,6 +507,226 @@ class _ActionBanner extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HistoryPanel extends StatelessWidget {
+  final List<GameHistoryEntry> entries;
+  final GameStartController controller;
+
+  const _HistoryPanel({required this.entries, required this.controller});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.sizeOf(context).height;
+    final panelHeight = screenHeight < 700 ? 128.0 : 176.0;
+
+    return Container(
+      height: panelHeight,
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      decoration: BoxDecoration(
+        color: _kSurface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        border: Border.all(color: _kBorder),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+            child: Row(
+              children: [
+                const Icon(Icons.history_rounded, size: 16, color: _kGold),
+                const SizedBox(width: 8),
+                Text(
+                  'gameHistory'.tr,
+                  style: GoogleFonts.rajdhani(
+                    color: _kGoldLight,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                  ),
+                ),
+                const Spacer(),
+                Text(
+                  'gameEvents'.trParams({'count': '${entries.length}'}),
+                  style: GoogleFonts.rajdhani(
+                    color: _kTextSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.6,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, thickness: 1, color: _kBorder),
+          Expanded(
+            child: entries.isEmpty
+                ? Center(
+                    child: Text(
+                      'gameNoActions'.tr,
+                      style: GoogleFonts.rajdhani(
+                        color: _kTextSecondary,
+                        fontSize: 14,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    itemCount: entries.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) =>
+                        _HistoryRow(entry: entries[index], controller: controller),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HistoryRow extends StatelessWidget {
+  final GameHistoryEntry entry;
+  final GameStartController controller;
+
+  const _HistoryRow({required this.entry, required this.controller});
+
+  Color get _accentColor {
+    switch (entry.actionType) {
+      case 'income':
+        return const Color(0xFF10B981);
+      case 'foreign_aid':
+        return const Color(0xFF06B6D4);
+      case 'tax':
+        return const Color(0xFF8B5CF6);
+      case 'assassinate':
+        return const Color(0xFFEF4444);
+      case 'steal':
+        return const Color(0xFF3B82F6);
+      case 'exchange':
+        return const Color(0xFF14B8A6);
+      case 'coup':
+        return const Color(0xFFF59E0B);
+      default:
+        return _kTextSecondary;
+    }
+  }
+
+  String get _actionLabel => entry.actionType.replaceAll('_', ' ').toUpperCase();
+
+  String get _statusLabel {
+    final status = entry.status;
+    if (status == null || status.isEmpty) return 'gamePending'.tr;
+    return status[0].toUpperCase() + status.substring(1);
+  }
+
+  String get _timeLabel {
+    final createdAt = entry.createdAt;
+    if (createdAt == null) return 'gameJustNow'.tr;
+    final hour = createdAt.hour.toString().padLeft(2, '0');
+    final minute = createdAt.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      decoration: BoxDecoration(
+        color: _kSurfaceHigh,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _kBorder.withOpacity(0.9)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.only(top: 5),
+            decoration: BoxDecoration(
+              color: _accentColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                RichText(
+                  text: TextSpan(
+                    style: GoogleFonts.rajdhani(
+                      color: _kTextSecondary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: controller.displayNameOf(entry.actorName),
+                        style: const TextStyle(color: _kTextPrimary, fontWeight: FontWeight.w700),
+                      ),
+                      TextSpan(text: ' ${'gameUsedAction'.tr} '),
+                      TextSpan(
+                        text: _actionLabel,
+                        style: TextStyle(color: _accentColor, fontWeight: FontWeight.w700),
+                      ),
+                      if (entry.targetName != null) ...[
+                        TextSpan(text: ' ${'gameOnTarget'.tr} '),
+                        TextSpan(
+                          text: controller.displayNameOf(entry.targetName),
+                          style: const TextStyle(color: _kTextPrimary, fontWeight: FontWeight.w700),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    _MiniBadge(label: _statusLabel, color: _accentColor),
+                    if (entry.claimedCard != null)
+                      _MiniBadge(label: entry.claimedCard!, color: _kGold),
+                    _MiniBadge(label: _timeLabel, color: _kTextSecondary),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniBadge extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _MiniBadge({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withOpacity(0.35)),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: GoogleFonts.rajdhani(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }
@@ -546,7 +778,7 @@ class _ActionPanel extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Text(
-              'Waiting for ${room.currentTurn ?? "..."}',
+              'gameWaitingFor'.trParams({'name': controller.displayNameOf(room.currentTurn)}),
               style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 14),
             ),
           ],
@@ -586,7 +818,7 @@ class _MyInfoBar extends StatelessWidget {
           const Icon(Icons.person, size: 14, color: _kTextSecondary),
           const SizedBox(width: 5),
           Text(
-            me.name,
+            me.shownName,
             style: GoogleFonts.rajdhani(
                 color: _kTextPrimary, fontSize: 14, fontWeight: FontWeight.w600),
           ),
@@ -594,7 +826,7 @@ class _MyInfoBar extends StatelessWidget {
           const Icon(Icons.monetization_on_rounded, size: 14, color: _kGold),
           const SizedBox(width: 4),
           Text(
-            '${me.coins} coins',
+            '${me.coins} ${'coins'.tr}',
             style: const TextStyle(color: _kGold, fontSize: 13, fontWeight: FontWeight.w700),
           ),
           const SizedBox(width: 16),
@@ -699,19 +931,19 @@ class _ActionTile extends StatelessWidget {
   String get _label {
     switch (action) {
       case CoupActionType.income:
-        return 'Income';
+        return 'actionIncome'.tr;
       case CoupActionType.foreignAid:
-        return 'Foreign Aid';
+        return 'actionForeignAid'.tr;
       case CoupActionType.coup:
-        return 'Coup';
+        return 'actionCoup'.tr;
       case CoupActionType.duke:
-        return 'Tax';
+        return 'actionTax'.tr;
       case CoupActionType.assassin:
-        return 'Assassinate';
+        return 'actionAssassinate'.tr;
       case CoupActionType.captain:
-        return 'Steal';
+        return 'actionSteal'.tr;
       case CoupActionType.ambassador:
-        return 'Exchange';
+        return 'actionExchange'.tr;
       default:
         return action.firestoreType;
     }
@@ -720,19 +952,19 @@ class _ActionTile extends StatelessWidget {
   String get _sublabel {
     switch (action) {
       case CoupActionType.income:
-        return '+1 coin';
+        return 'actionIncomeSub'.tr;
       case CoupActionType.foreignAid:
-        return '+2 coins';
+        return 'actionForeignAidSub'.tr;
       case CoupActionType.coup:
-        return '7 coins';
+        return 'actionCoupSub'.tr;
       case CoupActionType.duke:
-        return '+3 · Duke';
+        return 'actionTaxSub'.tr;
       case CoupActionType.assassin:
-        return '3 coins · Assassin';
+        return 'actionAssassinateSub'.tr;
       case CoupActionType.captain:
-        return 'steal 2 · Captain';
+        return 'actionStealSub'.tr;
       case CoupActionType.ambassador:
-        return 'Ambassador';
+        return 'actionExchangeSub'.tr;
       default:
         return '';
     }
@@ -810,22 +1042,22 @@ class _ChallengeButtons extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Do you challenge this action?',
+          'gameChallengeQuestion'.tr,
           style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 12, letterSpacing: 0.5),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
             _PanelButton(
-              label: 'Challenge',
-              sublabel: 'call their bluff',
+              label: 'gameChallenge'.tr,
+              sublabel: 'gameCallBluff'.tr,
               color: const Color(0xFFD97706),
               onTap: controller.challengeAction,
             ),
             const SizedBox(width: 8),
             _PanelButton(
-              label: 'Pass',
-              sublabel: 'let it happen',
+              label: 'gamePass'.tr,
+              sublabel: 'gameLetItHappen'.tr,
               color: _kTextSecondary,
               outlined: true,
               onTap: controller.passChallenge,
@@ -860,7 +1092,7 @@ class _BlockButtons extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Block this action?',
+          'gameBlockQuestion'.tr,
           style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 12, letterSpacing: 0.5),
         ),
         const SizedBox(height: 8),
@@ -872,15 +1104,16 @@ class _BlockButtons extends StatelessWidget {
               final roleType =
                   CoupRoleType.values.firstWhereOrNull((r) => r.firestoreValue == role);
               return _PanelButton(
-                label: 'Block as ${role[0].toUpperCase()}${role.substring(1)}',
-                sublabel: 'claim $role',
+                label: 'gameBlockAs'
+                    .trParams({'role': '${role[0].toUpperCase()}${role.substring(1)}'}),
+                sublabel: 'gameClaimRole'.trParams({'role': role}),
                 color: CardWidget.roleColor(roleType),
                 onTap: () => controller.blockAction(role),
               );
             }),
             _PanelButton(
-              label: 'No Block',
-              sublabel: 'allow action',
+              label: 'gameNoBlock'.tr,
+              sublabel: 'gameAllowAction'.tr,
               color: _kTextSecondary,
               outlined: true,
               onTap: controller.passBlockOpportunity,
@@ -903,22 +1136,22 @@ class _BlockChallengeButtons extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Someone blocked. Challenge the block?',
+          'gameChallengeBlockQuestion'.tr,
           style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 12, letterSpacing: 0.5),
         ),
         const SizedBox(height: 8),
         Row(
           children: [
             _PanelButton(
-              label: 'Challenge Block',
-              sublabel: 'call their bluff',
+              label: 'gameChallengeBlock'.tr,
+              sublabel: 'gameCallBluff'.tr,
               color: const Color(0xFFDC2626),
               onTap: controller.challengeBlock,
             ),
             const SizedBox(width: 8),
             _PanelButton(
-              label: 'Accept Block',
-              sublabel: 'action fails',
+              label: 'gameAcceptBlock'.tr,
+              sublabel: 'gameActionFails'.tr,
               color: _kTextSecondary,
               outlined: true,
               onTap: controller.passBlockChallenge,

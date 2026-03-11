@@ -32,7 +32,7 @@ class SplashPage extends GetView<SplashController> {
             ),
             const SizedBox(height: 24),
             Text(
-              'COUP',
+              'appTitle'.tr,
               style: GoogleFonts.rajdhani(
                 color: _kGoldLight,
                 fontSize: 48,
@@ -42,7 +42,7 @@ class SplashPage extends GetView<SplashController> {
             ),
             const SizedBox(height: 6),
             Text(
-              'THE BOARD GAME',
+              'appSubtitle'.tr,
               style: GoogleFonts.rajdhani(
                 color: _kTextSecondary,
                 fontSize: 13,
@@ -61,7 +61,7 @@ class SplashPage extends GetView<SplashController> {
             ),
             const SizedBox(height: 14),
             Text(
-              'Loading…',
+              'loading'.tr,
               style: GoogleFonts.rajdhani(
                 color: _kTextSecondary,
                 fontSize: 13,

@@ -3,7 +3,8 @@ import 'dart:math';
 import 'package:coup_boardgame/app/data/api/api_error.dart';
 import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
-// import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import '../../data/provider/home_provider.dart';
@@ -12,36 +13,48 @@ class HomeController extends GetxController {
   final HomeProvider? provider;
   HomeController({this.provider});
 
-  // text field controller for name input
-  final Rx<String> name = ''.obs;
   final Rx<String> roomCode = ''.obs;
+  final Rx<String> selectedLanguage = 'en'.obs;
+  late final String playerId;
+  late final String defaultDisplayName;
+
+  @override
+  void onInit() {
+    super.onInit();
+    selectedLanguage.value = Get.locale?.languageCode == 'vi' ? 'vi' : 'en';
+    playerId = _generatePlayerId();
+    defaultDisplayName = 'Player ${playerId.substring(playerId.length - 4)}';
+  }
+
+  void changeLanguage(String languageCode) {
+    if (selectedLanguage.value == languageCode) return;
+    selectedLanguage.value = languageCode;
+    Get.updateLocale(Locale(languageCode));
+  }
 
   Future<void> onTapCreateRoom() async {
-    if (name.value.isEmpty) {
-      // close old snackbar
-
-      EasyLoading.showInfo('Please enter your name');
-      return;
-    }
-
-    EasyLoading.show(status: 'Creating room...');
+    EasyLoading.show(status: 'msgCreatingRoom'.tr);
 
     final roomCode = generateRoomCode();
     try {
-      final isCreateRoomeSuccess =
-          await Get.find<FirestoreService>().createRoom(roomCode, [name.value]);
+      final isCreateRoomeSuccess = await Get.find<FirestoreService>().createRoom(
+        roomCode,
+        [playerId],
+        hostDisplayName: defaultDisplayName,
+      );
 
       EasyLoading.dismiss();
       if (isCreateRoomeSuccess) {
         Get.toNamed(AppRoutes.lobbyRoom, parameters: {
-          'userName': name.value,
+          'userName': playerId,
+          'displayName': defaultDisplayName,
           'roomCode': roomCode,
         });
       } else {
-        EasyLoading.showError('Failed to create room');
+        EasyLoading.showError('msgFailedCreateRoom'.tr);
       }
     } catch (e) {
-      EasyLoading.showError('Failed to create room');
+      EasyLoading.showError('msgFailedCreateRoom'.tr);
     }
   }
 
@@ -54,29 +67,35 @@ class HomeController extends GetxController {
   }
 
   Future<void> onTapJoinRoom() async {
-    //check name , room code
-    if (name.value.isEmpty) {
-      EasyLoading.showInfo('Please enter your name');
-      return;
-    }
-
     if (roomCode.value.isEmpty) {
-      EasyLoading.showInfo('Please enter room code');
+      EasyLoading.showInfo('msgEnterRoomCode'.tr);
       return;
     }
     try {
       final isCanJoinRoom =
-          await Get.find<FirestoreService>().isCanJoinRoom(roomCode.value, name.value);
+          await Get.find<FirestoreService>().isCanJoinRoom(roomCode.value, playerId);
       if (isCanJoinRoom) {
         Get.toNamed(AppRoutes.lobbyRoom, parameters: {
-          'userName': name.value,
+          'userName': playerId,
+          'displayName': defaultDisplayName,
           'roomCode': roomCode.value,
         });
       }
     } on JoinRoomError catch (e) {
       EasyLoading.showError(e.message);
     } catch (e) {
-      EasyLoading.showError('Failed to join room');
+      EasyLoading.showError('msgFailedJoinRoom'.tr);
     }
+  }
+
+  String _generatePlayerId() {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid != null && uid.isNotEmpty) {
+      final suffix = uid.substring(uid.length > 8 ? uid.length - 8 : 0);
+      return 'P_$suffix';
+    }
+
+    final seed = DateTime.now().millisecondsSinceEpoch % 1000000;
+    return 'P_$seed';
   }
 }

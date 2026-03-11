@@ -5,24 +5,36 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 
 class SplashController extends GetxController {
+  bool _hasNavigated = false;
+
   @override
-  void onInit() {
-    super.onInit();
+  void onReady() {
+    super.onReady();
+    unawaited(_bootstrap());
+  }
 
-    FirebaseAuth.instance.authStateChanges().listen((User? user) async {
+  Future<void> _bootstrap() async {
+    try {
+      final auth = FirebaseAuth.instance;
+      User? user = auth.currentUser;
+
       if (user == null) {
-        // sign in anonymously
-        await FirebaseAuth.instance.signInAnonymously();
-
-        // Get.offNamed(AppRoutes.login);
+        final credential = await auth.signInAnonymously().timeout(const Duration(seconds: 8));
+        user = credential.user;
       }
-      Get.offNamed(AppRoutes.home);
-    });
 
-    ///Your Function in the Future
-    Future.delayed(const Duration(seconds: 2), () {
-      // 2s over, navigate to a new page
-      Get.offNamed(AppRoutes.home);
-    });
+      Get.log('Splash auth ready: ${user?.uid ?? 'anonymous-unavailable'}');
+    } catch (e) {
+      Get.log('Splash bootstrap failed: $e');
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    _goHome();
+  }
+
+  void _goHome() {
+    if (_hasNavigated || isClosed) return;
+    _hasNavigated = true;
+    Get.offNamed(AppRoutes.home);
   }
 }

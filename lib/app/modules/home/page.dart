@@ -31,8 +31,8 @@ class HomePage extends GetView<HomeController> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildLogo(),
-                  const SizedBox(height: 48),
-                  _buildNameField(),
+                  const SizedBox(height: 20),
+                  _buildLanguageSelector(),
                   const SizedBox(height: 20),
                   _buildCreateSection(),
                   const SizedBox(height: 28),
@@ -57,7 +57,7 @@ class HomePage extends GetView<HomeController> {
             const Icon(Icons.shield_outlined, color: _kGold, size: 26),
             const SizedBox(width: 10),
             Text(
-              'COUP',
+              'appTitle'.tr,
               style: GoogleFonts.rajdhani(
                 color: _kGoldLight,
                 fontSize: 36,
@@ -71,7 +71,7 @@ class HomePage extends GetView<HomeController> {
         ),
         const SizedBox(height: 4),
         Text(
-          'THE BOARD GAME',
+          'appSubtitle'.tr,
           textAlign: TextAlign.center,
           style: GoogleFonts.rajdhani(
             color: _kTextSecondary,
@@ -84,26 +84,45 @@ class HomePage extends GetView<HomeController> {
     );
   }
 
-  Widget _buildNameField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'YOUR NAME',
-          style: GoogleFonts.rajdhani(
-            color: _kTextSecondary,
-            fontSize: 11,
-            letterSpacing: 2,
-            fontWeight: FontWeight.w600,
+  Widget _buildLanguageSelector() {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: _kSurface,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _kBorder),
+      ),
+      child: Row(
+        children: [
+          Text(
+            'homeLanguage'.tr,
+            style: GoogleFonts.rajdhani(
+              color: _kTextSecondary,
+              fontSize: 12,
+              letterSpacing: 1.2,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        _BoardTextField(
-          onChanged: controller.name.call,
-          hintText: 'Enter display name',
-          prefixIcon: Icons.person_outline,
-        ),
-      ],
+          const Spacer(),
+          Obx(
+            () => Wrap(
+              spacing: 8,
+              children: [
+                _LangButton(
+                  label: 'languageEnglish'.tr,
+                  selected: controller.selectedLanguage.value == 'en',
+                  onTap: () => controller.changeLanguage('en'),
+                ),
+                _LangButton(
+                  label: 'languageVietnamese'.tr,
+                  selected: controller.selectedLanguage.value == 'vi',
+                  onTap: () => controller.changeLanguage('vi'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -130,7 +149,7 @@ class HomePage extends GetView<HomeController> {
               ),
               const SizedBox(width: 10),
               Text(
-                'Create a Room',
+                'homeCreateRoomTitle'.tr,
                 style: GoogleFonts.rajdhani(
                   color: _kTextPrimary,
                   fontSize: 16,
@@ -141,18 +160,14 @@ class HomePage extends GetView<HomeController> {
             ],
           ),
           const SizedBox(height: 4),
-          Text(
-            'Start a new game and invite friends.',
-            style: TextStyle(color: _kTextSecondary, fontSize: 12),
-          ),
+          Text('homeCreateRoomDesc'.tr,
+              style: const TextStyle(color: _kTextSecondary, fontSize: 12)),
           const SizedBox(height: 16),
-          Obx(
-            () => _BoardButton(
-              label: 'Create Room',
-              color: _kGreen,
-              enabled: controller.name.value.isNotEmpty,
-              onTap: controller.onTapCreateRoom,
-            ),
+          _BoardButton(
+            label: 'homeCreateRoomButton'.tr,
+            color: _kGreen,
+            enabled: true,
+            onTap: controller.onTapCreateRoom,
           ),
         ],
       ),
@@ -162,11 +177,11 @@ class HomePage extends GetView<HomeController> {
   Widget _buildDivider() {
     return Row(
       children: [
-        Expanded(child: Divider(color: _kBorder, thickness: 1)),
+        const Expanded(child: Divider(color: _kBorder, thickness: 1)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
-            'OR',
+            'homeOr'.tr,
             style: GoogleFonts.rajdhani(
               color: _kTextSecondary,
               fontSize: 12,
@@ -175,7 +190,7 @@ class HomePage extends GetView<HomeController> {
             ),
           ),
         ),
-        Expanded(child: Divider(color: _kBorder, thickness: 1)),
+        const Expanded(child: Divider(color: _kBorder, thickness: 1)),
       ],
     );
   }
@@ -203,7 +218,7 @@ class HomePage extends GetView<HomeController> {
               ),
               const SizedBox(width: 10),
               Text(
-                'Join a Room',
+                'homeJoinRoomTitle'.tr,
                 style: GoogleFonts.rajdhani(
                   color: _kTextPrimary,
                   fontSize: 16,
@@ -214,26 +229,60 @@ class HomePage extends GetView<HomeController> {
             ],
           ),
           const SizedBox(height: 4),
-          Text(
-            'Enter a room code to join a game.',
-            style: TextStyle(color: _kTextSecondary, fontSize: 12),
-          ),
+          Text('homeJoinRoomDesc'.tr, style: const TextStyle(color: _kTextSecondary, fontSize: 12)),
           const SizedBox(height: 16),
           _BoardTextField(
             onChanged: controller.roomCode.call,
-            hintText: 'Enter room code (e.g. 1234)',
+            hintText: 'homeEnterRoomCode'.tr,
             prefixIcon: Icons.tag,
           ),
           const SizedBox(height: 12),
           Obx(
             () => _BoardButton(
-              label: 'Join Room',
+              label: 'homeJoinRoomButton'.tr,
               color: _kBlue,
               enabled: controller.roomCode.value.isNotEmpty,
               onTap: controller.onTapJoinRoom,
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LangButton extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const _LangButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: selected ? _kGold.withValues(alpha: 0.14) : _kSurfaceHigh,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: selected ? _kGold.withValues(alpha: 0.55) : _kBorder,
+          ),
+        ),
+        child: Text(
+          label,
+          style: GoogleFonts.rajdhani(
+            color: selected ? _kGoldLight : _kTextSecondary,
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
       ),
     );
   }

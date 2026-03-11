@@ -2,6 +2,7 @@ import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'controller.dart';
 
 const Color _kBg = Color(0xFF0F1728);
@@ -12,6 +13,7 @@ const Color _kGold = Color(0xFFD4AF37);
 const Color _kGoldLight = Color(0xFFEDD97A);
 const Color _kTextPrimary = Color(0xFFE8EDF5);
 const Color _kTextSecondary = Color(0xFF7A8CA8);
+const Color _kBlue = Color(0xFF3B82F6);
 const Color _kGreen = Color(0xFF2ECC71);
 const Color _kRed = Color(0xFFE74C3C);
 
@@ -37,6 +39,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         _buildRoomCodeCard(),
+                        const SizedBox(height: 16),
+                        _buildMyInfoCard(),
                         const SizedBox(height: 16),
                         _buildPlayersCard(room),
                         const SizedBox(height: 16),
@@ -64,20 +68,23 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
         children: [
           const Icon(Icons.shield_outlined, color: _kGold, size: 18),
           const SizedBox(width: 8),
-          Text(
-            'COUP',
-            style: GoogleFonts.rajdhani(
-              color: _kGold,
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 4,
+          GestureDetector(
+            onTap: () => Get.offAllNamed(AppRoutes.home),
+            child: Text(
+              'COUP',
+              style: GoogleFonts.rajdhani(
+                color: _kGold,
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 4,
+              ),
             ),
           ),
           const SizedBox(width: 14),
           Container(width: 1, height: 16, color: _kBorder),
           const SizedBox(width: 14),
           Text(
-            'LOBBY',
+            'lobbyTitle'.tr,
             style: GoogleFonts.rajdhani(
               color: _kTextSecondary,
               fontSize: 12,
@@ -97,8 +104,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 border: Border.all(color: _kGold.withValues(alpha: 0.4)),
               ),
               child: Text(
-                'HOST',
-                style: TextStyle(
+                'host'.tr,
+                style: const TextStyle(
                   color: _kGold,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -126,7 +133,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'ROOM CODE',
+                'lobbyRoomCode'.tr,
                 style: GoogleFonts.rajdhani(
                   color: _kTextSecondary,
                   fontSize: 11,
@@ -162,7 +169,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                   const Icon(Icons.copy_outlined, color: _kTextSecondary, size: 14),
                   const SizedBox(width: 6),
                   Text(
-                    'Copy',
+                    'copy'.tr,
                     style: GoogleFonts.rajdhani(
                       color: _kTextSecondary,
                       fontSize: 13,
@@ -196,7 +203,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 const Icon(Icons.people_outline, size: 15, color: _kTextSecondary),
                 const SizedBox(width: 8),
                 Text(
-                  'PLAYERS',
+                  'lobbyPlayers'.tr,
                   style: GoogleFonts.rajdhani(
                     color: _kTextSecondary,
                     fontSize: 11,
@@ -220,6 +227,14 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     ),
                   ),
                 ),
+                const Spacer(),
+                if (controller.isHost)
+                  _SmallButton(
+                    label: 'lobbyAddBot'.tr,
+                    icon: Icons.smart_toy_outlined,
+                    color: _kGold,
+                    onTap: controller.addAI,
+                  ),
               ],
             ),
           ),
@@ -228,7 +243,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             Padding(
               padding: const EdgeInsets.all(24),
               child: Text(
-                'Waiting for players…',
+                'lobbyWaitingPlayers'.tr,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.rajdhani(
                   color: _kTextSecondary,
@@ -249,6 +264,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
 
   Widget _buildPlayerRow(CoupPlayerModel player, bool isLast) {
     final isMe = player.name == controller.userName;
+    final canKick = controller.isHost && !isMe;
     return Column(
       children: [
         Padding(
@@ -260,16 +276,14 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isMe
-                      ? const Color(0xFF3B82F6).withValues(alpha: 0.15)
-                      : _kSurfaceHigh,
+                  color: isMe ? const Color(0xFF3B82F6).withValues(alpha: 0.15) : _kSurfaceHigh,
                   border: Border.all(
                     color: isMe ? const Color(0xFF3B82F6).withValues(alpha: 0.5) : _kBorder,
                   ),
                 ),
                 child: Center(
                   child: Text(
-                    player.name.isNotEmpty ? player.name[0].toUpperCase() : '?',
+                    player.shownName.isNotEmpty ? player.shownName[0].toUpperCase() : '?',
                     style: TextStyle(
                       color: isMe ? const Color(0xFF3B82F6) : _kTextSecondary,
                       fontSize: 14,
@@ -286,7 +300,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     Row(
                       children: [
                         Text(
-                          player.name,
+                          player.shownName,
                           style: GoogleFonts.rajdhani(
                             color: _kTextPrimary,
                             fontSize: 14,
@@ -296,8 +310,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                         if (isMe) ...[
                           const SizedBox(width: 6),
                           Text(
-                            '(you)',
-                            style: TextStyle(
+                            '(${"you".tr})',
+                            style: const TextStyle(
                               color: _kTextSecondary,
                               fontSize: 11,
                             ),
@@ -313,8 +327,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                               border: Border.all(color: _kGold.withValues(alpha: 0.3)),
                             ),
                             child: Text(
-                              'BOT',
-                              style: TextStyle(
+                              'lobbyBot'.tr,
+                              style: const TextStyle(
                                 color: _kGold,
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
@@ -323,12 +337,35 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                             ),
                           ),
                         ],
+                        const SizedBox(width: 6),
+                        _ReadyBadge(isReady: player.isReady),
                       ],
                     ),
                   ],
                 ),
               ),
-              _ReadyBadge(isReady: player.isReady),
+              if (canKick) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () => controller.kickPlayer(player.name),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: _kRed.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(color: _kRed.withValues(alpha: 0.4)),
+                    ),
+                    child: Text(
+                      'lobbyKick'.tr,
+                      style: GoogleFonts.rajdhani(
+                        color: _kRed,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -350,9 +387,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                color: canStart
-                    ? _kGreen.withValues(alpha: 0.14)
-                    : _kSurfaceHigh,
+                color: canStart ? _kGreen.withValues(alpha: 0.14) : _kSurfaceHigh,
                 borderRadius: BorderRadius.circular(10),
                 border: Border.all(
                   color: canStart ? _kGreen.withValues(alpha: 0.55) : _kBorder,
@@ -361,7 +396,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               child: Column(
                 children: [
                   Text(
-                    'Start Game',
+                    'lobbyStartGame'.tr,
                     textAlign: TextAlign.center,
                     style: GoogleFonts.rajdhani(
                       color: canStart ? _kGreen : _kTextSecondary,
@@ -372,37 +407,96 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                   ),
                   if (!canStart)
                     Text(
-                      'Need at least 2 players',
+                      'lobbyNeedTwoPlayers'.tr,
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: _kTextSecondary, fontSize: 11),
+                      style: const TextStyle(color: _kTextSecondary, fontSize: 11),
                     ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: _SmallButton(
-                  label: 'Add Bot',
-                  icon: Icons.smart_toy_outlined,
-                  color: _kGold,
-                  onTap: controller.addAI,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: _SmallButton(
-                  label: 'Remove Bot',
-                  icon: Icons.remove_circle_outline,
-                  color: _kRed,
-                  onTap: controller.removeAI,
-                ),
-              ),
-            ],
-          ),
         ],
+      );
+    });
+  }
+
+  Widget _buildMyInfoCard() {
+    return Obx(() {
+      final me = controller.mePlayer;
+      final isReady = me?.isReady ?? false;
+
+      return Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: _kSurface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _kBorder),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.person_outline, size: 16, color: _kTextSecondary),
+                const SizedBox(width: 8),
+                Text(
+                  'lobbyMyInfo'.tr,
+                  style: GoogleFonts.rajdhani(
+                    color: _kTextSecondary,
+                    fontSize: 12,
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: controller.displayNameController,
+              style: const TextStyle(color: _kTextPrimary, fontSize: 14),
+              cursorColor: _kGold,
+              decoration: InputDecoration(
+                hintText: 'homeEnterDisplayName'.tr,
+                hintStyle: const TextStyle(color: _kTextSecondary, fontSize: 13),
+                filled: true,
+                fillColor: _kSurfaceHigh,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: _kBorder),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: const BorderSide(color: _kGold, width: 1.3),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                Expanded(
+                  child: _SmallButton(
+                    label: 'lobbyEditName'.tr,
+                    icon: Icons.edit_outlined,
+                    color: _kBlue,
+                    onTap: controller.updateMyDisplayName,
+                  ),
+                ),
+                if (!controller.isHost) ...[
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _SmallButton(
+                      label: isReady ? 'lobbyUnready'.tr : 'lobbyReady'.tr,
+                      icon: isReady ? Icons.pause_circle_outline : Icons.check_circle_outline,
+                      color: isReady ? _kTextSecondary : _kGreen,
+                      onTap: controller.toggleReady,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
       );
     });
   }
@@ -417,16 +511,14 @@ class _ReadyBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: isReady
-            ? _kGreen.withValues(alpha: 0.12)
-            : _kSurfaceHigh,
+        color: isReady ? _kGreen.withValues(alpha: 0.12) : _kSurfaceHigh,
         borderRadius: BorderRadius.circular(5),
         border: Border.all(
           color: isReady ? _kGreen.withValues(alpha: 0.4) : _kBorder,
         ),
       ),
       child: Text(
-        isReady ? 'Ready' : 'Waiting',
+        isReady ? 'ready'.tr : 'waiting'.tr,
         style: TextStyle(
           color: isReady ? _kGreen : _kTextSecondary,
           fontSize: 11,
@@ -464,7 +556,7 @@ class _SmallButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: 14),
+            Icon(icon, color: color, size: 14).paddingOnly(left: 6),
             const SizedBox(width: 6),
             Text(
               label,
@@ -473,7 +565,7 @@ class _SmallButton extends StatelessWidget {
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
-            ),
+            ).paddingOnly(right: 6),
           ],
         ),
       ),
