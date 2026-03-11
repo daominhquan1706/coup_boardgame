@@ -27,6 +27,10 @@ class LobbyRoomController extends GetxController {
 
   FirestoreService get _firestoreService => Get.find<FirestoreService>();
 
+  bool get isHost => room.value?.hostId == userName;
+
+  bool get canStart => (room.value?.players.length ?? 0) >= 2;
+
   @override
   void onReady() {
     super.onReady();
@@ -56,6 +60,7 @@ class LobbyRoomController extends GetxController {
           cards: [],
           isAlive: true,
           coins: 2,
+          isBot: false,
         ),
       );
     } else {
@@ -71,6 +76,16 @@ class LobbyRoomController extends GetxController {
 
   //start game
   Future<void> startGame() async {
+    if (!isHost) {
+      EasyLoading.showError('Only host can start game');
+      return;
+    }
+
+    if (!canStart) {
+      EasyLoading.showError('Need at least 2 players');
+      return;
+    }
+
     if (room.value?.players.every((element) => element.isReady) == true) {
       await _firestoreService.startGame(roomCode!);
     } else {
@@ -83,18 +98,21 @@ class LobbyRoomController extends GetxController {
     EasyLoading.showSuccess('Room code copied', duration: const Duration(milliseconds: 500));
   }
 
-  void addAI() {
-    final randomName = 'AI${DateTime.now().millisecondsSinceEpoch}';
+  Future<void> addAI() async {
+    if (!isHost) {
+      EasyLoading.showError('Only host can add bot players');
+      return;
+    }
 
-    _firestoreService.joinRoom(
-      roomCode!,
-      CoupPlayerModel(
-        name: randomName,
-        isReady: true,
-        cards: [],
-        isAlive: true,
-        coins: 2,
-      ),
-    );
+    await _firestoreService.addBot(roomCode!);
+  }
+
+  Future<void> removeAI() async {
+    if (!isHost) {
+      EasyLoading.showError('Only host can remove bot players');
+      return;
+    }
+
+    await _firestoreService.removeBot(roomCode!);
   }
 }

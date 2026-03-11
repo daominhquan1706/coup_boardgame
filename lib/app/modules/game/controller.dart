@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_action_model.dart';
-import 'package:coup_boardgame/app/data/model/firestore_model/coup_card_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
@@ -10,243 +9,183 @@ import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+
 import '../../data/provider/game_provider.dart';
-
-//list roles: Ambasador, Captain, Contessa, Duke, Assassin
-
-// choose Duke action > waiting for vote > fully vote yes > get 3 coins > done
-// choose Duke action > waiting for vote > challenged > have Duke > Duke get 3 coins > challenger lose 1 influence > done
-// choose Duke action > waiting for vote > challenged > don't have Duke > lose 1 influence > done
-
-// choose Captain action > waiting for vote > fully vote yes > get 2 coins > done
-// choose Captain action > waiting for vote > challenged > have Captain > me get 2 coins > challenger lose 1 influence > done
-// choose Captain action > waiting for vote > challenged > don't have Captain > lose 1 influence > done
-// choose Captain action > waiting for vote > blocked by Captain/Ambasador/Inquisitor > say believe > done
-// choose Captain action > waiting for vote > blocked by Captain/Ambasador/Inquisitor > say don't believe > blocker have Captain/Ambasador/Inquisitor > blocker exchange the Captain/Ambasador/Inquisitor from counter > lose 1 influence
-// choose Captain action > waiting for vote > blocked by Captain/Ambasador/Inquisitor > say don't believe > blocker don't have Captain/Ambasador/Inquisitor > blocker lose 1 influence > me get 2 coins > done
-
-// choose Ambasador action > waiting for vote > fully vote yes > get 2 cards > return 2 cards > done
-// choose Ambasador action > waiting for vote > challenged > have Ambasador > Ambasador get 2 cards > challenger lose 1 influence > done
-// choose Ambasador action > waiting for vote > challenged > don't have Ambasador >
-
-// choose Assassin action > choose target > waiting for vote > fully vote yes >  target choose to lose 1 influence > target lose 1 influence > done
-// choose Assassin action > choose target > waiting for vote > challenged > have Assassin > me choose to lose 1 influence > challenger lose 1 influence > done
-// choose Assassin action > choose target > waiting for vote > challenged > don't have Assassin > lose 1 influence > done
-// choose Assassin action > choose target > waiting for vote > blocked by Contessa > say believe > done
-// choose Assassin action > choose target > waiting for vote > blocked by Contessa > say don't believe > target have Contessa > target lose 1 influence > done
-// choose Assassin action > choose target > waiting for vote > blocked by Contessa > say don't believe > target don't have Contessa > target lose 2 influence > done
-
-enum GamePlayingState {
-  waitingGameStart,
-  myTurnChooseAction,
-  myTurnWaitingVote,
-  myTurnFullyVotedChooseCardToExchange,
-  myTurnFullyVotedChooseTarget,
-  myTurnFullyVotedChooseCardToReturn,
-  myTurnFullyVotedChooseTargetToLoseInfluence,
-  myTurnFullyVotedChooseTargetToGetCoins,
-  myTurnFullyVotedChooseTargetToExchangeCard,
-  myTurnFullyVotedChooseTargetToBlock,
-  myTurnFullyVotedChooseTargetToChallenge,
-  myTurnFullyVotedChooseTargetToBelieve,
-  myTurnFullyVotedChooseTargetToDontBelieve,
-  myTurnFullyVotedChooseTargetToLoseInfluenceByBlocker,
-  myTurnFullyVotedChooseTargetToGetCoinsByBlocker,
-  myTurnFullyVotedChooseTargetToExchangeCardByBlocker,
-  myTurnFullyVotedChooseTargetToLoseInfluenceByChallenger,
-  myTurnFullyVotedChooseTargetToGetCoinsByChallenger,
-  myTurnFullyVotedChooseTargetToExchangeCardByChallenger,
-  myTurnFullyVotedChooseTargetToLoseInfluenceByTarget,
-  myTurnFullyVotedChooseTargetToGetCoinsByTarget,
-  myTurnFullyVotedChooseTargetToExchangeCardByTarget,
-  myTurnFullyVotedChooseTargetToLoseInfluenceByTargetByBlocker,
-  myTurnFullyVotedChooseTargetToGetCoinsByTargetByBlocker,
-  myTurnFullyVotedChooseTargetToExchangeCardByTargetByBlocker,
-  myTurnFullyVotedChooseTargetToLoseInfluenceByTargetByChallenger,
-  myTurnFullyVotedChooseTargetToGetCoinsByTargetByChallenger,
-  myTurnFullyVotedChooseTargetToExchangeCardByTargetByChallenger,
-  myTurnFullyVotedChooseTargetToLoseInfluenceByTargetByChallengerByBlocker,
-  myTurnFullyVotedChooseTargetToGetCoinsByTargetByChallengerByBlocker,
-  myTurnFullyVotedChooseTargetToExchangeCardByTargetByChallengerByBlocker,
-  myTurnFullyVotedChooseTargetToLoseInfluenceByTargetByChallengerByBlockerByChallenger,
-  myTurnFullyVotedChooseTargetToGetCoinsByTargetByChallengerByBlockerByChall
-}
 
 class GameStartController extends GetxController {
   final GameProvider? provider;
   GameStartController({this.provider});
 
-  final _text = 'GameStart'.obs;
-  set text(text) => _text.value = text;
-  get text => _text.value;
-
-  //get firebase service
-  FirestoreService get _firestoreService => Get.find<FirestoreService>();
-
-  late StreamSubscription? _roomStreamSubscription;
+  final FirestoreService _firestoreService = Get.find<FirestoreService>();
 
   final Rx<CoupRoomModel?> currentRoom = Rx<CoupRoomModel?>(null);
-  late Rx<CoupPlayerModel?> mePlayer = Rx<CoupPlayerModel?>(null);
+  final Rx<CoupPlayerModel?> mePlayer = Rx<CoupPlayerModel?>(null);
 
-  late String roomCode;
-  late String userName;
+  StreamSubscription<CoupRoomModel>? _roomStreamSubscription;
+
+  late final String roomCode;
+  late final String userName;
+
+  bool _isProcessingBots = false;
 
   CoupPlayerModel? get currentPlayerTurn {
-    final playersAliveInRoom =
-        currentRoom.value!.players.where((player) => player.isAlive).toList();
-
-    return playersAliveInRoom
-        .firstWhereOrNull((element) => element.name == currentRoom.value!.currentTurn);
+    final room = currentRoom.value;
+    if (room == null) return null;
+    return room.players.firstWhereOrNull((element) => element.name == room.currentTurn);
   }
 
-  GamePlayingState get gamePlayingState {
-    if (currentRoom.value == null) {
-      return GamePlayingState.waitingGameStart;
-    }
+  bool get isMyTurn => currentPlayerTurn?.name == userName;
 
-    final player = mePlayer.value;
-    final currentAction = currentRoom.value?.currentAction;
-    final currentPlayerTurn = currentRoom.value?.currentPlayerTurn;
-    
-    if (player == currentPlayerTurn) {
-      if (currentAction == null) {
-        return GamePlayingState.myTurnChooseAction;
-      }
-
-      switch (currentAction.actionType) {
-          case CoupActionType.duke:
-            if (gamePlayingState == GamePlayingState.myTurnWaitingVote) {
-              if (currentRoom.value!.isFullyVoted) {
-                // Get 3 coins
-                mePlayer.value!.coins += 3;
-                // Update player's coins in Firestore
-                _firestoreService.updatePlayerCoins(roomCode, mePlayer.value!);
-              } else if (currentRoom.value!.isChallenged) {
-                if (currentRoom.value!.isChallengerDuke) {
-                  // Duke gets 3 coins
-                  currentPlayerTurn!.coins += 3;
-                  // Challenger loses 1 influence
-                  currentRoom.value!.challenger!.influence -= 1;
-                  // Update player's coins and influence in Firestore
-                  _firestoreService.updatePlayerCoins(roomCode, currentPlayerTurn!);
-                  _firestoreService.updatePlayerInfluence(roomCode, currentRoom.value!.challenger!);
-                } else {
-                  // Lose 1 influence
-                  mePlayer.value!.influence -= 1;
-                  // Update player's influence in Firestore
-                  _firestoreService.updatePlayerInfluence(roomCode, mePlayer.value!);
-                }
-              }
-            }
-            break;
-        
-          
-          break;
-        default:
-      }
-      
-    }
+  bool get canAct {
+    final room = currentRoom.value;
+    if (room == null) return false;
+    return room.roomState == GameState.playing && room.phase == GamePhase.action && isMyTurn;
   }
 
   @override
   void onInit() {
     super.onInit();
-
     final args = Get.arguments as Map<String, String?>;
-    roomCode = args['roomCode']!;
-    userName = args['userName']!;
+    roomCode = args['roomCode'] ?? '';
+    userName = args['userName'] ?? '';
   }
 
   @override
   void onReady() {
     super.onReady();
-    if (roomCode.isNotEmpty && userName.isNotEmpty) {
-      getRoomInfo(roomCode);
-    } else {
+    if (roomCode.isEmpty || userName.isEmpty) {
       Get.offAllNamed(AppRoutes.home);
+      return;
     }
+
+    _subscribeRoom();
   }
 
   @override
   void onClose() {
-    super.onClose();
     _roomStreamSubscription?.cancel();
+    super.onClose();
   }
 
-  // get room info
-  Future<void> getRoomInfo(String roomId) async {
-    EasyLoading.show(status: 'Starting...');
-    final room = await _firestoreService.getRoom(roomId);
-    mePlayer.value = room.players.firstWhere((element) => element.name == userName);
+  void _subscribeRoom() {
+    EasyLoading.show(status: 'Loading game...');
+    _roomStreamSubscription = _firestoreService.getRoomStream(roomCode).listen((room) async {
+      currentRoom.value = room;
+      mePlayer.value = room.players.firstWhereOrNull((element) => element.name == userName);
 
-    EasyLoading.dismiss();
-    _roomStreamSubscription = _firestoreService.getRoomStream(roomCode).listen((value) {
-      currentRoom.value = value;
-      mePlayer.value = value.players.firstWhere((element) => element.name == userName);
+      EasyLoading.dismiss();
 
-      switch (value.roomState) {
-        case GameState.waiting:
-          // Back to lobby if room is waiting
-          Get.offNamed(
-            AppRoutes.lobbyRoom,
-            parameters: {
-              'roomCode': roomCode,
-              'userName': userName,
-            },
-          );
-          return;
-        case GameState.playing:
-          break;
-        default:
+      if (room.roomState == GameState.waiting) {
+        Get.offNamed(
+          AppRoutes.lobbyRoom,
+          parameters: {
+            'roomCode': roomCode,
+            'userName': userName,
+          },
+        );
+        return;
       }
+
+      if (room.roomState == GameState.finished && room.winnerId != null) {
+        EasyLoading.showInfo('Winner: ${room.winnerId}');
+      }
+
+      await _processBots(room);
     });
   }
 
-  //end game
+  Future<void> _processBots(CoupRoomModel room) async {
+    if (_isProcessingBots) return;
+    _isProcessingBots = true;
+    try {
+      await _firestoreService.processBots(room.roomId);
+    } finally {
+      _isProcessingBots = false;
+    }
+  }
+
   Future<void> endGame() async {
     await _firestoreService.endGame(roomCode);
   }
 
   Future<void> performAction(CoupActionType action) async {
-    final isNeedTarget = CoupFunction.isNeedPlayerTarget(action);
+    if (!canAct) {
+      EasyLoading.showInfo('Not your turn');
+      return;
+    }
+
     CoupPlayerModel? targetPlayer;
-    if (isNeedTarget) {
-      targetPlayer = await _buildDialogTargetPlayer(action);
+    if (CoupFunction.isNeedPlayerTarget(action)) {
+      targetPlayer = await _buildDialogTargetPlayer();
+      if (targetPlayer == null) return;
     }
 
     final player = mePlayer.value;
-    if (player != null) {
-      final actionModel = CoupActionModel(
-        source: player,
-        target: targetPlayer,
-        actionType: action,
-      );
-      _firestoreService.performAction(roomCode, actionModel);
+    if (player == null) return;
+
+    final actionModel = CoupActionModel(
+      source: player,
+      target: targetPlayer,
+      actionType: action,
+    );
+
+    try {
+      await _firestoreService.performAction(roomCode, actionModel);
+    } catch (e) {
+      EasyLoading.showError(e.toString());
     }
   }
 
-  Future<CoupPlayerModel?> _buildDialogTargetPlayer(CoupActionType action) async {
-    return await Get.dialog<CoupPlayerModel?>(
+  Future<void> passChallenge() async {
+    await _firestoreService.respondToChallenge(roomCode, userName, challenge: false);
+  }
+
+  Future<void> challengeAction() async {
+    await _firestoreService.respondToChallenge(roomCode, userName, challenge: true);
+  }
+
+  Future<void> passBlockOpportunity() async {
+    await _firestoreService.respondToBlockOpportunity(roomCode, userName, block: false);
+  }
+
+  Future<void> blockAction(String claimedCard) async {
+    await _firestoreService.respondToBlockOpportunity(
+      roomCode,
+      userName,
+      block: true,
+      claimedCard: claimedCard,
+    );
+  }
+
+  Future<void> passBlockChallenge() async {
+    await _firestoreService.respondToBlockChallenge(roomCode, userName, challenge: false);
+  }
+
+  Future<void> challengeBlock() async {
+    await _firestoreService.respondToBlockChallenge(roomCode, userName, challenge: true);
+  }
+
+  Future<CoupPlayerModel?> _buildDialogTargetPlayer() async {
+    final room = currentRoom.value;
+    if (room == null) return null;
+
+    return Get.dialog<CoupPlayerModel>(
       AlertDialog(
         title: const Text('Select Target Player'),
-        content: Column(
-          children: currentRoom.value!.players
-              .where((player) => player != mePlayer.value)
-              .map(
-                (player) => ListTile(
-                  title: Text(player.name),
-                  onTap: () {
-                    final actionModel = CoupActionModel(
-                      source: mePlayer.value!,
-                      actionType: action,
-                      target: player,
-                    );
-                    _firestoreService.performAction(roomCode, actionModel);
-                    Get.back();
-                  },
-                ),
-              )
-              .toList(),
+        content: SizedBox(
+          width: 360,
+          child: ListView(
+            shrinkWrap: true,
+            children: room.players
+                .where((player) => player.name != userName && player.isAlive)
+                .map(
+                  (player) => ListTile(
+                    title: Text(player.name),
+                    onTap: () => Get.back(result: player),
+                  ),
+                )
+                .toList(),
+          ),
         ),
       ),
     );

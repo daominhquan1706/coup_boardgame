@@ -14,6 +14,97 @@ enum CoupActionType {
   inquisitor,  
 }
 
+extension CoupActionTypeX on CoupActionType {
+  String get firestoreType {
+    switch (this) {
+      case CoupActionType.income:
+        return 'income';
+      case CoupActionType.foreignAid:
+        return 'foreign_aid';
+      case CoupActionType.coup:
+        return 'coup';
+      case CoupActionType.duke:
+        return 'tax';
+      case CoupActionType.captain:
+        return 'steal';
+      case CoupActionType.ambassador:
+        return 'exchange';
+      case CoupActionType.assassin:
+        return 'assassinate';
+      case CoupActionType.contessa:
+        return 'block_contessa';
+      case CoupActionType.inquisitor:
+        return 'inquisitor';
+    }
+  }
+
+  bool get isChallengeable {
+    switch (this) {
+      case CoupActionType.duke:
+      case CoupActionType.captain:
+      case CoupActionType.ambassador:
+      case CoupActionType.assassin:
+      case CoupActionType.inquisitor:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  bool get isBlockable {
+    switch (this) {
+      case CoupActionType.foreignAid:
+      case CoupActionType.captain:
+      case CoupActionType.assassin:
+        return true;
+      default:
+        return false;
+    }
+  }
+
+  CoupRoleType? get claimedRole {
+    switch (this) {
+      case CoupActionType.duke:
+        return CoupRoleType.duke;
+      case CoupActionType.captain:
+        return CoupRoleType.captain;
+      case CoupActionType.ambassador:
+        return CoupRoleType.ambassador;
+      case CoupActionType.assassin:
+        return CoupRoleType.assassin;
+      case CoupActionType.contessa:
+        return CoupRoleType.contessa;
+      case CoupActionType.inquisitor:
+        return CoupRoleType.inquisitor;
+      default:
+        return null;
+    }
+  }
+
+  static CoupActionType fromFirestoreType(String value) {
+    switch (value) {
+      case 'income':
+        return CoupActionType.income;
+      case 'foreign_aid':
+        return CoupActionType.foreignAid;
+      case 'coup':
+        return CoupActionType.coup;
+      case 'tax':
+        return CoupActionType.duke;
+      case 'steal':
+        return CoupActionType.captain;
+      case 'exchange':
+        return CoupActionType.ambassador;
+      case 'assassinate':
+        return CoupActionType.assassin;
+      case 'inquisitor':
+        return CoupActionType.inquisitor;
+      default:
+        return CoupActionType.income;
+    }
+  }
+}
+
 enum CoupRoleType {
   duke,
   assassin,
@@ -21,6 +112,44 @@ enum CoupRoleType {
   captain,
   ambassador,
   inquisitor,
+}
+
+extension CoupRoleTypeX on CoupRoleType {
+  String get firestoreValue {
+    switch (this) {
+      case CoupRoleType.duke:
+        return 'duke';
+      case CoupRoleType.assassin:
+        return 'assassin';
+      case CoupRoleType.contessa:
+        return 'contessa';
+      case CoupRoleType.captain:
+        return 'captain';
+      case CoupRoleType.ambassador:
+        return 'ambassador';
+      case CoupRoleType.inquisitor:
+        return 'inquisitor';
+    }
+  }
+
+  static CoupRoleType fromFirestoreValue(String value) {
+    switch (value) {
+      case 'duke':
+        return CoupRoleType.duke;
+      case 'assassin':
+        return CoupRoleType.assassin;
+      case 'contessa':
+        return CoupRoleType.contessa;
+      case 'captain':
+        return CoupRoleType.captain;
+      case 'ambassador':
+        return CoupRoleType.ambassador;
+      case 'inquisitor':
+        return CoupRoleType.inquisitor;
+      default:
+        return CoupRoleType.duke;
+    }
+  }
 }
 
 extension CoupCardTypeExtension on CoupRoleType {
@@ -140,61 +269,24 @@ class CoupFunction {
 
   static List<CoupActionType> normalAction() {
     return [
-      CoupActionType.taxByDuke,
-      CoupActionType.stealByCaptain,
-      CoupActionType.assassinate,
-      CoupActionType.exchangeByAmbassador,
       CoupActionType.income,
       CoupActionType.foreignAid,
       CoupActionType.coup,
+      CoupActionType.duke,
+      CoupActionType.assassin,
+      CoupActionType.captain,
+      CoupActionType.ambassador,
     ];
   }
 
   static bool isNeedPlayerTarget(CoupActionType action) {
     switch (action) {
-      case CoupActionType.assassinate:
-      case CoupActionType.stealByCaptain:
-      case CoupActionType.exchangeUserCardInquisitor:
       case CoupActionType.coup:
+      case CoupActionType.assassin:
+      case CoupActionType.captain:
         return true;
       default:
         return false;
-    }
-  }
-
-  static List<CoupActionType> nextActions(CoupActionType action) {
-    switch (action) {
-      case CoupActionType.foreignAid:
-        return [
-          CoupActionType.blockForeignAidByDuke,
-        ];
-
-      case CoupActionType.assassinate:
-        return [
-          CoupActionType.challengeAssassinate,
-          CoupActionType.blockAssassinateByContessa,
-        ];
-      case CoupActionType.stealByCaptain:
-        return [
-          CoupActionType.challengeSteal,
-          CoupActionType.blockStealByAmbassador,
-          CoupActionType.blockStealByCaptain,
-          CoupActionType.blockStealByInquisitor,
-        ];
-      case CoupActionType.exchangeUserCardInquisitor:
-        return [
-          CoupActionType.challengeExchangeByInquisitor,
-        ];
-      case CoupActionType.exchangeByAmbassador:
-        return [
-          CoupActionType.challengeExchangeByAmbassador,
-        ];
-      case CoupActionType.taxByDuke:
-        return [
-          CoupActionType.challengeTax,
-        ];
-      default:
-        return [];
     }
   }
 

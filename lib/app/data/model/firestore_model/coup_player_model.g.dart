@@ -14,7 +14,8 @@ CoupPlayerModel _$CoupPlayerModelFromJson(Map<String, dynamic> json) =>
           .map((e) => CoupCardModel.fromJson(e as Map<String, dynamic>))
           .toList(),
       isAlive: json['isAlive'] as bool,
-      coins: json['coins'] as int,
+      coins: (json['coins'] as num).toInt(),
+      isBot: json['isBot'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$CoupPlayerModelToJson(CoupPlayerModel instance) =>
@@ -24,4 +25,5 @@ Map<String, dynamic> _$CoupPlayerModelToJson(CoupPlayerModel instance) =>
       'isAlive': instance.isAlive,
       'isReady': instance.isReady,
       'coins': instance.coins,
+      'isBot': instance.isBot,
     };

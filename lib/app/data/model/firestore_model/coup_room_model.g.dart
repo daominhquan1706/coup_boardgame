@@ -12,24 +12,34 @@ CoupRoomModel _$CoupRoomModelFromJson(Map<String, dynamic> json) =>
       players: (json['players'] as List<dynamic>)
           .map((e) => CoupPlayerModel.fromJson(e as Map<String, dynamic>))
           .toList(),
-      roomState: $enumDecode(_$GameStateEnumMap, json['roomState']),
+      roomState: _gameStateFromJson(json['status'] as String?),
+      phase: json['phase'] == null
+          ? GamePhase.waiting
+          : _gamePhaseFromJson(json['phase'] as String?),
       deck: (json['deck'] as List<dynamic>)
           .map((e) => CoupCardModel.fromJson(e as Map<String, dynamic>))
           .toList(),
+      hostId: json['hostId'] as String?,
       lastAction:
           $enumDecodeNullable(_$CoupActionTypeEnumMap, json['lastAction']),
-    )
-      ..currentTurn = json['currentTurn'] as String?
-      ..currentAction = json['currentAction'] == null
+      currentTurn: json['currentTurnPlayerId'] as String?,
+      winnerId: json['winnerId'] as String?,
+      playerOrder: (json['playerOrder'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const <String>[],
+      currentAction: json['currentAction'] == null
           ? null
           : CoupActionModel.fromJson(
-              json['currentAction'] as Map<String, dynamic>);
+              json['currentAction'] as Map<String, dynamic>),
+    );
 
 Map<String, dynamic> _$CoupRoomModelToJson(CoupRoomModel instance) {
   final val = <String, dynamic>{
     'roomId': instance.roomId,
     'players': instance.players.map((e) => e.toJson()).toList(),
-    'roomState': _$GameStateEnumMap[instance.roomState]!,
+    'status': _gameStateToJson(instance.roomState),
+    'phase': _gamePhaseToJson(instance.phase),
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -38,36 +48,24 @@ Map<String, dynamic> _$CoupRoomModelToJson(CoupRoomModel instance) {
     }
   }
 
+  writeNotNull('hostId', instance.hostId);
   writeNotNull('lastAction', _$CoupActionTypeEnumMap[instance.lastAction]);
   val['deck'] = instance.deck.map((e) => e.toJson()).toList();
-  writeNotNull('currentTurn', instance.currentTurn);
+  writeNotNull('currentTurnPlayerId', instance.currentTurn);
+  writeNotNull('winnerId', instance.winnerId);
+  val['playerOrder'] = instance.playerOrder;
   writeNotNull('currentAction', instance.currentAction?.toJson());
   return val;
 }
-
-const _$GameStateEnumMap = {
-  GameState.waiting: 'waiting',
-  GameState.playing: 'playing',
-};
 
 const _$CoupActionTypeEnumMap = {
   CoupActionType.income: 'income',
   CoupActionType.foreignAid: 'foreignAid',
   CoupActionType.coup: 'coup',
-  CoupActionType.taxByDuke: 'taxByDuke',
-  CoupActionType.assassinate: 'assassinate',
-  CoupActionType.exchangeByAmbassador: 'exchangeByAmbassador',
-  CoupActionType.exchangeDeskCardByInquisitor: 'exchangeDeskCardByInquisitor',
-  CoupActionType.exchangeUserCardInquisitor: 'exchangeUserCardInquisitor',
-  CoupActionType.stealByCaptain: 'stealByCaptain',
-  CoupActionType.challengeAssassinate: 'challengeAssassinate',
-  CoupActionType.challengeSteal: 'challengeSteal',
-  CoupActionType.challengeExchangeByAmbassador: 'challengeExchangeByAmbassador',
-  CoupActionType.challengeExchangeByInquisitor: 'challengeExchangeByInquisitor',
-  CoupActionType.challengeTax: 'challengeTax',
-  CoupActionType.blockForeignAidByDuke: 'blockForeignAidByDuke',
-  CoupActionType.blockAssassinateByContessa: 'blockAssassinateByContessa',
-  CoupActionType.blockStealByAmbassador: 'blockStealByAmbassador',
-  CoupActionType.blockStealByCaptain: 'blockStealByCaptain',
-  CoupActionType.blockStealByInquisitor: 'blockStealByInquisitor',
+  CoupActionType.duke: 'duke',
+  CoupActionType.captain: 'captain',
+  CoupActionType.ambassador: 'ambassador',
+  CoupActionType.assassin: 'assassin',
+  CoupActionType.contessa: 'contessa',
+  CoupActionType.inquisitor: 'inquisitor',
 };

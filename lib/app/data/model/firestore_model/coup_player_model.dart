@@ -11,6 +11,7 @@ class CoupPlayerModel implements BaseModel {
   bool isAlive;
   bool isReady;
   int coins;
+  bool isBot;
 
   CoupPlayerModel({
     required this.name,
@@ -18,6 +19,7 @@ class CoupPlayerModel implements BaseModel {
     required this.cards,
     required this.isAlive,
     required this.coins,
+    this.isBot = false,
   });
 
   factory CoupPlayerModel.fromJson(Map<String, dynamic> json) => _$CoupPlayerModelFromJson(json);

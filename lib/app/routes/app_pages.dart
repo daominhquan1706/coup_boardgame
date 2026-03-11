@@ -6,8 +6,6 @@ import 'package:coup_boardgame/app/modules/lobby_room/binding.dart';
 import 'package:coup_boardgame/app/modules/lobby_room/page.dart';
 import 'package:coup_boardgame/app/modules/home/binding.dart';
 import 'package:coup_boardgame/app/modules/home/page.dart';
-import 'package:coup_boardgame/app/modules/home/binding.dart';
-import 'package:coup_boardgame/app/modules/home/page.dart';
 import 'package:coup_boardgame/app/modules/splash/page.dart';
 part './app_routes.dart';
 
