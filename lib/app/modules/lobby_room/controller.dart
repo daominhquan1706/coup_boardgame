@@ -22,11 +22,13 @@ class LobbyRoomController extends GetxController {
   // stable player id
   String? get userName => Get.parameters['userName'] ?? '';
   String get defaultDisplayName => Get.parameters['displayName'] ?? 'Player';
+  bool get shouldAutoReadyOnEnter => Get.parameters['autoReady'] == '1';
 
   final Rx<CoupRoomModel?> room = Rx<CoupRoomModel?>(null);
   final TextEditingController displayNameController = TextEditingController();
 
   late StreamSubscription? _roomStreamSubscription;
+  bool _didApplyAutoReady = false;
 
   FirestoreService get _firestoreService => Get.find<FirestoreService>();
 
@@ -62,6 +64,13 @@ class LobbyRoomController extends GetxController {
         final shown = me.shownName;
         if (displayNameController.text != shown) {
           displayNameController.text = shown;
+        }
+
+        if (shouldAutoReadyOnEnter && !_didApplyAutoReady && value.roomState == GameState.waiting) {
+          _didApplyAutoReady = true;
+          if (!me.isReady) {
+            unawaited(_firestoreService.updatePlayerReady(roomCode!, me.name, isReady: true));
+          }
         }
 
         if (value.roomState == GameState.playing) {

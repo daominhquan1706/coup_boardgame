@@ -6,6 +6,7 @@ import 'package:coup_boardgame/app/modules/game/widgets/card_widget.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 
@@ -51,23 +52,42 @@ class GamePage extends GetView<GameStartController> {
             children: [
               _TopBar(room: room, controller: controller),
               Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      _PlayerGrid(room: room, controller: controller),
-                      const SizedBox(height: 12),
-                      _GameStatusCard(room: room, controller: controller),
-                    ],
-                  ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // Left: player grid, status card, action panel
+                    Expanded(
+                      flex: 6,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.fromLTRB(16, 14, 16, 10),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _PlayerGrid(room: room, controller: controller),
+                                  const SizedBox(height: 12),
+                                  _GameStatusCard(room: room, controller: controller),
+                                ],
+                              ),
+                            ),
+                          ),
+                          _ActionPanel(room: room, controller: controller),
+                        ],
+                      ),
+                    ),
+                    // Right: history log panel
+                    Expanded(
+                      flex: 2,
+                      child: Obx(() {
+                        final entries = controller.historyEntries.toList(growable: false);
+                        return _HistoryPanel(entries: entries, controller: controller);
+                      }),
+                    ),
+                  ],
                 ),
               ),
-              Obx(() {
-                final entries = controller.historyEntries.toList(growable: false);
-                return _HistoryPanel(entries: entries, controller: controller);
-              }),
-              _ActionPanel(room: room, controller: controller),
             ],
           ),
         );
@@ -135,17 +155,18 @@ class _TopBar extends StatelessWidget {
             ),
             const SizedBox(width: 14),
           ],
-          TextButton(
-            onPressed: controller.endGame,
-            style: TextButton.styleFrom(
-              foregroundColor: _kRed.withOpacity(0.75),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              minimumSize: Size.zero,
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          if (room.roomState != GameState.finished)
+            TextButton(
+              onPressed: controller.endGame,
+              style: TextButton.styleFrom(
+                foregroundColor: _kRed.withOpacity(0.75),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              child: Text('gameEndGame'.tr,
+                  style: GoogleFonts.rajdhani(fontSize: 12, letterSpacing: 0.5)),
             ),
-            child: Text('gameEndGame'.tr,
-                style: GoogleFonts.rajdhani(fontSize: 12, letterSpacing: 0.5)),
-          ),
         ],
       ),
     );
@@ -399,7 +420,10 @@ class _GameStatusCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (room.roomState == GameState.finished) {
       final winner = room.players.firstWhereOrNull((p) => p.name == room.winnerId)?.shownName;
-      return _FinishedBanner(winnerName: winner);
+      return _FinishedBanner(
+        winnerName: winner,
+        onBackLobby: controller.endGame,
+      );
     }
     final action = room.currentAction;
     if (action == null) return const SizedBox.shrink();
@@ -409,7 +433,12 @@ class _GameStatusCard extends StatelessWidget {
 
 class _FinishedBanner extends StatelessWidget {
   final String? winnerName;
-  const _FinishedBanner({this.winnerName});
+  final VoidCallback onBackLobby;
+
+  const _FinishedBanner({
+    this.winnerName,
+    required this.onBackLobby,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -422,27 +451,48 @@ class _FinishedBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _kGold.withOpacity(0.35)),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.emoji_events_rounded, color: _kGold, size: 32),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text('gameOver'.tr,
-                  style: GoogleFonts.rajdhani(
-                    color: _kGoldLight,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1,
-                  )),
-              if (winnerName != null)
-                Text('gameWinner'.trParams({'name': winnerName!}),
-                    style: GoogleFonts.rajdhani(
-                        color: _kTextPrimary, fontSize: 15, fontWeight: FontWeight.w500)),
+              const Icon(Icons.emoji_events_rounded, color: _kGold, size: 32),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('gameOver'.tr,
+                      style: GoogleFonts.rajdhani(
+                        color: _kGoldLight,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 1,
+                      )),
+                  if (winnerName != null)
+                    Text('gameWinner'.trParams({'name': winnerName!}),
+                        style: GoogleFonts.rajdhani(
+                            color: _kTextPrimary, fontSize: 15, fontWeight: FontWeight.w500)),
+                ],
+              ),
             ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: 210,
+            child: ElevatedButton.icon(
+              onPressed: onBackLobby,
+              icon: const Icon(Icons.logout_rounded, size: 16),
+              label: Text('gameBackToLobby'.tr),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _kGold.withOpacity(0.16),
+                foregroundColor: _kGoldLight,
+                side: BorderSide(color: _kGold.withOpacity(0.45)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+            ),
           ),
         ],
       ),
@@ -518,17 +568,152 @@ class _HistoryPanel extends StatelessWidget {
 
   const _HistoryPanel({required this.entries, required this.controller});
 
+  List<_HistoryGroup> _groupedEntries() {
+    final map = <String, List<GameHistoryEntry>>{};
+    final order = <String>[];
+
+    for (final entry in entries) {
+      final baseId = entry.id.split('#').first;
+      if (!map.containsKey(baseId)) {
+        map[baseId] = <GameHistoryEntry>[];
+        order.add(baseId);
+      }
+      map[baseId]!.add(entry);
+    }
+
+    return order.map((id) {
+      final grouped = map[id]!;
+      grouped.sort((a, b) {
+        final aMs = a.createdAt?.millisecondsSinceEpoch ?? 0;
+        final bMs = b.createdAt?.millisecondsSinceEpoch ?? 0;
+        return aMs.compareTo(bMs);
+      });
+      return _HistoryGroup(id: id, entries: grouped);
+    }).toList(growable: false);
+  }
+
+  String _actionLabel(String actionType) {
+    switch (actionType) {
+      case 'income':
+        return 'actionIncome'.tr;
+      case 'foreign_aid':
+        return 'actionForeignAid'.tr;
+      case 'coup':
+        return 'actionCoup'.tr;
+      case 'tax':
+        return 'actionTax'.tr;
+      case 'assassinate':
+        return 'actionAssassinate'.tr;
+      case 'steal':
+        return 'actionSteal'.tr;
+      case 'exchange':
+        return 'actionExchange'.tr;
+      default:
+        return actionType.replaceAll('_', ' ').toUpperCase();
+    }
+  }
+
+  int? _timelineStartMs() {
+    int? minMs;
+    for (final entry in entries) {
+      final ms = entry.createdAt?.millisecondsSinceEpoch;
+      if (ms == null) continue;
+      if (minMs == null || ms < minMs) minMs = ms;
+    }
+    return minMs;
+  }
+
+  String _fmtTime(DateTime? time, int? timelineStartMs) {
+    if (time == null || timelineStartMs == null) return '--:--';
+    final deltaMs = time.millisecondsSinceEpoch - timelineStartMs;
+    final totalSeconds = (deltaMs < 0 ? 0 : deltaMs) ~/ 1000;
+    final mm = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+    final ss = (totalSeconds % 60).toString().padLeft(2, '0');
+    return '$mm:$ss';
+  }
+
+  String _rawLine(GameHistoryEntry entry) {
+    final actor = controller.displayNameOf(entry.actorName);
+    final target = entry.targetName == null ? null : controller.displayNameOf(entry.targetName);
+    final action = _actionLabel(entry.actionType);
+
+    switch (entry.eventType) {
+      case 'coins_changed':
+        final delta = entry.coinDelta ?? 0;
+        final sign = delta >= 0 ? '+' : '';
+        if (target == null || target.isEmpty) {
+          return '$actor $sign$delta coins';
+        }
+        return '$actor $sign$delta coins ($target)';
+      case 'influence_revealed':
+        final card = entry.claimedCard?.toUpperCase() ?? 'UNKNOWN';
+        return '$actor reveal $card';
+      case 'challenge_called':
+        return target == null
+            ? '$actor ${'gameChallenge'.tr} $action'
+            : '$actor ${'gameChallenge'.tr} $target ($action)';
+      case 'challenge_pass':
+        return 'gamePassedChallenge'.trParams({'actor': actor});
+      case 'block_called':
+        final card = entry.claimedCard?.toUpperCase() ?? 'UNKNOWN';
+        return 'gameBlockedWith'.trParams({'actor': actor, 'card': card});
+      case 'block_pass':
+        return 'gamePassedBlockOpportunity'.trParams({'actor': actor});
+      case 'block_challenge_called':
+        return target == null
+            ? '$actor ${'gameChallengeBlock'.tr}'
+            : '$actor ${'gameChallengeBlock'.tr} $target';
+      case 'block_challenge_pass':
+        return '$actor ${'gameAcceptBlock'.tr}';
+      default:
+        return target == null
+            ? '$actor ${'gameUsedAction'.tr} $action'
+            : '$actor ${'gameUsedAction'.tr} $action ${'gameOnTarget'.tr} $target';
+    }
+  }
+
+  Future<void> _copyAllLogs(List<_HistoryGroup> groups, int? timelineStartMs) async {
+    final lines = <String>[];
+    for (final group in groups) {
+      if (group.entries.isEmpty) continue;
+      final root = group.actionEntry ?? group.entries.first;
+      lines.add('[${_fmtTime(root.createdAt, timelineStartMs)}] ${_rawLine(root)}');
+      for (final event in group.entries) {
+        if (event == root) continue;
+        lines.add('  - [${_fmtTime(event.createdAt, timelineStartMs)}] ${_rawLine(event)}');
+      }
+      lines.add('');
+    }
+
+    final text = lines.join('\n').trimRight();
+    if (text.isEmpty) return;
+    await Clipboard.setData(ClipboardData(text: text));
+    Get.rawSnackbar(
+      messageText: Text(
+        'gameLogsCopied'.tr,
+        style: GoogleFonts.rajdhani(color: _kTextPrimary, fontWeight: FontWeight.w600),
+      ),
+      backgroundColor: _kSurface,
+      borderColor: _kBorder,
+      borderWidth: 1,
+      margin: const EdgeInsets.all(12),
+      borderRadius: 8,
+      snackPosition: SnackPosition.BOTTOM,
+      duration: const Duration(milliseconds: 1100),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    final panelHeight = screenHeight < 700 ? 128.0 : 176.0;
+    final groups = _groupedEntries();
+    final timelineStartMs = _timelineStartMs();
 
     return Container(
-      height: panelHeight,
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+      width: 160,
+      margin: const EdgeInsets.fromLTRB(0, 8, 8, 8),
       decoration: BoxDecoration(
         color: _kSurface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _kBorder),
       ),
       child: Column(
@@ -558,12 +743,23 @@ class _HistoryPanel extends StatelessWidget {
                     letterSpacing: 0.6,
                   ),
                 ),
+                const SizedBox(width: 6),
+                if (groups.isNotEmpty)
+                  IconButton(
+                    tooltip: 'gameCopyLogs'.tr,
+                    onPressed: () => _copyAllLogs(groups, timelineStartMs),
+                    splashRadius: 16,
+                    iconSize: 16,
+                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+                    padding: const EdgeInsets.all(4),
+                    icon: const Icon(Icons.copy_rounded, color: _kGold),
+                  ),
               ],
             ),
           ),
           const Divider(height: 1, thickness: 1, color: _kBorder),
           Expanded(
-            child: entries.isEmpty
+            child: groups.isEmpty
                 ? Center(
                     child: Text(
                       'gameNoActions'.tr,
@@ -576,10 +772,13 @@ class _HistoryPanel extends StatelessWidget {
                   )
                 : ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    itemCount: entries.length,
+                    itemCount: groups.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) =>
-                        _HistoryRow(entry: entries[index], controller: controller),
+                    itemBuilder: (context, index) => _HistoryGroupCard(
+                      group: groups[index],
+                      controller: controller,
+                      timelineStartMs: timelineStartMs,
+                    ),
                   ),
           ),
         ],
@@ -588,13 +787,84 @@ class _HistoryPanel extends StatelessWidget {
   }
 }
 
-class _HistoryRow extends StatelessWidget {
-  final GameHistoryEntry entry;
+class _HistoryGroup {
+  final String id;
+  final List<GameHistoryEntry> entries;
+
+  const _HistoryGroup({required this.id, required this.entries});
+
+  GameHistoryEntry? get actionEntry =>
+      entries.firstWhereOrNull((entry) => entry.eventType == 'action_played');
+}
+
+class _HistoryGroupCard extends StatelessWidget {
+  final _HistoryGroup group;
   final GameStartController controller;
+  final int? timelineStartMs;
 
-  const _HistoryRow({required this.entry, required this.controller});
+  const _HistoryGroupCard({
+    required this.group,
+    required this.controller,
+    required this.timelineStartMs,
+  });
 
-  Color get _accentColor {
+  CoupRoleType? _roleFromActionType(String actionType) {
+    if (actionType == 'block_contessa') return CoupRoleType.contessa;
+    return CoupActionTypeX.fromFirestoreType(actionType).claimedRole;
+  }
+
+  String _actionLabel(String actionType) {
+    switch (actionType) {
+      case 'income':
+        return 'actionIncome'.tr;
+      case 'foreign_aid':
+        return 'actionForeignAid'.tr;
+      case 'coup':
+        return 'actionCoup'.tr;
+      case 'tax':
+        return 'actionTax'.tr;
+      case 'assassinate':
+        return 'actionAssassinate'.tr;
+      case 'steal':
+        return 'actionSteal'.tr;
+      case 'exchange':
+        return 'actionExchange'.tr;
+      default:
+        return actionType.replaceAll('_', ' ').toUpperCase();
+    }
+  }
+
+  String _timeLabel(DateTime? createdAt) {
+    if (createdAt == null || timelineStartMs == null) return '--:--';
+    final deltaMs = createdAt.millisecondsSinceEpoch - timelineStartMs!;
+    final totalSeconds = (deltaMs < 0 ? 0 : deltaMs) ~/ 1000;
+    final mm = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+    final ss = (totalSeconds % 60).toString().padLeft(2, '0');
+    return '$mm:$ss';
+  }
+
+  Color _eventAccent(GameHistoryEntry entry) {
+    if (entry.eventType == 'coins_changed') {
+      final delta = entry.coinDelta ?? 0;
+      return delta < 0 ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+    }
+    if (entry.eventType == 'influence_revealed') {
+      return const Color(0xFFF59E0B);
+    }
+
+    switch (entry.eventType) {
+      case 'challenge_called':
+      case 'block_challenge_called':
+        return const Color(0xFFD97706);
+      case 'block_called':
+        return const Color(0xFF7C3AED);
+      default:
+        break;
+    }
+
+    final role = _roleFromActionType(entry.actionType);
+    if (role != null) return CardWidget.roleColor(role);
+
     switch (entry.actionType) {
       case 'income':
         return const Color(0xFF10B981);
@@ -615,124 +885,205 @@ class _HistoryRow extends StatelessWidget {
     }
   }
 
-  String get _actionLabel => entry.actionType.replaceAll('_', ' ').toUpperCase();
+  List<InlineSpan> _spans(GameHistoryEntry entry) {
+    final actor = controller.displayNameOf(entry.actorName);
+    final target = entry.targetName == null ? null : controller.displayNameOf(entry.targetName);
+    final actionLabel = _actionLabel(entry.actionType);
+    final actionColor = _eventAccent(entry);
+    final base = GoogleFonts.rajdhani(
+      color: _kTextSecondary,
+      fontSize: 11.5,
+      fontWeight: FontWeight.w500,
+    );
+    final strong = GoogleFonts.rajdhani(
+      color: _kTextPrimary,
+      fontSize: 11.8,
+      fontWeight: FontWeight.w700,
+    );
+    final actionStrong = GoogleFonts.rajdhani(
+      color: actionColor,
+      fontSize: 11.8,
+      fontWeight: FontWeight.w700,
+      letterSpacing: 0.2,
+    );
 
-  String get _statusLabel {
-    final status = entry.status;
-    if (status == null || status.isEmpty) return 'gamePending'.tr;
-    return status[0].toUpperCase() + status.substring(1);
-  }
+    final spans = <InlineSpan>[
+      TextSpan(text: actor, style: strong),
+    ];
 
-  String get _timeLabel {
-    final createdAt = entry.createdAt;
-    if (createdAt == null) return 'gameJustNow'.tr;
-    final hour = createdAt.hour.toString().padLeft(2, '0');
-    final minute = createdAt.minute.toString().padLeft(2, '0');
-    return '$hour:$minute';
+    switch (entry.eventType) {
+      case 'coins_changed':
+        final delta = entry.coinDelta ?? 0;
+        final sign = delta >= 0 ? '+' : '';
+        spans.add(TextSpan(text: ' ', style: base));
+        spans.add(TextSpan(
+          text: '$sign$delta',
+          style: GoogleFonts.rajdhani(
+            color: delta < 0 ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+            fontSize: 11.8,
+            fontWeight: FontWeight.w700,
+          ),
+        ));
+        spans.add(TextSpan(text: ' coins', style: base));
+        if (target != null && target.isNotEmpty) {
+          spans.add(TextSpan(text: ' ($target)', style: base));
+        }
+        return spans;
+      case 'influence_revealed':
+        final card = entry.claimedCard?.toUpperCase() ?? 'UNKNOWN';
+        final roleType =
+            CoupRoleType.values.firstWhereOrNull((r) => r.firestoreValue == card.toLowerCase());
+        final revealColor = roleType == null ? actionColor : CardWidget.roleColor(roleType);
+        spans.add(TextSpan(text: ' reveal ', style: base));
+        spans.add(TextSpan(
+          text: card,
+          style: GoogleFonts.rajdhani(
+            color: revealColor,
+            fontSize: 11.8,
+            fontWeight: FontWeight.w700,
+          ),
+        ));
+        return spans;
+      case 'challenge_called':
+        spans.add(TextSpan(text: " ${'gameChallenge'.tr.toLowerCase()} ", style: base));
+        if (target != null) {
+          spans.add(TextSpan(text: target, style: strong));
+          spans.add(TextSpan(text: ' (', style: base));
+          spans.add(TextSpan(text: actionLabel, style: actionStrong));
+          spans.add(TextSpan(text: ')', style: base));
+        } else {
+          spans.add(TextSpan(text: actionLabel, style: actionStrong));
+        }
+        return spans;
+      case 'challenge_pass':
+        spans.add(TextSpan(
+            text: " ${'gamePassedChallenge'.trParams({'actor': ''}).trim()}", style: base));
+        return spans;
+      case 'block_called':
+        final card = entry.claimedCard?.toUpperCase() ?? '';
+        final roleType = card.isEmpty
+            ? null
+            : CoupRoleType.values.firstWhereOrNull((r) => r.firestoreValue == card.toLowerCase());
+        final roleColor = roleType == null ? actionColor : CardWidget.roleColor(roleType);
+        spans.add(TextSpan(
+            text: " ${'gameBlockedWith'.trParams({'actor': '', 'card': ''}).trim()} ",
+            style: base));
+        spans.add(TextSpan(
+          text: card,
+          style: GoogleFonts.rajdhani(
+            color: roleColor,
+            fontSize: 11.8,
+            fontWeight: FontWeight.w700,
+          ),
+        ));
+        return spans;
+      case 'block_pass':
+        spans.add(TextSpan(
+            text: " ${'gamePassedBlockOpportunity'.trParams({'actor': ''}).trim()}", style: base));
+        return spans;
+      case 'block_challenge_called':
+        spans.add(TextSpan(text: " ${'gameChallengeBlock'.tr.toLowerCase()} ", style: base));
+        if (target != null) {
+          spans.add(TextSpan(text: target, style: strong));
+        } else {
+          spans.add(TextSpan(text: '...', style: base));
+        }
+        return spans;
+      case 'block_challenge_pass':
+        spans.add(TextSpan(text: " ${'gameAcceptBlock'.tr.toLowerCase()}", style: base));
+        return spans;
+      default:
+        spans.add(TextSpan(text: " ${'gameUsedAction'.tr} ", style: base));
+        spans.add(TextSpan(text: actionLabel, style: actionStrong));
+        if (target != null) {
+          spans.add(TextSpan(text: " ${'gameOnTarget'.tr} ", style: base));
+          spans.add(TextSpan(text: target, style: strong));
+        }
+        return spans;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final root = group.actionEntry ?? group.entries.first;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: _kSurfaceHigh,
-        borderRadius: BorderRadius.circular(10),
+        color: _kSurfaceHigh.withOpacity(0.92),
+        borderRadius: BorderRadius.circular(8),
         border: Border.all(color: _kBorder.withOpacity(0.9)),
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            width: 8,
-            height: 8,
-            margin: const EdgeInsets.only(top: 5),
-            decoration: BoxDecoration(
-              color: _accentColor,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                RichText(
-                  text: TextSpan(
-                    style: GoogleFonts.rajdhani(
-                      color: _kTextSecondary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    children: [
-                      TextSpan(
-                        text: controller.displayNameOf(entry.actorName),
-                        style: const TextStyle(color: _kTextPrimary, fontWeight: FontWeight.w700),
-                      ),
-                      TextSpan(text: ' ${'gameUsedAction'.tr} '),
-                      TextSpan(
-                        text: _actionLabel,
-                        style: TextStyle(color: _accentColor, fontWeight: FontWeight.w700),
-                      ),
-                      if (entry.targetName != null) ...[
-                        TextSpan(text: ' ${'gameOnTarget'.tr} '),
-                        TextSpan(
-                          text: controller.displayNameOf(entry.targetName),
-                          style: const TextStyle(color: _kTextPrimary, fontWeight: FontWeight.w700),
-                        ),
-                      ],
-                    ],
+          Row(
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(color: _eventAccent(root), shape: BoxShape.circle),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _actionLabel(root.actionType).toUpperCase(),
+                  style: GoogleFonts.rajdhani(
+                    color: _eventAccent(root),
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.8,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
-                  children: [
-                    _MiniBadge(label: _statusLabel, color: _accentColor),
-                    if (entry.claimedCard != null)
-                      _MiniBadge(label: entry.claimedCard!, color: _kGold),
-                    _MiniBadge(label: _timeLabel, color: _kTextSecondary),
-                  ],
+              ),
+              Text(
+                _timeLabel(root.createdAt),
+                style: GoogleFonts.rajdhani(
+                  color: _kTextSecondary,
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.w600,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+          const SizedBox(height: 5),
+          for (final entry in group.entries)
+            Padding(
+              padding: const EdgeInsets.only(top: 3),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 5,
+                    height: 5,
+                    margin: const EdgeInsets.only(top: 5),
+                    decoration: BoxDecoration(
+                      color: _eventAccent(entry).withOpacity(0.9),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 7),
+                  Expanded(
+                    child: RichText(text: TextSpan(children: _spans(entry))),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _timeLabel(entry.createdAt),
+                    style: GoogleFonts.rajdhani(
+                      color: _kTextSecondary.withOpacity(0.9),
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
         ],
       ),
     );
   }
 }
 
-class _MiniBadge extends StatelessWidget {
-  final String label;
-  final Color color;
-
-  const _MiniBadge({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.35)),
-      ),
-      child: Text(
-        label.toUpperCase(),
-        style: GoogleFonts.rajdhani(
-          color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.8,
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Action panel ─────────────────────────────────────────────────────────────
+// Action panel
 class _ActionPanel extends StatelessWidget {
   final CoupRoomModel room;
   final GameStartController controller;
@@ -756,7 +1107,103 @@ class _ActionPanel extends StatelessWidget {
           const Divider(height: 1, thickness: 1, color: _kBorder),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-            child: _buildPhaseContent(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildDecisionBanner(),
+                const SizedBox(height: 10),
+                _buildPhaseContent(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDecisionBanner() {
+    final action = room.currentAction;
+    final actorName = action == null ? null : controller.displayNameOf(action.source.name);
+    final actionLabel = action?.actionType.firestoreType.replaceAll('_', ' ').toUpperCase();
+
+    String text;
+    final phase = room.phase;
+    if (phase == GamePhase.action) {
+      text = controller.isMyTurn
+          ? 'gameYourTurnChooseAction'.tr
+          : 'gameWaitingFor'.trParams({'name': controller.displayNameOf(room.currentTurn)});
+    } else if (phase == GamePhase.challenge && action != null) {
+      text = controller.canRespondChallenge(room)
+          ? 'gameRespondChallengePrompt'
+              .trParams({'actor': actorName ?? '', 'action': actionLabel ?? ''})
+          : 'gameWaitingOthersResponse'.tr;
+    } else if (phase == GamePhase.block && action != null) {
+      text = controller.canRespondBlock(room)
+          ? 'gameRespondBlockPrompt'
+              .trParams({'actor': actorName ?? '', 'action': actionLabel ?? ''})
+          : 'gameWaitingOthersResponse'.tr;
+    } else if (phase == GamePhase.blockChallenge && action != null) {
+      text = controller.canRespondBlockChallenge(room)
+          ? 'gameRespondBlockChallengePrompt'
+              .trParams({'actor': actorName ?? '', 'action': actionLabel ?? ''})
+          : 'gameWaitingOthersResponse'.tr;
+    } else {
+      text = 'gameWaitingOthersResponse'.tr;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+      decoration: BoxDecoration(
+        color: _kSurfaceHigh,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: _kBorder),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, size: 14, color: _kTextSecondary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: GoogleFonts.rajdhani(
+                color: _kTextPrimary,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Obx(() {
+            final count = controller.autoActionCountdown.value;
+            if (count <= 0) return const SizedBox.shrink();
+            return Text(
+              ' ${'gameAutoIn'.trParams({'sec': '$count'})}',
+              style: GoogleFonts.rajdhani(
+                color: _kGold,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWaitingIndicator() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(strokeWidth: 1.5, color: _kTextSecondary),
+          ),
+          const SizedBox(width: 10),
+          Text(
+            'gameWaitingOthersResponse'.tr,
+            style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 14),
           ),
         ],
       ),
@@ -764,37 +1211,23 @@ class _ActionPanel extends StatelessWidget {
   }
 
   Widget _buildPhaseContent() {
-    final phase = room.phase;
-    if (phase == GamePhase.action && !controller.isMyTurn) {
-      return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const SizedBox(
-              width: 14,
-              height: 14,
-              child: CircularProgressIndicator(strokeWidth: 1.5, color: _kTextSecondary),
-            ),
-            const SizedBox(width: 10),
-            Text(
-              'gameWaitingFor'.trParams({'name': controller.displayNameOf(room.currentTurn)}),
-              style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 14),
-            ),
-          ],
-        ),
-      );
-    }
-
-    switch (phase) {
+    switch (room.phase) {
       case GamePhase.action:
-        return _ActionButtons(controller: controller);
+        return controller.isMyTurn
+            ? _ActionButtons(controller: controller)
+            : _buildWaitingIndicator();
       case GamePhase.challenge:
-        return _ChallengeButtons(controller: controller);
+        return controller.canRespondChallenge(room)
+            ? _ChallengeButtons(controller: controller)
+            : _buildWaitingIndicator();
       case GamePhase.block:
-        return _BlockButtons(room: room, controller: controller);
+        return controller.canRespondBlock(room)
+            ? _BlockButtons(room: room, controller: controller)
+            : _buildWaitingIndicator();
       case GamePhase.blockChallenge:
-        return _BlockChallengeButtons(controller: controller);
+        return controller.canRespondBlockChallenge(room)
+            ? _BlockChallengeButtons(controller: controller)
+            : _buildWaitingIndicator();
       default:
         return const SizedBox.shrink();
     }
@@ -837,6 +1270,30 @@ class _MyInfoBar extends StatelessWidget {
                   isEliminated: card.isRevealed,
                 ),
               )),
+          const Spacer(),
+          Obx(
+            () => Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'gameAutoAction'.tr,
+                  style: GoogleFonts.rajdhani(
+                    color: _kTextSecondary,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Switch.adaptive(
+                  value: controller.autoActionEnabled.value,
+                  activeThumbColor: _kGold,
+                  activeTrackColor: _kGold.withValues(alpha: 0.35),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  onChanged: controller.setAutoActionEnabled,
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );
