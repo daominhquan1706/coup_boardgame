@@ -56,14 +56,14 @@ class CardWidget extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [color, color.withOpacity(0.72)],
+            colors: [color, color.withValues(alpha: (0.72))],
           ),
           borderRadius: BorderRadius.circular(small ? 7 : 10),
           boxShadow: isEliminated
               ? null
               : [
                   BoxShadow(
-                    color: color.withOpacity(0.4),
+                    color: color.withValues(alpha: (0.4)),
                     blurRadius: 8,
                     offset: const Offset(0, 4),
                   ),
@@ -80,7 +80,7 @@ class CardWidget extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.08),
+                  color: Colors.white.withValues(alpha: (0.08)),
                 ),
               ),
             ),
@@ -148,7 +148,7 @@ class CardWidget extends StatelessWidget {
         border: Border.all(color: const Color(0xFFAA9342), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
+            color: Colors.black.withValues(alpha: (0.4)),
             blurRadius: 7,
             offset: const Offset(0, 3),
           ),
@@ -161,7 +161,7 @@ class CardWidget extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(5),
             border: Border.all(
-              color: const Color(0xFFAA9342).withOpacity(0.3),
+              color: const Color(0xFFAA9342).withValues(alpha: (0.3)),
               width: 1,
             ),
           ),

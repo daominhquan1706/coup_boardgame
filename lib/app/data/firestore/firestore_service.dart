@@ -242,6 +242,44 @@ class FirestoreService extends GetxService {
     return events;
   }
 
+  Future<Map<String, dynamic>?> _getGameDataInPhase(
+    Transaction tx,
+    DocumentReference<Map<String, dynamic>> gameRef, {
+    String? expectedPhase,
+  }) async {
+    final gameSnap = await tx.get(gameRef);
+    if (!gameSnap.exists || gameSnap.data() == null) return null;
+
+    final gameData = gameSnap.data()!;
+    if (expectedPhase != null && (gameData['phase'] as String?) != expectedPhase) {
+      return null;
+    }
+
+    return gameData;
+  }
+
+  Future<Map<String, dynamic>?> _getActionData(
+    Transaction tx,
+    String roomId,
+    String? actionId,
+  ) async {
+    if (actionId == null) return null;
+    final actionSnap = await tx.get(_actionsRef(roomId).doc(actionId));
+    if (!actionSnap.exists || actionSnap.data() == null) return null;
+    return actionSnap.data()!;
+  }
+
+  Future<Map<String, dynamic>?> _getBlockData(
+    Transaction tx,
+    String roomId,
+    String? blockId,
+  ) async {
+    if (blockId == null) return null;
+    final blockSnap = await tx.get(_blocksRef(roomId).doc(blockId));
+    if (!blockSnap.exists || blockSnap.data() == null) return null;
+    return blockSnap.data()!;
+  }
+
   Future<bool> joinRoom(String roomId, CoupPlayerModel player) async {
     try {
       final gameRef = _games.doc(roomId);
@@ -674,20 +712,16 @@ class FirestoreService extends GetxService {
     final gameRef = _games.doc(roomId);
 
     await _firestore.runTransaction((tx) async {
-      final gameSnap = await tx.get(gameRef);
-      if (!gameSnap.exists || gameSnap.data() == null) return;
-
-      final game = gameSnap.data()!;
-      if ((game['phase'] as String?) != 'challenge') return;
+      final game = await _getGameDataInPhase(tx, gameRef, expectedPhase: 'challenge');
+      if (game == null) return;
 
       final actionId = game['currentActionId'] as String?;
       if (actionId == null) return;
 
-      final actionRef = _actionsRef(roomId).doc(actionId);
-      final actionSnap = await tx.get(actionRef);
-      if (!actionSnap.exists || actionSnap.data() == null) return;
+      final action = await _getActionData(tx, roomId, actionId);
+      if (action == null) return;
 
-      final action = actionSnap.data()!;
+      final actionRef = _actionsRef(roomId).doc(actionId);
       final playerStates = await _loadPlayerStatesInOrder(tx, roomId, game);
       final actorId = action['playerId'] as String;
       final responderData = playerStates[playerId];
@@ -848,19 +882,16 @@ class FirestoreService extends GetxService {
     final gameRef = _games.doc(roomId);
 
     await _firestore.runTransaction((tx) async {
-      final gameSnap = await tx.get(gameRef);
-      if (!gameSnap.exists || gameSnap.data() == null) return;
-
-      final game = gameSnap.data()!;
-      if ((game['phase'] as String?) != 'block') return;
+      final game = await _getGameDataInPhase(tx, gameRef, expectedPhase: 'block');
+      if (game == null) return;
 
       final actionId = game['currentActionId'] as String?;
       if (actionId == null) return;
 
+      final action = await _getActionData(tx, roomId, actionId);
+      if (action == null) return;
+
       final actionRef = _actionsRef(roomId).doc(actionId);
-      final actionSnap = await tx.get(actionRef);
-      if (!actionSnap.exists || actionSnap.data() == null) return;
-      final action = actionSnap.data()!;
       final playerStates = await _loadPlayerStatesInOrder(tx, roomId, game);
 
       final actorId = action['playerId'] as String;
@@ -968,23 +999,20 @@ class FirestoreService extends GetxService {
     final gameRef = _games.doc(roomId);
 
     await _firestore.runTransaction((tx) async {
-      final gameSnap = await tx.get(gameRef);
-      if (!gameSnap.exists || gameSnap.data() == null) return;
-      final game = gameSnap.data()!;
-      if ((game['phase'] as String?) != 'block_challenge') return;
+      final game = await _getGameDataInPhase(tx, gameRef, expectedPhase: 'block_challenge');
+      if (game == null) return;
 
       final actionId = game['currentActionId'] as String?;
       final blockId = game['currentBlockId'] as String?;
       if (actionId == null || blockId == null) return;
 
+      final action = await _getActionData(tx, roomId, actionId);
+      final blockData = await _getBlockData(tx, roomId, blockId);
+      if (action == null || blockData == null) return;
+
       final actionRef = _actionsRef(roomId).doc(actionId);
       final blockRef = _blocksRef(roomId).doc(blockId);
-      final actionSnap = await tx.get(actionRef);
-      final blockSnap = await tx.get(blockRef);
-      if (!actionSnap.exists || !blockSnap.exists) return;
 
-      final action = actionSnap.data()!;
-      final blockData = blockSnap.data()!;
       if ((blockData['status'] as String?) != 'pending') return;
       final playerStates = await _loadPlayerStatesInOrder(tx, roomId, game);
       final blockerId = blockData['blockerId'] as String;
@@ -1303,30 +1331,33 @@ class FirestoreService extends GetxService {
 
     switch (actionType) {
       case 'income':
-        tx.update(sourceRef, {'coins': FieldValue.increment(1)});
-        appendEvent(
-          eventType: 'coins_changed',
-          actorId: sourceId,
-          actionType: actionType,
-          coinDelta: 1,
+        eventLogs = _updatePlayerCoins(
+          tx,
+          sourceRef,
+          sourceId,
+          actionType,
+          1,
+          eventLogs,
         );
         break;
       case 'foreign_aid':
-        tx.update(sourceRef, {'coins': FieldValue.increment(2)});
-        appendEvent(
-          eventType: 'coins_changed',
-          actorId: sourceId,
-          actionType: actionType,
-          coinDelta: 2,
+        eventLogs = _updatePlayerCoins(
+          tx,
+          sourceRef,
+          sourceId,
+          actionType,
+          2,
+          eventLogs,
         );
         break;
       case 'tax':
-        tx.update(sourceRef, {'coins': FieldValue.increment(3)});
-        appendEvent(
-          eventType: 'coins_changed',
-          actorId: sourceId,
-          actionType: actionType,
-          coinDelta: 3,
+        eventLogs = _updatePlayerCoins(
+          tx,
+          sourceRef,
+          sourceId,
+          actionType,
+          3,
+          eventLogs,
         );
         break;
       case 'steal':
@@ -1436,6 +1467,24 @@ class FirestoreService extends GetxService {
     tx.update(targetRef, {'coins': targetCoins - transfer});
     tx.update(sourceRef, {'coins': FieldValue.increment(transfer)});
     return transfer;
+  }
+
+  List<dynamic>? _updatePlayerCoins(
+    Transaction tx,
+    DocumentReference<Map<String, dynamic>> playerRef,
+    String playerId,
+    String actionType,
+    int delta,
+    List<dynamic>? eventLogs,
+  ) {
+    tx.update(playerRef, {'coins': FieldValue.increment(delta)});
+    return _appendActionEvent(
+      eventLogs,
+      eventType: 'coins_changed',
+      actorId: playerId,
+      actionType: actionType,
+      coinDelta: delta,
+    );
   }
 
   void _applyExchange(
