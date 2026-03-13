@@ -21,6 +21,17 @@ class AppTranslationKey {
   static String get pleaseLogin => "pleaseLogin".tr;
   static String get noData => "noData".tr;
   static String get enterText => "enterText".tr;
+
+  // Game end screen
+  static String get gameVictory => "gameVictory".tr;
+  static String get gameDefeated => "gameDefeated".tr;
+  static String get gameYouWon => "gameYouWon".tr;
+  static String get gameRanking => "gameRanking".tr;
+  static String get gameSummary => "gameSummary".tr;
+  static String get gameMostBluffs => "gameMostBluffs".tr;
+  static String get gameTotalCoups => "gameTotalCoups".tr;
+  static String get gamePlayAgain => "gamePlayAgain".tr;
+  static String get gameExit => "gameExit".tr;
 }
 
 class AppTranslation {

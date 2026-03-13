@@ -1,14 +1,25 @@
 {
-  "dart.flutterSdkPath": ".fvm/versions/3.35.4",
+  "dart.flutterSdkPath": "/Users/quandao/fvm/versions/3.35.4",
+  "chrome-devtools-mcp-relay.autoConnect": true,
+  "chrome-devtools-mcp-relay.additionalMCPServerArguments": "",
   "mcp": {
     "servers": {
       "dart": {
         "type": "stdio",
-        "command": "/Users/masterbranch/fvm/versions/3.35.4/bin/cache/dart-sdk/bin/dartaotruntime",
+        "command": "/Users/quandao/fvm/versions/3.35.4/bin/cache/dart-sdk/bin/dartaotruntime",
         "args": [
-          "/Users/masterbranch/fvm/versions/3.35.4/bin/cache/dart-sdk/bin/snapshots/dart_mcp_server_aot.dart.snapshot"
+          "/Users/quandao/fvm/versions/3.35.4/bin/cache/dart-sdk/bin/snapshots/dart_mcp_server_aot.dart.snapshot"
         ]
       }
     }
-  }
+  },
+  "mcpsx.servers": [
+    {
+      "id": "chrome-devtools",
+      "name": "Chrome DevTools MCP",
+      "command": "npx -y chrome-devtools-mcp@latest",
+      "enabled": true,
+      "type": "process"
+    }
+  ]
 }

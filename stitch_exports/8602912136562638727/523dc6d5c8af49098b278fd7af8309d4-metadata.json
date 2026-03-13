@@ -1,0 +1,20 @@
+{
+    "projectId": "8602912136562638727",
+    "projectName": "Coup Immersive Table Redesign Variant 2",
+    "screenId": "523dc6d5c8af49098b278fd7af8309d4",
+    "screenTitle": "Coup Immersive Table Redesign Variant 2",
+    "deviceType": "MOBILE",
+    "dimensions": {
+        "width": 768,
+        "height": 1376
+    },
+    "downloads": {
+        "screenshotUrl": "https://lh3.googleusercontent.com/aida/AOfcidXgNcbVvSBrJYA9qqhGBcH47OHm-4kPYmF9S1ITwGU7z0k1R1v5nGFp52EXuLtcHbR5LdJo6G9tRYK4h_2gY8al0D0L4gPxcAWvDmezfndvZVAi1yjtEjZqRP2YzGGxCEET0JTwKpGXMowVgxONghXf38r3ecSyBCX2WHK4vhTMZINJNRnpHs7EHq5B5bY7LRALsLqj5ZA3XiaCsEaQRkmqyAa7DxB7nLyIhKZRvNlCE0lXkzbGcTaLLxY",
+        "localScreenshot": "stitch_exports/8602912136562638727/523dc6d5c8af49098b278fd7af8309d4-Coup-Immersive-Table-Redesign-Variant-2.png"
+    },
+    "code": {
+        "available": false,
+        "htmlCode": {},
+        "note": "Stitch get_screen returned an empty htmlCode object, so there is no hosted code URL available to download for this screen at the moment."
+    }
+}

@@ -1,6 +1,32 @@
 {
     "version": "2.0.0",
     "tasks": [
+        {
+            "type": "shell",
+            "label": "Run Web (Chrome, port 7357)",
+            "command": "fvm",
+            "args": [
+                "flutter",
+                "run",
+                "-d",
+                "chrome",
+                "--web-port",
+                "7357"
+            ],
+            "group": "build"
+        },
+        {
+            "type": "shell",
+            "label": "Run Android (emulator/device)",
+            "command": "fvm",
+            "args": [
+                "flutter",
+                "run",
+                "-d",
+                "android"
+            ],
+            "group": "build"
+        },
         // Generate Models
         {
             "type": "flutter",
@@ -19,4 +45,4 @@
             "label": "Generate Models"
         },
     ]
-} 
+}

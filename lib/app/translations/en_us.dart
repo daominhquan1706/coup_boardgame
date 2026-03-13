@@ -101,6 +101,15 @@ const Map<String, String> enUS = {
   "gamePassedChallenge": "@actor passed challenge",
   "gameBlockedWith": "@actor blocked with @card",
   "gamePassedBlockOpportunity": "@actor did not block",
+  "gameVictory": "VICTORY!",
+  "gameDefeated": "DEFEATED",
+  "gameYouWon": "You dominated the court",
+  "gameRanking": "Ranking",
+  "gameSummary": "Match Summary",
+  "gameMostBluffs": "Biggest Bluffer",
+  "gameTotalCoups": "Coups Executed",
+  "gamePlayAgain": "Play Again",
+  "gameExit": "Exit",
 
   // Action labels
   "actionIncome": "Income",

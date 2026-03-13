@@ -9,7 +9,20 @@
             "request": "launch",
             "type": "dart",
             "program": "lib/main.dart"
-
+        },
+        {
+            "name": "Flutter Web (Chrome)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "deviceId": "chrome"
+        },
+        {
+            "name": "Flutter Android (Connected/Emulator)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "deviceId": "android"
         }
     ]
 }

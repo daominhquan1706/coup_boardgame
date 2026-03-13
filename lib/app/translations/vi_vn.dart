@@ -101,6 +101,15 @@ const Map<String, String> viVN = {
   "gamePassedChallenge": "@actor đã bỏ qua challenge",
   "gameBlockedWith": "@actor chặn bằng @card",
   "gamePassedBlockOpportunity": "@actor không chặn",
+  "gameVictory": "CHIẾN THẮNG!",
+  "gameDefeated": "THẤT BẠI",
+  "gameYouWon": "Bạn đã thống trị cung đình",
+  "gameRanking": "Bảng xếp hạng",
+  "gameSummary": "Thống kê trận đấu",
+  "gameMostBluffs": "Thánh chém gió",
+  "gameTotalCoups": "Đảo chính thực hiện",
+  "gamePlayAgain": "Chơi lại",
+  "gameExit": "Thoát",
 
   // Action labels
   "actionIncome": "Thu nhập",
