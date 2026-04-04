@@ -1,4 +1,5 @@
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
+import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -120,67 +121,70 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
   }
 
   Widget _buildRoomCodeCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
-      decoration: BoxDecoration(
-        color: _kSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder),
-      ),
-      child: Row(
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'lobbyRoomCode'.tr,
-                style: GoogleFonts.rajdhani(
-                  color: _kTextSecondary,
-                  fontSize: 11,
-                  letterSpacing: 2,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                controller.roomCode ?? '—',
-                style: GoogleFonts.rajdhani(
-                  color: _kGoldLight,
-                  fontSize: 38,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 10,
-                ),
-              ),
-            ],
-          ),
-          const Spacer(),
-          GestureDetector(
-            onTap: controller.copyCode,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-              decoration: BoxDecoration(
-                color: _kSurfaceHigh,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: _kBorder),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.copy_outlined, color: _kTextSecondary, size: 14),
-                  const SizedBox(width: 6),
-                  Text(
-                    'copy'.tr,
-                    style: GoogleFonts.rajdhani(
-                      color: _kTextSecondary,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
+    return E2ETag(
+      label: 'e2e-lobby-room-code-card',
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        decoration: BoxDecoration(
+          color: _kSurface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: _kBorder),
+        ),
+        child: Row(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'lobbyRoomCode'.tr,
+                  style: GoogleFonts.rajdhani(
+                    color: _kTextSecondary,
+                    fontSize: 11,
+                    letterSpacing: 2,
+                    fontWeight: FontWeight.w600,
                   ),
-                ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  controller.roomCode ?? '—',
+                  style: GoogleFonts.rajdhani(
+                    color: _kGoldLight,
+                    fontSize: 38,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 10,
+                  ),
+                ),
+              ],
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: controller.copyCode,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                decoration: BoxDecoration(
+                  color: _kSurfaceHigh,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: _kBorder),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.copy_outlined, color: _kTextSecondary, size: 14),
+                    const SizedBox(width: 6),
+                    Text(
+                      'copy'.tr,
+                      style: GoogleFonts.rajdhani(
+                        color: _kTextSecondary,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -229,11 +233,15 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 ),
                 const Spacer(),
                 if (controller.isHost)
-                  _SmallButton(
-                    label: 'lobbyAddBot'.tr,
-                    icon: Icons.smart_toy_outlined,
-                    color: _kGold,
-                    onTap: controller.addAI,
+                  E2ETag(
+                    label: 'e2e-lobby-add-bot-button',
+                    button: true,
+                    child: _SmallButton(
+                      label: 'lobbyAddBot'.tr,
+                      icon: Icons.smart_toy_outlined,
+                      color: _kGold,
+                      onTap: controller.addAI,
+                    ),
                   ),
               ],
             ),
@@ -381,37 +389,44 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           // Start game button
-          GestureDetector(
-            onTap: canStart ? controller.startGame : null,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              decoration: BoxDecoration(
-                color: canStart ? _kGreen.withValues(alpha: 0.14) : _kSurfaceHigh,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(
-                  color: canStart ? _kGreen.withValues(alpha: 0.55) : _kBorder,
-                ),
-              ),
-              child: Column(
-                children: [
-                  Text(
-                    'lobbyStartGame'.tr,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.rajdhani(
-                      color: canStart ? _kGreen : _kTextSecondary,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 0.5,
-                    ),
+          E2ETag(
+            label: canStart
+                ? 'e2e-lobby-start-game-button-ready'
+                : 'e2e-lobby-start-game-button-disabled',
+            button: true,
+            enabled: canStart,
+            child: GestureDetector(
+              onTap: canStart ? controller.startGame : null,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: canStart ? _kGreen.withValues(alpha: 0.14) : _kSurfaceHigh,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: canStart ? _kGreen.withValues(alpha: 0.55) : _kBorder,
                   ),
-                  if (!canStart)
+                ),
+                child: Column(
+                  children: [
                     Text(
-                      'lobbyNeedTwoPlayers'.tr,
+                      'lobbyStartGame'.tr,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: _kTextSecondary, fontSize: 11),
+                      style: GoogleFonts.rajdhani(
+                        color: canStart ? _kGreen : _kTextSecondary,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                ],
+                    if (!canStart)
+                      Text(
+                        'lobbyNeedTwoPlayers'.tr,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: _kTextSecondary, fontSize: 11),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -453,6 +468,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             const SizedBox(height: 10),
             TextField(
               controller: controller.displayNameController,
+              onChanged: controller.onDisplayNameChanged,
               style: const TextStyle(color: _kTextPrimary, fontSize: 14),
               cursorColor: _kGold,
               decoration: InputDecoration(

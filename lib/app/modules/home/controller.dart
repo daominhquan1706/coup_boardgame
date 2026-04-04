@@ -3,10 +3,12 @@ import 'dart:math';
 import 'package:coup_boardgame/app/data/api/api_error.dart';
 import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
+import 'package:coup_boardgame/app/constants/local_storage_keys.dart';
+import 'package:coup_boardgame/app/utils/widgets/app_toast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../data/provider/home_provider.dart';
 
 class HomeController extends GetxController {
@@ -15,6 +17,7 @@ class HomeController extends GetxController {
 
   final Rx<String> roomCode = ''.obs;
   final Rx<String> selectedLanguage = 'en'.obs;
+  final GetStorage _storage = GetStorage();
   late final String playerId;
   late final String defaultDisplayName;
 
@@ -22,8 +25,13 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     selectedLanguage.value = Get.locale?.languageCode == 'vi' ? 'vi' : 'en';
-    playerId = _generatePlayerId();
-    defaultDisplayName = 'Player ${playerId.substring(playerId.length - 4)}';
+    playerId = _storage.read<String>(LocalStorageKeys.userName) ??
+        _generatePlayerId();
+    _storage.write(LocalStorageKeys.userName, playerId);
+
+    defaultDisplayName = _storage.read<String>(LocalStorageKeys.displayName) ??
+        'Player ${playerId.substring(playerId.length - 4)}';
+    _storage.write(LocalStorageKeys.displayName, defaultDisplayName);
   }
 
   void changeLanguage(String languageCode) {
@@ -33,28 +41,24 @@ class HomeController extends GetxController {
   }
 
   Future<void> onTapCreateRoom() async {
-    EasyLoading.show(status: 'msgCreatingRoom'.tr);
+    AppToast.info('msgCreatingRoom'.tr);
 
     final roomCode = generateRoomCode();
     try {
-      final isCreateRoomeSuccess = await Get.find<FirestoreService>().createRoom(
+      final isCreateRoomeSuccess =
+          await Get.find<FirestoreService>().createRoom(
         roomCode,
         [playerId],
         hostDisplayName: defaultDisplayName,
       );
 
-      EasyLoading.dismiss();
       if (isCreateRoomeSuccess) {
-        Get.toNamed(AppRoutes.lobbyRoom, parameters: {
-          'userName': playerId,
-          'displayName': defaultDisplayName,
-          'roomCode': roomCode,
-        });
+        Get.toNamed(AppRoutes.lobbyRoomPath(roomCode));
       } else {
-        EasyLoading.showError('msgFailedCreateRoom'.tr);
+        AppToast.error('msgFailedCreateRoom'.tr);
       }
     } catch (e) {
-      EasyLoading.showError('msgFailedCreateRoom'.tr);
+      AppToast.error('msgFailedCreateRoom'.tr);
     }
   }
 
@@ -68,23 +72,19 @@ class HomeController extends GetxController {
 
   Future<void> onTapJoinRoom() async {
     if (roomCode.value.isEmpty) {
-      EasyLoading.showInfo('msgEnterRoomCode'.tr);
+      AppToast.info('msgEnterRoomCode'.tr);
       return;
     }
     try {
-      final isCanJoinRoom =
-          await Get.find<FirestoreService>().isCanJoinRoom(roomCode.value, playerId);
+      final isCanJoinRoom = await Get.find<FirestoreService>()
+          .isCanJoinRoom(roomCode.value, playerId);
       if (isCanJoinRoom) {
-        Get.toNamed(AppRoutes.lobbyRoom, parameters: {
-          'userName': playerId,
-          'displayName': defaultDisplayName,
-          'roomCode': roomCode.value,
-        });
+        Get.toNamed(AppRoutes.lobbyRoomPath(roomCode.value));
       }
     } on JoinRoomError catch (e) {
-      EasyLoading.showError(e.message);
+      AppToast.error(e.message);
     } catch (e) {
-      EasyLoading.showError('msgFailedJoinRoom'.tr);
+      AppToast.error('msgFailedJoinRoom'.tr);
     }
   }
 

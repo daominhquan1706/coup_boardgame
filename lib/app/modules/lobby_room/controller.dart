@@ -1,13 +1,15 @@
 import 'dart:async';
 
+import 'package:coup_boardgame/app/constants/local_storage_keys.dart';
 import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
+import 'package:coup_boardgame/app/utils/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../data/provider/lobby_room_provider.dart';
 
 class LobbyRoomController extends GetxController {
@@ -18,17 +20,31 @@ class LobbyRoomController extends GetxController {
   set text(text) => _text.value = text;
   get text => _text.value;
 
-  String? get roomCode => Get.parameters['roomCode'] ?? '';
+  final GetStorage _storage = GetStorage();
+
+  String? get roomCode =>
+      Get.parameters['room_code'] ?? Get.parameters['roomCode'] ?? '';
   // stable player id
-  String? get userName => Get.parameters['userName'] ?? '';
-  String get defaultDisplayName => Get.parameters['displayName'] ?? 'Player';
+  String? get userName =>
+      _storage.read<String>(LocalStorageKeys.userName) ??
+      Get.parameters['userName'] ??
+      '';
+  String get defaultDisplayName =>
+      _storage.read<String>(LocalStorageKeys.displayName) ??
+      Get.parameters['displayName'] ??
+      'Player';
   bool get shouldAutoReadyOnEnter => Get.parameters['autoReady'] == '1';
 
   final Rx<CoupRoomModel?> room = Rx<CoupRoomModel?>(null);
   final TextEditingController displayNameController = TextEditingController();
+  final RxString _pendingDisplayName = ''.obs;
 
   late StreamSubscription? _roomStreamSubscription;
+  Worker? _displayNameDebounceWorker;
   bool _didApplyAutoReady = false;
+  bool _isUpdatingDisplayName = false;
+  bool _shouldRetryDisplayNameSync = false;
+  String _lastSubmittedDisplayName = '';
 
   FirestoreService get _firestoreService => Get.find<FirestoreService>();
 
@@ -44,6 +60,16 @@ class LobbyRoomController extends GetxController {
   }
 
   @override
+  void onInit() {
+    super.onInit();
+    _displayNameDebounceWorker = debounce<String>(
+      _pendingDisplayName,
+      (_) => _syncMyDisplayName(),
+      time: const Duration(seconds: 1),
+    );
+  }
+
+  @override
   void onReady() {
     super.onReady();
     if ((roomCode ?? '').isNotEmpty && (userName ?? '').isNotEmpty) {
@@ -51,31 +77,37 @@ class LobbyRoomController extends GetxController {
         room.value = value;
       });
 
-      _roomStreamSubscription = _firestoreService.getRoomStream(roomCode!).listen((value) {
+      _roomStreamSubscription =
+          _firestoreService.getRoomStream(roomCode!).listen((value) {
         room.value = value;
 
-        final me = value.players.firstWhereOrNull((player) => player.name == userName);
+        final me =
+            value.players.firstWhereOrNull((player) => player.name == userName);
         if (me == null) {
-          EasyLoading.showInfo('msgYouWereKicked'.tr);
+          AppToast.info('msgYouWereKicked'.tr);
           Get.offAllNamed(AppRoutes.home);
           return;
         }
 
         final shown = me.shownName;
+        _lastSubmittedDisplayName = shown;
         if (displayNameController.text != shown) {
           displayNameController.text = shown;
         }
 
-        if (shouldAutoReadyOnEnter && !_didApplyAutoReady && value.roomState == GameState.waiting) {
+        if (shouldAutoReadyOnEnter &&
+            !_didApplyAutoReady &&
+            value.roomState == GameState.waiting) {
           _didApplyAutoReady = true;
           if (!me.isReady) {
-            unawaited(_firestoreService.updatePlayerReady(roomCode!, me.name, isReady: true));
+            unawaited(_firestoreService.updatePlayerReady(roomCode!, me.name,
+                isReady: true));
           }
         }
 
         if (value.roomState == GameState.playing) {
           Get.offNamed(
-            AppRoutes.gameStart,
+            AppRoutes.gameStartPath(roomCode!),
             arguments: {
               'roomCode': roomCode,
               'userName': userName,
@@ -105,18 +137,19 @@ class LobbyRoomController extends GetxController {
   void onClose() {
     super.onClose();
     _roomStreamSubscription?.cancel();
+    _displayNameDebounceWorker?.dispose();
     displayNameController.dispose();
   }
 
   //start game
   Future<void> startGame() async {
     if (!isHost) {
-      EasyLoading.showError('msgOnlyHostStart'.tr);
+      AppToast.error('msgOnlyHostStart'.tr);
       return;
     }
 
     if (!canStart) {
-      EasyLoading.showError('msgAllPlayersReady'.tr);
+      AppToast.error('msgAllPlayersReady'.tr);
       return;
     }
 
@@ -125,12 +158,13 @@ class LobbyRoomController extends GetxController {
 
   Future<void> copyCode() async {
     await Clipboard.setData(ClipboardData(text: roomCode!));
-    EasyLoading.showSuccess('msgRoomCodeCopied'.tr, duration: const Duration(milliseconds: 500));
+    AppToast.success('msgRoomCodeCopied'.tr,
+        duration: const Duration(milliseconds: 900));
   }
 
   Future<void> addAI() async {
     if (!isHost) {
-      EasyLoading.showError('msgOnlyHostAddBot'.tr);
+      AppToast.error('msgOnlyHostAddBot'.tr);
       return;
     }
 
@@ -147,33 +181,64 @@ class LobbyRoomController extends GetxController {
     );
   }
 
+  void onDisplayNameChanged(String value) {
+    _pendingDisplayName.value = value;
+  }
+
   Future<void> updateMyDisplayName() async {
+    await _syncMyDisplayName(showSuccessToast: true);
+  }
+
+  Future<void> _syncMyDisplayName({bool showSuccessToast = false}) async {
+    if (_isUpdatingDisplayName) {
+      _shouldRetryDisplayNameSync = true;
+      return;
+    }
+
     final me = mePlayer;
     if (me == null) return;
 
     final name = displayNameController.text.trim();
     if (name.isEmpty) {
-      EasyLoading.showInfo('msgEnterName'.tr);
+      if (showSuccessToast) {
+        AppToast.info('msgEnterName'.tr);
+      }
+      return;
+    }
+    if (name == _lastSubmittedDisplayName || name == me.shownName) {
       return;
     }
 
-    final success = await _firestoreService.updatePlayerDisplayName(roomCode!, me.name, name);
+    _isUpdatingDisplayName = true;
+    final success = await _firestoreService.updatePlayerDisplayName(
+        roomCode!, me.name, name);
+    _isUpdatingDisplayName = false;
+    if (_shouldRetryDisplayNameSync) {
+      _shouldRetryDisplayNameSync = false;
+      unawaited(_syncMyDisplayName());
+    }
     if (!success) {
       // likely the game already started or transaction aborted
-      EasyLoading.showError('msgNameUpdateFailed'.tr);
+      AppToast.error('msgNameUpdateFailed'.tr);
       return;
     }
 
     // Optimistic UI update so the list reflects the new name immediately.
     room.update((current) {
-      final target = current?.players.firstWhereOrNull((player) => player.name == me.name);
+      final target =
+          current?.players.firstWhereOrNull((player) => player.name == me.name);
       if (target != null) {
         target.displayName = name;
       }
     });
     room.refresh();
+    _lastSubmittedDisplayName = name;
+    _storage.write(LocalStorageKeys.displayName, name);
 
-    EasyLoading.showSuccess('msgNameUpdated'.tr, duration: const Duration(milliseconds: 700));
+    if (showSuccessToast) {
+      AppToast.success('msgNameUpdated'.tr,
+          duration: const Duration(milliseconds: 1000));
+    }
   }
 
   Future<void> kickPlayer(String targetPlayerId) async {

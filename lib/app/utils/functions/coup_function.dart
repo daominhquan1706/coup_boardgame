@@ -1,6 +1,7 @@
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_card_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 enum CoupActionType {
   income,
@@ -11,7 +12,7 @@ enum CoupActionType {
   ambassador,
   assassin,
   contessa,
-  inquisitor,  
+  inquisitor,
 }
 
 extension CoupActionTypeX on CoupActionType {
@@ -150,9 +151,72 @@ extension CoupRoleTypeX on CoupRoleType {
         return CoupRoleType.duke;
     }
   }
+
+  static CoupRoleType? tryFromFirestoreValue(String? value) {
+    if (value == null) return null;
+
+    switch (value.toLowerCase()) {
+      case 'duke':
+        return CoupRoleType.duke;
+      case 'assassin':
+        return CoupRoleType.assassin;
+      case 'contessa':
+        return CoupRoleType.contessa;
+      case 'captain':
+        return CoupRoleType.captain;
+      case 'ambassador':
+        return CoupRoleType.ambassador;
+      case 'inquisitor':
+        return CoupRoleType.inquisitor;
+      default:
+        return null;
+    }
+  }
 }
 
 extension CoupCardTypeExtension on CoupRoleType {
+  String get titleKey {
+    switch (this) {
+      case CoupRoleType.duke:
+        return 'roleNameDuke';
+      case CoupRoleType.assassin:
+        return 'roleNameAssassin';
+      case CoupRoleType.contessa:
+        return 'roleNameContessa';
+      case CoupRoleType.captain:
+        return 'roleNameCaptain';
+      case CoupRoleType.ambassador:
+        return 'roleNameAmbassador';
+      case CoupRoleType.inquisitor:
+        return 'roleNameInquisitor';
+    }
+  }
+
+  String get shortGuideKey {
+    switch (this) {
+      case CoupRoleType.duke:
+        return 'roleGuideDuke';
+      case CoupRoleType.assassin:
+        return 'roleGuideAssassin';
+      case CoupRoleType.contessa:
+        return 'roleGuideContessa';
+      case CoupRoleType.captain:
+        return 'roleGuideCaptain';
+      case CoupRoleType.ambassador:
+        return 'roleGuideAmbassador';
+      case CoupRoleType.inquisitor:
+        return 'roleGuideInquisitor';
+    }
+  }
+
+  String get localizedName => titleKey.tr;
+
+  String get localizedInitial {
+    final value = localizedName.trim();
+    if (value.isEmpty) return '?';
+    return value[0].toUpperCase();
+  }
+
   String get name {
     switch (this) {
       case CoupRoleType.duke:

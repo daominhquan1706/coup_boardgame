@@ -1,11 +1,15 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:coup_boardgame/app/data/model/game_history_entry.dart';
+import 'package:coup_boardgame/app/data/model/firestore_model/coup_card_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
 import 'package:coup_boardgame/app/modules/game/widgets/card_widget.dart';
-import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
+import 'package:coup_boardgame/app/utils/widgets/app_toast.dart';
+import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
 import 'package:flutter/material.dart';
-import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
@@ -19,6 +23,7 @@ part 'widgets/game_page_history.dart';
 part 'widgets/game_page_rules_settings.dart';
 part 'widgets/game_page_end_screen.dart';
 part 'widgets/game_page_widgets.dart';
+part 'widgets/game_page_motion.dart';
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
 const Color _kBg = Color(0xFF0F1728);
@@ -87,13 +92,49 @@ class _GamePageState extends State<GamePage> {
     }
   }
 
+  Widget _tabViewFor(
+    _GameScreenTab tab, {
+    required CoupRoomModel room,
+    required List<GameHistoryEntry> entries,
+    required _GameViewport viewport,
+  }) {
+    switch (tab) {
+      case _GameScreenTab.game:
+        return _GameBoardTab(
+            room: room, controller: controller, viewport: viewport);
+      case _GameScreenTab.history:
+        return _HistoryTabView(
+            entries: entries, controller: controller, viewport: viewport);
+      case _GameScreenTab.rules:
+        return const _RulesTabView();
+      case _GameScreenTab.settings:
+        return _SettingsTabView(room: room, controller: controller);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final viewport = _GameViewport.of(context);
+    final useRailNav = viewport.width >= 1120;
 
     return Obx(() {
       final room = controller.currentRoom.value;
       final entries = controller.historyEntries.toList(growable: false);
+      final tabContent = room == null
+          ? const SizedBox.shrink()
+          : IndexedStack(
+              index: _currentTab.index,
+              children: _GameScreenTab.values
+                  .map(
+                    (tab) => _tabViewFor(
+                      tab,
+                      room: room,
+                      entries: entries,
+                      viewport: viewport,
+                    ),
+                  )
+                  .toList(),
+            );
 
       return Scaffold(
         backgroundColor: _kBg,
@@ -102,55 +143,109 @@ class _GamePageState extends State<GamePage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const CircularProgressIndicator(color: _kGold, strokeWidth: 2),
+                    const CircularProgressIndicator(
+                        color: _kGold, strokeWidth: 2),
                     const SizedBox(height: 16),
                     Text('msgLoadingGame'.tr,
-                        style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 14)),
+                        style: GoogleFonts.rajdhani(
+                            color: _kTextSecondary, fontSize: 14)),
                   ],
                 ),
               )
-            : SafeArea(
-                child: Column(
-                  children: [
-                    _TopBar(room: room, controller: controller),
-                    Expanded(
-                      child: IndexedStack(
-                        index: _currentTab.index,
-                        children: [
-                          _GameBoardTab(room: room, controller: controller, viewport: viewport),
-                          _HistoryTabView(
-                              entries: entries, controller: controller, viewport: viewport),
-                          const _RulesTabView(),
-                          _SettingsTabView(room: room, controller: controller),
-                        ],
+            : E2ETag(
+                label: 'e2e-game-screen',
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      _TopBar(room: room, controller: controller),
+                      Expanded(
+                        child: useRailNav
+                            ? Row(
+                                children: [
+                                  E2ETag(
+                                    label: 'e2e-game-nav-rail',
+                                    child: Container(
+                                      width: 96,
+                                      decoration: const BoxDecoration(
+                                        color: _kSurface,
+                                        border: Border(
+                                            right: BorderSide(color: _kBorder)),
+                                      ),
+                                      child: NavigationRail(
+                                        backgroundColor: Colors.transparent,
+                                        selectedIndex: _currentTab.index,
+                                        labelType: NavigationRailLabelType.all,
+                                        minWidth: 68,
+                                        minExtendedWidth: 96,
+                                        selectedLabelTextStyle:
+                                            GoogleFonts.rajdhani(
+                                          color: _kGold,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                        unselectedLabelTextStyle:
+                                            GoogleFonts.rajdhani(
+                                          color: _kTextSecondary,
+                                          fontSize: 11.5,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        onDestinationSelected: (index) {
+                                          setState(() {
+                                            _currentTab =
+                                                _GameScreenTab.values[index];
+                                          });
+                                        },
+                                        destinations: _GameScreenTab.values
+                                            .map(
+                                              (tab) =>
+                                                  NavigationRailDestination(
+                                                icon: Icon(_iconForTab(tab),
+                                                    color: _kTextSecondary),
+                                                selectedIcon: Icon(
+                                                    _iconForTab(tab),
+                                                    color: _kGold),
+                                                label: Text(_labelForTab(tab)),
+                                              ),
+                                            )
+                                            .toList(),
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(child: tabContent),
+                                ],
+                              )
+                            : tabContent,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-        bottomNavigationBar: room == null
+        bottomNavigationBar: room == null || useRailNav
             ? null
-            : NavigationBar(
-                height: 74,
-                backgroundColor: _kSurface,
-                indicatorColor: _kGold.withValues(alpha: (0.16)),
-                surfaceTintColor: Colors.transparent,
-                selectedIndex: _currentTab.index,
-                labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                onDestinationSelected: (index) {
-                  setState(() {
-                    _currentTab = _GameScreenTab.values[index];
-                  });
-                },
-                destinations: _GameScreenTab.values
-                    .map(
-                      (tab) => NavigationDestination(
-                        icon: Icon(_iconForTab(tab), color: _kTextSecondary),
-                        selectedIcon: Icon(_iconForTab(tab), color: _kGold),
-                        label: _labelForTab(tab),
-                      ),
-                    )
-                    .toList(),
+            : E2ETag(
+                label: 'e2e-game-nav-bottom',
+                child: NavigationBar(
+                  height: 74,
+                  backgroundColor: _kSurface,
+                  indicatorColor: _kGold.withValues(alpha: (0.16)),
+                  surfaceTintColor: Colors.transparent,
+                  selectedIndex: _currentTab.index,
+                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                  onDestinationSelected: (index) {
+                    setState(() {
+                      _currentTab = _GameScreenTab.values[index];
+                    });
+                  },
+                  destinations: _GameScreenTab.values
+                      .map(
+                        (tab) => NavigationDestination(
+                          icon: Icon(_iconForTab(tab), color: _kTextSecondary),
+                          selectedIcon: Icon(_iconForTab(tab), color: _kGold),
+                          label: _labelForTab(tab),
+                        ),
+                      )
+                      .toList(),
+                ),
               ),
       );
     });

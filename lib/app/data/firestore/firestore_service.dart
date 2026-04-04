@@ -12,10 +12,20 @@ import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
 import 'package:get/get.dart';
 
 class FirestoreService extends GetxService {
+  static const String _revealReasonChallengeActorLost =
+      'challenge_actor_lost';
+  static const String _revealReasonChallengeChallengerLost =
+      'challenge_challenger_lost';
+  static const String _revealReasonBlockChallengeBlockerLost =
+      'block_challenge_blocker_lost';
+  static const String _revealReasonBlockChallengeChallengerLost =
+      'block_challenge_challenger_lost';
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final Random _random = Random();
 
-  CollectionReference<Map<String, dynamic>> get _games => _firestore.collection('games');
+  CollectionReference<Map<String, dynamic>> get _games =>
+      _firestore.collection('games');
 
   CollectionReference<Map<String, dynamic>> _playersRef(String gameId) {
     return _games.doc(gameId).collection('players');
@@ -33,7 +43,8 @@ class FirestoreService extends GetxService {
     return _games.doc(gameId).collection('challenges');
   }
 
-  Future<bool> createRoom(String roomId, List<String> players, {String? hostDisplayName}) async {
+  Future<bool> createRoom(String roomId, List<String> players,
+      {String? hostDisplayName}) async {
     try {
       final hostId = players.isNotEmpty ? players.first : 'host';
       await _games.doc(roomId).set({
@@ -80,11 +91,13 @@ class FirestoreService extends GetxService {
 
     final game = gameDoc.data()!;
     final playersSnap = await _playersRef(roomId).get();
-    final players =
-        playersSnap.docs.map((doc) => _playerFromFirestore(doc.id, doc.data())).toList();
+    final players = playersSnap.docs
+        .map((doc) => _playerFromFirestore(doc.id, doc.data()))
+        .toList();
 
-    final playerOrder =
-        (game['playerOrder'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toList();
+    final playerOrder = (game['playerOrder'] as List<dynamic>? ?? <dynamic>[])
+        .map((e) => e.toString())
+        .toList();
 
     players.sort((a, b) {
       final aIndex = playerOrder.indexOf(a.name);
@@ -100,17 +113,20 @@ class FirestoreService extends GetxService {
     if (actionId != null) {
       final actionDoc = await _actionsRef(roomId).doc(actionId).get();
       if (actionDoc.exists && actionDoc.data() != null) {
-        currentAction = _actionFromFirestore(actionId, actionDoc.data()!, players);
+        currentAction =
+            _actionFromFirestore(actionId, actionDoc.data()!, players);
       }
     }
 
-    final deckStrings =
-        (game['deck'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toList();
+    final deckStrings = (game['deck'] as List<dynamic>? ?? <dynamic>[])
+        .map((e) => e.toString())
+        .toList();
 
     return CoupRoomModel(
       roomId: roomId,
       players: players,
-      roomState: GameStateExtension.fromName((game['status'] as String?) ?? 'waiting'),
+      roomState:
+          GameStateExtension.fromName((game['status'] as String?) ?? 'waiting'),
       phase: GamePhaseX.fromName((game['phase'] as String?) ?? 'waiting'),
       hostId: game['hostId'] as String?,
       deck: deckStrings
@@ -131,7 +147,10 @@ class FirestoreService extends GetxService {
   }
 
   Stream<List<GameHistoryEntry>> getActionHistoryStream(String roomId) {
-    return _actionsRef(roomId).orderBy('createdAt', descending: true).snapshots().map((snapshot) {
+    return _actionsRef(roomId)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) {
       final logs = <GameHistoryEntry>[];
       for (final doc in snapshot.docs) {
         final data = doc.data();
@@ -189,7 +208,8 @@ class FirestoreService extends GetxService {
   }
 
   Future<void> _clearRoundArtifacts(String roomId) async {
-    Future<void> clearCollection(CollectionReference<Map<String, dynamic>> ref) async {
+    Future<void> clearCollection(
+        CollectionReference<Map<String, dynamic>> ref) async {
       final snap = await ref.get();
       if (snap.docs.isEmpty) return;
 
@@ -251,7 +271,8 @@ class FirestoreService extends GetxService {
     if (!gameSnap.exists || gameSnap.data() == null) return null;
 
     final gameData = gameSnap.data()!;
-    if (expectedPhase != null && (gameData['phase'] as String?) != expectedPhase) {
+    if (expectedPhase != null &&
+        (gameData['phase'] as String?) != expectedPhase) {
       return null;
     }
 
@@ -309,7 +330,8 @@ class FirestoreService extends GetxService {
             'playerOrder': FieldValue.arrayUnion(<String>[player.name]),
           });
 
-          tx.set(playerRef, _playerToFirestore(player), SetOptions(merge: true));
+          tx.set(
+              playerRef, _playerToFirestore(player), SetOptions(merge: true));
         } else {
           final updateData = <String, dynamic>{};
           final display = player.displayName?.trim();
@@ -347,7 +369,10 @@ class FirestoreService extends GetxService {
 
   Future<void> removeBot(String roomId) async {
     final gameRef = _games.doc(roomId);
-    final botsSnap = await _playersRef(roomId).where('isBot', isEqualTo: true).limit(1).get();
+    final botsSnap = await _playersRef(roomId)
+        .where('isBot', isEqualTo: true)
+        .limit(1)
+        .get();
     if (botsSnap.docs.isEmpty) return;
 
     final botRef = botsSnap.docs.first.reference;
@@ -393,7 +418,8 @@ class FirestoreService extends GetxService {
     return true;
   }
 
-  Future<void> updatePlayerReady(String roomId, String playerId, {required bool isReady}) async {
+  Future<void> updatePlayerReady(String roomId, String playerId,
+      {required bool isReady}) async {
     final gameRef = _games.doc(roomId);
     final playerRef = _playersRef(roomId).doc(playerId);
 
@@ -420,7 +446,8 @@ class FirestoreService extends GetxService {
   ///
   /// Returns `true` if the transaction actually wrote a value, `false`
   /// otherwise (e.g. the game was already playing or the name was empty).
-  Future<bool> updatePlayerDisplayName(String roomId, String playerId, String displayName) async {
+  Future<bool> updatePlayerDisplayName(
+      String roomId, String playerId, String displayName) async {
     final gameRef = _games.doc(roomId);
     final playerRef = _playersRef(roomId).doc(playerId);
     var didWrite = false;
@@ -504,7 +531,8 @@ class FirestoreService extends GetxService {
         throw JoinRoomError('Need at least 2 players');
       }
 
-      final playerIds = playersSnap.docs.map((e) => e.id).toList()..shuffle(_random);
+      final playerIds = playersSnap.docs.map((e) => e.id).toList()
+        ..shuffle(_random);
       final deck = _generateStandardDeck();
 
       for (final playerDoc in playersSnap.docs) {
@@ -567,16 +595,25 @@ class FirestoreService extends GetxService {
     });
   }
 
-  Future<void> performAction(String roomId, CoupActionModel actionModel) async {
+  Future<void> performAction(
+    String roomId,
+    CoupActionModel actionModel, {
+    List<String>? exchangeKeepInfluences,
+  }) async {
     final gameRef = _games.doc(roomId);
     final actionRef = _actionsRef(roomId).doc();
+    final exchangeKeep = (exchangeKeepInfluences ?? const <String>[])
+        .map((e) => e.trim().toLowerCase())
+        .where((e) => e.isNotEmpty)
+        .toList(growable: false);
 
     await _firestore.runTransaction((tx) async {
       final gameSnap = await tx.get(gameRef);
       if (!gameSnap.exists || gameSnap.data() == null) return;
 
       final game = gameSnap.data()!;
-      if ((game['status'] as String?) != 'playing' || (game['phase'] as String?) != 'action') {
+      if ((game['status'] as String?) != 'playing' ||
+          (game['phase'] as String?) != 'action') {
         return;
       }
 
@@ -633,7 +670,7 @@ class FirestoreService extends GetxService {
 
       final claimedRole = action.claimedRole;
       final canChallenge = action.isChallengeable;
-      final canBlock = action.isBlockable;
+      final canBlock = action.isBlockable || action == CoupActionType.coup;
       var initialEvents = _appendActionEvent(
         null,
         eventType: 'action_played',
@@ -660,7 +697,7 @@ class FirestoreService extends GetxService {
         );
       }
 
-      tx.set(actionRef, {
+      final actionPayload = <String, dynamic>{
         'type': action.firestoreType,
         'playerId': actionModel.source.name,
         'targetId': targetId,
@@ -671,7 +708,11 @@ class FirestoreService extends GetxService {
         'challengePasses': <String>[actionModel.source.name],
         'blockPasses': <String>[],
         'eventLogs': initialEvents,
-      });
+      };
+      if (action == CoupActionType.ambassador && exchangeKeep.isNotEmpty) {
+        actionPayload['exchangeKeepInfluences'] = exchangeKeep;
+      }
+      tx.set(actionRef, actionPayload);
 
       if (canChallenge) {
         tx.update(gameRef, {
@@ -697,9 +738,203 @@ class FirestoreService extends GetxService {
             'type': action.firestoreType,
             'playerId': actionModel.source.name,
             'targetId': targetId,
+            'exchangeKeepInfluences': exchangeKeep,
           },
           actionEventLogs: initialEvents,
         );
+      }
+    });
+  }
+
+  Future<void> submitExchangeSelection(
+    String roomId,
+    String playerId, {
+    required List<String> keepInfluences,
+  }) async {
+    final gameRef = _games.doc(roomId);
+
+    await _firestore.runTransaction((tx) async {
+      final game =
+          await _getGameDataInPhase(tx, gameRef, expectedPhase: 'resolve');
+      if (game == null) return;
+
+      final actionId = game['currentActionId'] as String?;
+      if (actionId == null) return;
+
+      final action = await _getActionData(tx, roomId, actionId);
+      if (action == null) return;
+      if ((action['type'] as String?) != 'exchange') return;
+      if ((action['status'] as String?) != 'awaiting_exchange_selection') {
+        return;
+      }
+
+      final actorId = action['playerId'] as String?;
+      if (actorId != playerId) return;
+
+      final actionRef = _actionsRef(roomId).doc(actionId);
+      final playerStates = await _loadPlayerStatesInOrder(tx, roomId, game);
+
+      final normalizedKeep = keepInfluences
+          .map((e) => e.trim().toLowerCase())
+          .where((e) => e.isNotEmpty)
+          .toList(growable: false);
+
+      await _resolveActionSuccessInTransaction(
+        tx,
+        roomId: roomId,
+        gameRef: gameRef,
+        gameData: game,
+        actionRef: actionRef,
+        playerStates: playerStates,
+        actionData: {
+          ...action,
+          'exchangeKeepInfluences': normalizedKeep,
+        },
+        actionEventLogs: action['eventLogs'] as List<dynamic>?,
+      );
+    });
+  }
+
+  Future<void> submitRevealSelection(
+    String roomId,
+    String playerId, {
+    required String revealedInfluence,
+  }) async {
+    final gameRef = _games.doc(roomId);
+
+    await _firestore.runTransaction((tx) async {
+      final game =
+          await _getGameDataInPhase(tx, gameRef, expectedPhase: 'resolve');
+      if (game == null) return;
+
+      final actionId = game['currentActionId'] as String?;
+      if (actionId == null) return;
+
+      final action = await _getActionData(tx, roomId, actionId);
+      if (action == null) return;
+      if ((action['status'] as String?) != 'awaiting_reveal_selection') return;
+
+      final revealChooserId = action['revealChooserId'] as String?;
+      final revealReason = action['revealSelectionReason'] as String?;
+      final pendingBlockId = action['pendingBlockId'] as String?;
+      if (revealChooserId != playerId || revealReason == null) return;
+
+      final actionRef = _actionsRef(roomId).doc(actionId);
+      final blockRef = pendingBlockId == null
+          ? null
+          : _blocksRef(roomId).doc(pendingBlockId);
+      final playerStates = await _loadPlayerStatesInOrder(tx, roomId, game);
+      final chooserData = playerStates[playerId];
+      if (chooserData == null) return;
+
+      final influences =
+          (chooserData['influences'] as List<dynamic>? ?? <dynamic>[])
+              .map((e) => e.toString())
+              .toList(growable: false);
+      if (!influences.contains(revealedInfluence)) return;
+
+      final actionType = action['type'] as String? ?? 'income';
+      var actionEventLogs = action['eventLogs'] as List<dynamic>?;
+      final chooserRef = _playersRef(roomId).doc(playerId);
+      final revealedCard = _loseOneInfluenceInTransaction(
+        tx,
+        chooserRef,
+        chooserData,
+        playerStates: playerStates,
+        playerId: playerId,
+        preferredInfluence: revealedInfluence,
+      );
+      if (revealedCard != null) {
+        actionEventLogs = _appendActionEvent(
+          actionEventLogs,
+          eventType: 'influence_revealed',
+          actorId: playerId,
+          actionType: actionType,
+          claimedCard: revealedCard,
+        );
+      }
+
+      switch (revealReason) {
+        case _revealReasonChallengeActorLost:
+          tx.update(actionRef, {
+            'status': 'resolved',
+            'resolvedAt': FieldValue.serverTimestamp(),
+            'eventLogs': actionEventLogs,
+            'revealChooserId': null,
+            'revealSelectionReason': null,
+            'pendingBlockId': null,
+          });
+          await _rotateTurnOrFinish(
+            tx,
+            roomId: roomId,
+            gameRef: gameRef,
+            gameData: game,
+            playerStates: playerStates,
+          );
+          return;
+        case _revealReasonChallengeChallengerLost:
+          tx.update(actionRef, {
+            'eventLogs': actionEventLogs,
+            'revealChooserId': null,
+            'revealSelectionReason': null,
+            'pendingBlockId': null,
+          });
+          if (_isActionBlockable(actionType)) {
+            tx.update(gameRef, {'phase': 'block'});
+          } else {
+            await _resolveActionSuccessInTransaction(
+              tx,
+              roomId: roomId,
+              gameRef: gameRef,
+              gameData: game,
+              actionRef: actionRef,
+              playerStates: playerStates,
+              actionData: action,
+              actionEventLogs: actionEventLogs,
+            );
+          }
+          return;
+        case _revealReasonBlockChallengeChallengerLost:
+          if (blockRef != null) {
+            tx.update(blockRef, {'status': 'resolved'});
+          }
+          tx.update(actionRef, {
+            'status': 'resolved',
+            'resolvedAt': FieldValue.serverTimestamp(),
+            'eventLogs': actionEventLogs,
+            'revealChooserId': null,
+            'revealSelectionReason': null,
+            'pendingBlockId': null,
+          });
+          await _rotateTurnOrFinish(
+            tx,
+            roomId: roomId,
+            gameRef: gameRef,
+            gameData: game,
+            playerStates: playerStates,
+          );
+          return;
+        case _revealReasonBlockChallengeBlockerLost:
+          if (blockRef != null) {
+            tx.update(blockRef, {'status': 'resolved'});
+          }
+          tx.update(actionRef, {
+            'eventLogs': actionEventLogs,
+            'revealChooserId': null,
+            'revealSelectionReason': null,
+            'pendingBlockId': null,
+          });
+          await _resolveActionSuccessInTransaction(
+            tx,
+            roomId: roomId,
+            gameRef: gameRef,
+            gameData: game,
+            actionRef: actionRef,
+            playerStates: playerStates,
+            actionData: action,
+            actionEventLogs: actionEventLogs,
+          );
+          return;
       }
     });
   }
@@ -712,7 +947,8 @@ class FirestoreService extends GetxService {
     final gameRef = _games.doc(roomId);
 
     await _firestore.runTransaction((tx) async {
-      final game = await _getGameDataInPhase(tx, gameRef, expectedPhase: 'challenge');
+      final game =
+          await _getGameDataInPhase(tx, gameRef, expectedPhase: 'challenge');
       if (game == null) return;
 
       final actionId = game['currentActionId'] as String?;
@@ -728,9 +964,10 @@ class FirestoreService extends GetxService {
       final responderAlive = (responderData?['alive'] as bool?) ?? false;
       if (!responderAlive) return;
       var actionEventLogs = action['eventLogs'] as List<dynamic>?;
-      final passes = (action['challengePasses'] as List<dynamic>? ?? <dynamic>[])
-          .map((e) => e.toString())
-          .toSet();
+      final passes =
+          (action['challengePasses'] as List<dynamic>? ?? <dynamic>[])
+              .map((e) => e.toString())
+              .toSet();
 
       if (challenge) {
         if (playerId == actorId || passes.contains(playerId)) return;
@@ -762,6 +999,31 @@ class FirestoreService extends GetxService {
         );
 
         if (actorHasClaim) {
+          final shouldAwaitReveal = _shouldAwaitRevealSelection(
+            challengerData,
+            playerId: playerId,
+          );
+          if (shouldAwaitReveal) {
+            tx.update(actionRef, {
+              'status': 'awaiting_reveal_selection',
+              'revealChooserId': playerId,
+              'revealSelectionReason': _revealReasonChallengeChallengerLost,
+              'pendingBlockId': null,
+              'eventLogs': actionEventLogs,
+            });
+            _exchangeClaimedCardWithDeck(
+              tx,
+              roomId: roomId,
+              gameRef: gameRef,
+              gameData: game,
+              playerRef: actorRef,
+              playerData: actorData,
+              claimedCard: claimedCard,
+            );
+            tx.update(gameRef, {'phase': 'resolve'});
+            return;
+          }
+
           final revealedCard = _loseOneInfluenceInTransaction(
             tx,
             challengerRef,
@@ -804,6 +1066,22 @@ class FirestoreService extends GetxService {
             );
           }
         } else {
+          final shouldAwaitReveal = _shouldAwaitRevealSelection(
+            actorData,
+            playerId: actorId,
+          );
+          if (shouldAwaitReveal) {
+            tx.update(actionRef, {
+              'status': 'awaiting_reveal_selection',
+              'revealChooserId': actorId,
+              'revealSelectionReason': _revealReasonChallengeActorLost,
+              'pendingBlockId': null,
+              'eventLogs': actionEventLogs,
+            });
+            tx.update(gameRef, {'phase': 'resolve'});
+            return;
+          }
+
           final revealedCard = _loseOneInfluenceInTransaction(
             tx,
             actorRef,
@@ -882,7 +1160,8 @@ class FirestoreService extends GetxService {
     final gameRef = _games.doc(roomId);
 
     await _firestore.runTransaction((tx) async {
-      final game = await _getGameDataInPhase(tx, gameRef, expectedPhase: 'block');
+      final game =
+          await _getGameDataInPhase(tx, gameRef, expectedPhase: 'block');
       if (game == null) return;
 
       final actionId = game['currentActionId'] as String?;
@@ -909,13 +1188,14 @@ class FirestoreService extends GetxService {
       if (!eligibleBlockers.contains(playerId)) return;
 
       if (!block &&
-          actionType == 'assassinate' &&
+          (actionType == 'assassinate' || actionType == 'coup') &&
           targetId == playerId &&
           revealedInfluence != null) {
         final targetData = playerStates[playerId];
-        final influences = (targetData?['influences'] as List<dynamic>? ?? <dynamic>[])
-            .map((e) => e.toString())
-            .toList();
+        final influences =
+            (targetData?['influences'] as List<dynamic>? ?? <dynamic>[])
+                .map((e) => e.toString())
+                .toList();
         if (!influences.contains(revealedInfluence)) {
           return;
         }
@@ -954,8 +1234,9 @@ class FirestoreService extends GetxService {
         return;
       }
 
-      final passes =
-          (action['blockPasses'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toSet();
+      final passes = (action['blockPasses'] as List<dynamic>? ?? <dynamic>[])
+          .map((e) => e.toString())
+          .toSet();
       if (!passes.contains(playerId)) {
         passes.add(playerId);
         actionEventLogs = _appendActionEvent(
@@ -972,7 +1253,9 @@ class FirestoreService extends GetxService {
 
       if (passes.containsAll(eligibleBlockers)) {
         final forcedRevealByPlayerId = <String, String>{};
-        if (actionType == 'assassinate' && targetId == playerId && revealedInfluence != null) {
+        if ((actionType == 'assassinate' || actionType == 'coup') &&
+            targetId == playerId &&
+            revealedInfluence != null) {
           forcedRevealByPlayerId[playerId] = revealedInfluence;
         }
 
@@ -984,7 +1267,8 @@ class FirestoreService extends GetxService {
           actionRef: actionRef,
           playerStates: playerStates,
           actionData: action,
-          forcedRevealByPlayerId: forcedRevealByPlayerId.isEmpty ? null : forcedRevealByPlayerId,
+          forcedRevealByPlayerId:
+              forcedRevealByPlayerId.isEmpty ? null : forcedRevealByPlayerId,
           actionEventLogs: actionEventLogs,
         );
       }
@@ -999,7 +1283,8 @@ class FirestoreService extends GetxService {
     final gameRef = _games.doc(roomId);
 
     await _firestore.runTransaction((tx) async {
-      final game = await _getGameDataInPhase(tx, gameRef, expectedPhase: 'block_challenge');
+      final game = await _getGameDataInPhase(tx, gameRef,
+          expectedPhase: 'block_challenge');
       if (game == null) return;
 
       final actionId = game['currentActionId'] as String?;
@@ -1020,9 +1305,10 @@ class FirestoreService extends GetxService {
       final responderAlive = (responderData?['alive'] as bool?) ?? false;
       if (!responderAlive) return;
       var actionEventLogs = action['eventLogs'] as List<dynamic>?;
-      final challengePasses = (blockData['challengePasses'] as List<dynamic>? ?? <dynamic>[])
-          .map((e) => e.toString())
-          .toSet();
+      final challengePasses =
+          (blockData['challengePasses'] as List<dynamic>? ?? <dynamic>[])
+              .map((e) => e.toString())
+              .toSet();
 
       if (challenge) {
         if (playerId == blockerId || challengePasses.contains(playerId)) return;
@@ -1054,6 +1340,32 @@ class FirestoreService extends GetxService {
         );
 
         if (blockerHasCard) {
+          final shouldAwaitReveal = _shouldAwaitRevealSelection(
+            challengerData,
+            playerId: playerId,
+          );
+          if (shouldAwaitReveal) {
+            _exchangeClaimedCardWithDeck(
+              tx,
+              roomId: roomId,
+              gameRef: gameRef,
+              gameData: game,
+              playerRef: blockerRef,
+              playerData: blockerData,
+              claimedCard: claimedCard,
+            );
+            tx.update(actionRef, {
+              'status': 'awaiting_reveal_selection',
+              'revealChooserId': playerId,
+              'revealSelectionReason':
+                  _revealReasonBlockChallengeChallengerLost,
+              'pendingBlockId': blockId,
+              'eventLogs': actionEventLogs,
+            });
+            tx.update(gameRef, {'phase': 'resolve'});
+            return;
+          }
+
           final revealedCard = _loseOneInfluenceInTransaction(
             tx,
             challengerRef,
@@ -1093,6 +1405,22 @@ class FirestoreService extends GetxService {
             playerStates: playerStates,
           );
         } else {
+          final shouldAwaitReveal = _shouldAwaitRevealSelection(
+            blockerData,
+            playerId: blockerId,
+          );
+          if (shouldAwaitReveal) {
+            tx.update(actionRef, {
+              'status': 'awaiting_reveal_selection',
+              'revealChooserId': blockerId,
+              'revealSelectionReason': _revealReasonBlockChallengeBlockerLost,
+              'pendingBlockId': blockId,
+              'eventLogs': actionEventLogs,
+            });
+            tx.update(gameRef, {'phase': 'resolve'});
+            return;
+          }
+
           final revealedCard = _loseOneInfluenceInTransaction(
             tx,
             blockerRef,
@@ -1141,7 +1469,8 @@ class FirestoreService extends GetxService {
       }
 
       final alivePlayerIds = _alivePlayerIdsFromStates(playerStates, game);
-      final neededPasses = alivePlayerIds.where((id) => id != blockerId).toSet();
+      final neededPasses =
+          alivePlayerIds.where((id) => id != blockerId).toSet();
       if (challengePasses.containsAll(neededPasses)) {
         tx.update(blockRef, {'status': 'resolved'});
         tx.update(actionRef, {
@@ -1167,15 +1496,18 @@ class FirestoreService extends GetxService {
     if (room.roomState != GameState.playing) return;
 
     // --- Action phase: it is a bot's turn ---
-    final bot =
-        room.players.firstWhereOrNull((p) => p.name == room.currentTurn && p.isBot && p.isAlive);
+    final bot = room.players.firstWhereOrNull(
+        (p) => p.name == room.currentTurn && p.isBot && p.isAlive);
 
     if (room.phase == GamePhase.action && bot != null) {
       final action = _chooseBotAction(room, bot);
       CoupPlayerModel? target;
       if (CoupFunction.isNeedPlayerTarget(action)) {
-        final targets = room.players.where((p) => p.isAlive && p.name != bot.name).toList();
-        target = targets.isNotEmpty ? targets[_random.nextInt(targets.length)] : null;
+        final targets =
+            room.players.where((p) => p.isAlive && p.name != bot.name).toList();
+        target = targets.isNotEmpty
+            ? targets[_random.nextInt(targets.length)]
+            : null;
       }
       await performAction(
         roomId,
@@ -1186,6 +1518,46 @@ class FirestoreService extends GetxService {
 
     final currentAction = room.currentAction;
     if (currentAction == null) return;
+
+    if (room.phase == GamePhase.resolve &&
+        currentAction.status == 'awaiting_reveal_selection') {
+      final chooserPlayer = room.players.firstWhereOrNull(
+          (player) => player.name == currentAction.revealChooserId);
+      if (chooserPlayer != null &&
+          (_isBotPlayerId(chooserPlayer.name) || chooserPlayer.isBot)) {
+        final hiddenCards = chooserPlayer.cards
+            .where((card) => !card.isRevealed)
+            .toList(growable: false);
+        if (hiddenCards.isNotEmpty) {
+          await submitRevealSelection(
+            roomId,
+            chooserPlayer.name,
+            revealedInfluence: hiddenCards.first.roleType.firestoreValue,
+          );
+        }
+      }
+      return;
+    }
+
+    if (room.phase == GamePhase.resolve &&
+        currentAction.actionType == CoupActionType.ambassador &&
+        currentAction.status == 'awaiting_exchange_selection') {
+      final sourcePlayer = room.players.firstWhereOrNull(
+          (player) => player.name == currentAction.source.name);
+      if (sourcePlayer?.isBot ?? false) {
+        final hiddenToKeep = currentAction.exchangeHiddenToKeep ?? 0;
+        final defaultKeep =
+            (currentAction.exchangeOriginalHidden ?? const <String>[])
+                .take(hiddenToKeep)
+                .toList(growable: false);
+        await submitExchangeSelection(
+          roomId,
+          currentAction.source.name,
+          keepInfluences: defaultKeep,
+        );
+      }
+      return;
+    }
 
     // --- Challenge phase: all pending bots respond in one pass ---
     // Intermediate passes only update the action doc (not the game doc), so the
@@ -1248,18 +1620,24 @@ class FirestoreService extends GetxService {
 
       final blockData = blockDoc.data()!;
       final blockerId = blockData['blockerId'] as String?;
-      final alreadyVoted = (blockData['challengePasses'] as List<dynamic>? ?? <dynamic>[])
-          .map((e) => e.toString())
-          .toSet();
+      final alreadyVoted =
+          (blockData['challengePasses'] as List<dynamic>? ?? <dynamic>[])
+              .map((e) => e.toString())
+              .toSet();
 
       final pendingBots = room.players
           .where(
-            (p) => p.isBot && p.isAlive && p.name != blockerId && !alreadyVoted.contains(p.name),
+            (p) =>
+                p.isBot &&
+                p.isAlive &&
+                p.name != blockerId &&
+                !alreadyVoted.contains(p.name),
           )
           .toList();
       for (final bot in pendingBots) {
         final shouldChallenge = _random.nextInt(100) < 20;
-        await respondToBlockChallenge(roomId, bot.name, challenge: shouldChallenge);
+        await respondToBlockChallenge(roomId, bot.name,
+            challenge: shouldChallenge);
         // A challenge resolves the block; stop and let stream drive next state.
         if (shouldChallenge) break;
       }
@@ -1309,6 +1687,7 @@ class FirestoreService extends GetxService {
     final sourceData = playerStates[sourceId];
     final targetData = targetId == null ? null : playerStates[targetId];
     List<dynamic>? eventLogs = actionEventLogs;
+    var isWaitingExchangeSelection = false;
 
     void appendEvent({
       required String eventType,
@@ -1426,17 +1805,71 @@ class FirestoreService extends GetxService {
         break;
       case 'exchange':
         if (sourceData != null) {
-          _applyExchange(
-            tx,
-            gameRef: gameRef,
-            sourceRef: sourceRef,
-            gameData: gameData,
-            sourceData: sourceData,
-          );
+          final existingPool =
+              (actionData['exchangePool'] as List<dynamic>? ?? <dynamic>[])
+                  .map((e) => e.toString())
+                  .toList(growable: false);
+          final exchangeKeepInfluences =
+              (actionData['exchangeKeepInfluences'] as List<dynamic>? ??
+                      <dynamic>[])
+                  .map((e) => e.toString())
+                  .toList(growable: false);
+          if (exchangeKeepInfluences.isEmpty) {
+            if (existingPool.isNotEmpty) {
+              throw Exception('Please choose cards to keep');
+            }
+            final prepared = _prepareExchangeSelection(
+              gameData: gameData,
+              sourceData: sourceData,
+            );
+            if (prepared != null) {
+              tx.update(actionRef, {
+                'status': 'awaiting_exchange_selection',
+                'exchangePool': prepared.pool,
+                'exchangeOriginalHidden': prepared.originalHidden,
+                'exchangeHiddenToKeep': prepared.hiddenToKeep,
+                'eventLogs': eventLogs,
+              });
+              tx.update(gameRef, {
+                'phase': 'resolve',
+                'currentActionId': actionRef.id,
+                'currentBlockId': null,
+                'deck': prepared.deckAfterDraw,
+              });
+              isWaitingExchangeSelection = true;
+            }
+          } else {
+            final hiddenToKeepRaw = actionData['exchangeHiddenToKeep'];
+            final hiddenToKeep = hiddenToKeepRaw is int
+                ? hiddenToKeepRaw
+                : (hiddenToKeepRaw is num ? hiddenToKeepRaw.toInt() : null);
+
+            if (existingPool.isEmpty || hiddenToKeep == null) {
+              throw Exception('Exchange selection data is missing');
+            }
+
+            final applied = _applyExchangeSelection(
+              tx,
+              gameRef: gameRef,
+              sourceRef: sourceRef,
+              gameData: gameData,
+              sourceData: sourceData,
+              pool: existingPool,
+              hiddenToKeep: hiddenToKeep,
+              selectedKeep: exchangeKeepInfluences,
+            );
+            if (!applied) {
+              throw Exception('Invalid exchange selection');
+            }
+          }
         }
         break;
       default:
         break;
+    }
+
+    if (isWaitingExchangeSelection) {
+      return;
     }
 
     tx.update(actionRef, {
@@ -1487,41 +1920,107 @@ class FirestoreService extends GetxService {
     );
   }
 
-  void _applyExchange(
+  _PreparedExchangeSelection? _prepareExchangeSelection({
+    required Map<String, dynamic> gameData,
+    required Map<String, dynamic> sourceData,
+  }) {
+    final deck = (gameData['deck'] as List<dynamic>? ?? <dynamic>[])
+        .map((e) => e.toString())
+        .toList();
+    if (deck.length < 2) return null;
+
+    final influences =
+        (sourceData['influences'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
+    final revealed =
+        (sourceData['revealedInfluences'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
+
+    // A player can never hold more than 2 total influences (hidden + revealed).
+    final hiddenToKeep = (2 - revealed.length).clamp(0, 2);
+    if (hiddenToKeep == 0) return null;
+
+    final drawA = deck.removeLast();
+    final drawB = deck.removeLast();
+    final pool = <String>[...influences, drawA, drawB];
+
+    return _PreparedExchangeSelection(
+      pool: pool,
+      originalHidden: influences,
+      hiddenToKeep: hiddenToKeep,
+      deckAfterDraw: deck,
+    );
+  }
+
+  bool _applyExchangeSelection(
     Transaction tx, {
     required DocumentReference<Map<String, dynamic>> gameRef,
     required DocumentReference<Map<String, dynamic>> sourceRef,
     required Map<String, dynamic> gameData,
     required Map<String, dynamic> sourceData,
+    required List<String> pool,
+    required int hiddenToKeep,
+    required List<String> selectedKeep,
   }) {
-    final deck =
-        (gameData['deck'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toList();
-    if (deck.length < 2) return;
+    final normalizedKeep = selectedKeep
+        .map((e) => e.trim().toLowerCase())
+        .where((e) => e.isNotEmpty)
+        .toList(growable: false);
+    if (!_isValidExchangeKeepSelection(
+      normalizedKeep,
+      pool: pool,
+      hiddenToKeep: hiddenToKeep,
+    )) {
+      return false;
+    }
 
-    final influences = (sourceData['influences'] as List<dynamic>? ?? <dynamic>[])
+    final deck = (gameData['deck'] as List<dynamic>? ?? <dynamic>[])
         .map((e) => e.toString())
         .toList();
-    final revealed = (sourceData['revealedInfluences'] as List<dynamic>? ?? <dynamic>[])
-        .map((e) => e.toString())
-        .toList();
+    final revealed =
+        (sourceData['revealedInfluences'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
 
-    // A player can never hold more than 2 total influences (hidden + revealed).
-    final hiddenToKeep = (2 - revealed.length).clamp(0, 2);
-    if (hiddenToKeep == 0) return;
-
-    final drawA = deck.removeLast();
-    final drawB = deck.removeLast();
-    final pool = <String>[...influences, drawA, drawB]..shuffle(_random);
-    final keep = pool.take(hiddenToKeep).toList();
-    final returns = pool.skip(hiddenToKeep).toList();
+    final returns = List<String>.from(pool);
+    for (final kept in normalizedKeep) {
+      final index = returns.indexOf(kept);
+      if (index >= 0) {
+        returns.removeAt(index);
+      }
+    }
     deck.addAll(returns);
     deck.shuffle(_random);
 
     tx.update(sourceRef, {
-      'influences': keep,
+      'influences': normalizedKeep,
       'revealedInfluences': revealed,
     });
     tx.update(gameRef, {'deck': deck});
+    return true;
+  }
+
+  bool _isValidExchangeKeepSelection(
+    List<String> selectedKeep, {
+    required List<String> pool,
+    required int hiddenToKeep,
+  }) {
+    if (selectedKeep.length != hiddenToKeep) return false;
+
+    final poolCounts = <String, int>{};
+    for (final card in pool) {
+      poolCounts[card] = (poolCounts[card] ?? 0) + 1;
+    }
+
+    for (final selected in selectedKeep) {
+      final remain = poolCounts[selected] ?? 0;
+      if (remain <= 0) return false;
+      poolCounts[selected] = remain - 1;
+    }
+
+    return true;
   }
 
   Future<List<String>> _alivePlayerIdsInOrder(
@@ -1529,8 +2028,9 @@ class FirestoreService extends GetxService {
     String roomId,
     Map<String, dynamic> game,
   ) async {
-    final order =
-        (game['playerOrder'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toList();
+    final order = (game['playerOrder'] as List<dynamic>? ?? <dynamic>[])
+        .map((e) => e.toString())
+        .toList();
 
     final alive = <String>[];
     for (final playerId in order) {
@@ -1560,12 +2060,14 @@ class FirestoreService extends GetxService {
         : await _alivePlayerIdsInOrder(tx, roomId, gameData);
     if (alive.length <= 1) {
       final hostId = gameData['hostId'] as String?;
-      final playerIdsToResetReady = playerStates?.keys.toList(growable: false) ?? order;
+      final playerIdsToResetReady =
+          playerStates?.keys.toList(growable: false) ?? order;
       for (final playerId in playerIdsToResetReady) {
         final playerData = playerStates?[playerId];
         final isBot = (playerData?['isBot'] as bool?) ?? false;
         final isHost = hostId != null && playerId == hostId;
-        tx.update(_playersRef(roomId).doc(playerId), {'isReady': isBot || isHost});
+        tx.update(
+            _playersRef(roomId).doc(playerId), {'isReady': isBot || isHost});
       }
 
       tx.update(gameRef, {
@@ -1602,8 +2104,9 @@ class FirestoreService extends GetxService {
     String roomId,
     Map<String, dynamic> game,
   ) async {
-    final order =
-        (game['playerOrder'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toList();
+    final order = (game['playerOrder'] as List<dynamic>? ?? <dynamic>[])
+        .map((e) => e.toString())
+        .toList();
 
     final playerStates = <String, Map<String, dynamic>>{};
     for (final playerId in order) {
@@ -1618,9 +2121,13 @@ class FirestoreService extends GetxService {
     Map<String, Map<String, dynamic>> playerStates,
     Map<String, dynamic> game,
   ) {
-    final order =
-        (game['playerOrder'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toList();
-    return order.where((playerId) => (playerStates[playerId]?['alive'] as bool?) ?? false).toList();
+    final order = (game['playerOrder'] as List<dynamic>? ?? <dynamic>[])
+        .map((e) => e.toString())
+        .toList();
+    return order
+        .where(
+            (playerId) => (playerStates[playerId]?['alive'] as bool?) ?? false)
+        .toList();
   }
 
   String? _loseOneInfluenceInTransaction(
@@ -1631,12 +2138,14 @@ class FirestoreService extends GetxService {
     String? playerId,
     String? preferredInfluence,
   }) {
-    final influences = (playerData['influences'] as List<dynamic>? ?? <dynamic>[])
-        .map((e) => e.toString())
-        .toList();
-    final revealed = (playerData['revealedInfluences'] as List<dynamic>? ?? <dynamic>[])
-        .map((e) => e.toString())
-        .toList();
+    final influences =
+        (playerData['influences'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
+    final revealed =
+        (playerData['revealedInfluences'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
 
     if (influences.isEmpty) {
       tx.update(playerRef, {'alive': false});
@@ -1649,8 +2158,12 @@ class FirestoreService extends GetxService {
       return null;
     }
 
-    final preferredIndex = preferredInfluence == null ? -1 : influences.indexOf(preferredInfluence);
-    final lost = preferredIndex >= 0 ? influences.removeAt(preferredIndex) : influences.removeAt(0);
+    final preferredIndex = preferredInfluence == null
+        ? -1
+        : influences.indexOf(preferredInfluence);
+    final lost = preferredIndex >= 0
+        ? influences.removeAt(preferredIndex)
+        : influences.removeAt(0);
     revealed.add(lost);
 
     tx.update(playerRef, {
@@ -1681,14 +2194,16 @@ class FirestoreService extends GetxService {
   }) {
     if (claimedCard == null) return;
 
-    final influences = (playerData['influences'] as List<dynamic>? ?? <dynamic>[])
-        .map((e) => e.toString())
-        .toList();
+    final influences =
+        (playerData['influences'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
     final index = influences.indexOf(claimedCard);
     if (index == -1) return;
 
-    final deck =
-        (gameData['deck'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toList();
+    final deck = (gameData['deck'] as List<dynamic>? ?? <dynamic>[])
+        .map((e) => e.toString())
+        .toList();
     if (deck.isEmpty) return;
 
     final old = influences[index];
@@ -1703,14 +2218,34 @@ class FirestoreService extends GetxService {
 
   bool _playerHasCard(Map<String, dynamic> playerData, String? claimedCard) {
     if (claimedCard == null) return false;
-    final influences = (playerData['influences'] as List<dynamic>? ?? <dynamic>[])
-        .map((e) => e.toString())
-        .toList();
+    final influences =
+        (playerData['influences'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
     return influences.contains(claimedCard);
   }
 
+  bool _shouldAwaitRevealSelection(
+    Map<String, dynamic> playerData, {
+    required String playerId,
+  }) {
+    final influences =
+        (playerData['influences'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList(growable: false);
+    final isBot = _isBotPlayerId(playerId) ||
+        ((playerData['isBot'] as bool?) ?? false);
+    return !isBot && influences.isNotEmpty;
+  }
+
+  bool _isBotPlayerId(String playerId) {
+    return playerId.startsWith('BOT_');
+  }
+
   bool _isActionBlockable(String actionType) {
-    return actionType == 'foreign_aid' || actionType == 'assassinate' || actionType == 'steal';
+    return actionType == 'foreign_aid' ||
+        actionType == 'assassinate' ||
+        actionType == 'steal';
   }
 
   Set<String> _eligibleBlockers({
@@ -1723,7 +2258,9 @@ class FirestoreService extends GetxService {
       return alivePlayerIds.where((id) => id != actorId).toSet();
     }
 
-    if (actionType == 'assassinate' || actionType == 'steal') {
+    if (actionType == 'assassinate' ||
+        actionType == 'steal' ||
+        actionType == 'coup') {
       if (targetId == null) return <String>{};
       return <String>{targetId};
     }
@@ -1744,18 +2281,21 @@ class FirestoreService extends GetxService {
     }
   }
 
-  CoupPlayerModel _playerFromFirestore(String playerId, Map<String, dynamic> data) {
-    final influences =
-        (data['influences'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toList();
-    final revealed = (data['revealedInfluences'] as List<dynamic>? ?? <dynamic>[])
+  CoupPlayerModel _playerFromFirestore(
+      String playerId, Map<String, dynamic> data) {
+    final influences = (data['influences'] as List<dynamic>? ?? <dynamic>[])
         .map((e) => e.toString())
         .toList();
+    final revealed =
+        (data['revealedInfluences'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
 
     final cards = <CoupCardModel>[
-      ...influences.map(
-          (v) => CoupCardModel(roleType: CoupRoleTypeX.fromFirestoreValue(v), isRevealed: false)),
-      ...revealed.map(
-          (v) => CoupCardModel(roleType: CoupRoleTypeX.fromFirestoreValue(v), isRevealed: true)),
+      ...influences.map((v) => CoupCardModel(
+          roleType: CoupRoleTypeX.fromFirestoreValue(v), isRevealed: false)),
+      ...revealed.map((v) => CoupCardModel(
+          roleType: CoupRoleTypeX.fromFirestoreValue(v), isRevealed: true)),
     ];
 
     return CoupPlayerModel(
@@ -1770,10 +2310,14 @@ class FirestoreService extends GetxService {
   }
 
   Map<String, dynamic> _playerToFirestore(CoupPlayerModel player) {
-    final influences =
-        player.cards.where((e) => !e.isRevealed).map((e) => e.roleType.firestoreValue).toList();
-    final revealed =
-        player.cards.where((e) => e.isRevealed).map((e) => e.roleType.firestoreValue).toList();
+    final influences = player.cards
+        .where((e) => !e.isRevealed)
+        .map((e) => e.roleType.firestoreValue)
+        .toList();
+    final revealed = player.cards
+        .where((e) => e.isRevealed)
+        .map((e) => e.roleType.firestoreValue)
+        .toList();
 
     return {
       'name': player.name,
@@ -1797,27 +2341,49 @@ class FirestoreService extends GetxService {
     final targetId = action['targetId'] as String?;
 
     final source = players.firstWhereOrNull((p) => p.name == sourceId) ??
-        CoupPlayerModel(name: sourceId, isReady: true, cards: const [], isAlive: true, coins: 0);
-    final target = targetId == null ? null : players.firstWhereOrNull((p) => p.name == targetId);
+        CoupPlayerModel(
+            name: sourceId,
+            isReady: true,
+            cards: const [],
+            isAlive: true,
+            coins: 0);
+    final target = targetId == null
+        ? null
+        : players.firstWhereOrNull((p) => p.name == targetId);
 
-    final challengePasses = (action['challengePasses'] as List<dynamic>? ?? <dynamic>[])
+    final challengePasses =
+        (action['challengePasses'] as List<dynamic>? ?? <dynamic>[])
+            .map((e) => e.toString())
+            .toList();
+    final blockPasses = (action['blockPasses'] as List<dynamic>? ?? <dynamic>[])
         .map((e) => e.toString())
         .toList();
-    final blockPasses =
-        (action['blockPasses'] as List<dynamic>? ?? <dynamic>[]).map((e) => e.toString()).toList();
 
     return CoupActionModel(
       actionId: actionId,
       source: source,
       target: target,
-      actionType: CoupActionTypeX.fromFirestoreType((action['type'] as String?) ?? 'income'),
+      actionType: CoupActionTypeX.fromFirestoreType(
+          (action['type'] as String?) ?? 'income'),
       status: action['status'] as String?,
       claimedCard: action['claimedCard'] as String?,
       blockerId: action['blockerId'] as String?,
       blockClaimedCard: action['blockClaimedCard'] as String?,
+      revealChooserId: action['revealChooserId'] as String?,
+      revealSelectionReason: action['revealSelectionReason'] as String?,
+      pendingBlockId: action['pendingBlockId'] as String?,
     )
       ..listNeedVote = challengePasses
-      ..listVoted = blockPasses;
+      ..listVoted = blockPasses
+      ..exchangePool = (action['exchangePool'] as List<dynamic>? ?? <dynamic>[])
+          .map((e) => e.toString())
+          .toList(growable: false)
+      ..exchangeOriginalHidden =
+          (action['exchangeOriginalHidden'] as List<dynamic>? ?? <dynamic>[])
+              .map((e) => e.toString())
+              .toList(growable: false)
+      ..exchangeHiddenToKeep =
+          (action['exchangeHiddenToKeep'] as num?)?.toInt();
   }
 
   List<String> _generateStandardDeck() {
@@ -1841,4 +2407,18 @@ class FirestoreService extends GetxService {
     roles.shuffle(_random);
     return roles;
   }
+}
+
+class _PreparedExchangeSelection {
+  final List<String> pool;
+  final List<String> originalHidden;
+  final int hiddenToKeep;
+  final List<String> deckAfterDraw;
+
+  const _PreparedExchangeSelection({
+    required this.pool,
+    required this.originalHidden,
+    required this.hiddenToKeep,
+    required this.deckAfterDraw,
+  });
 }

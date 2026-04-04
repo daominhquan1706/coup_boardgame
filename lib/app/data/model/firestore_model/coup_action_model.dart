@@ -10,8 +10,10 @@ class CoupActionModel implements BaseModel {
   @JsonKey(includeIfNull: false)
   final String? actionId;
   final CoupPlayerModel source; // Player performing the action
-  final CoupActionType actionType; // Type of action being taken (e.g., income, challenge)
-  final CoupPlayerModel? target; // Optional target player if the action requires one
+  final CoupActionType
+      actionType; // Type of action being taken (e.g., income, challenge)
+  final CoupPlayerModel?
+      target; // Optional target player if the action requires one
   @JsonKey(includeIfNull: false)
   String? status;
   @JsonKey(includeIfNull: false)
@@ -22,7 +24,20 @@ class CoupActionModel implements BaseModel {
   String? blockerId;
   @JsonKey(includeIfNull: false)
   String? blockClaimedCard;
-  List<String> listNeedVote = []; // List of players who need to vote on the action
+  @JsonKey(includeIfNull: false)
+  List<String>? exchangePool;
+  @JsonKey(includeIfNull: false)
+  List<String>? exchangeOriginalHidden;
+  @JsonKey(includeIfNull: false)
+  int? exchangeHiddenToKeep;
+  @JsonKey(includeIfNull: false)
+  String? revealChooserId;
+  @JsonKey(includeIfNull: false)
+  String? revealSelectionReason;
+  @JsonKey(includeIfNull: false)
+  String? pendingBlockId;
+  List<String> listNeedVote =
+      []; // List of players who need to vote on the action
   List<String> listVoted = []; // List of players who have voted on the action
   String? preventedBy; // Name of the player who prevented the action
   bool? isFakeAction; // Whether the action is a fake action
@@ -37,9 +52,13 @@ class CoupActionModel implements BaseModel {
     this.challengerId,
     this.blockerId,
     this.blockClaimedCard,
+    this.revealChooserId,
+    this.revealSelectionReason,
+    this.pendingBlockId,
   });
 
-  factory CoupActionModel.fromJson(Map<String, dynamic> json) => _$CoupActionModelFromJson(json);
+  factory CoupActionModel.fromJson(Map<String, dynamic> json) =>
+      _$CoupActionModelFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$CoupActionModelToJson(this);

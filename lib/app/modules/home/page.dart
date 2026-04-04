@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
 import 'controller.dart';
 
 const Color _kBg = Color(0xFF0F1728);
@@ -163,11 +164,15 @@ class HomePage extends GetView<HomeController> {
           Text('homeCreateRoomDesc'.tr,
               style: const TextStyle(color: _kTextSecondary, fontSize: 12)),
           const SizedBox(height: 16),
-          _BoardButton(
-            label: 'homeCreateRoomButton'.tr,
-            color: _kGreen,
-            enabled: true,
-            onTap: controller.onTapCreateRoom,
+          E2ETag(
+            label: 'e2e-home-create-room-button',
+            button: true,
+            child: _BoardButton(
+              label: 'homeCreateRoomButton'.tr,
+              color: _kGreen,
+              enabled: true,
+              onTap: controller.onTapCreateRoom,
+            ),
           ),
         ],
       ),
@@ -231,18 +236,29 @@ class HomePage extends GetView<HomeController> {
           const SizedBox(height: 4),
           Text('homeJoinRoomDesc'.tr, style: const TextStyle(color: _kTextSecondary, fontSize: 12)),
           const SizedBox(height: 16),
-          _BoardTextField(
-            onChanged: controller.roomCode.call,
-            hintText: 'homeEnterRoomCode'.tr,
-            prefixIcon: Icons.tag,
+          E2ETag(
+            label: 'e2e-home-join-room-code-input',
+            textField: true,
+            child: _BoardTextField(
+              onChanged: controller.roomCode.call,
+              hintText: 'homeEnterRoomCode'.tr,
+              prefixIcon: Icons.tag,
+            ),
           ),
           const SizedBox(height: 12),
           Obx(
-            () => _BoardButton(
-              label: 'homeJoinRoomButton'.tr,
-              color: _kBlue,
+            () => E2ETag(
+              label: controller.roomCode.value.isNotEmpty
+                  ? 'e2e-home-join-room-button-ready'
+                  : 'e2e-home-join-room-button-disabled',
+              button: true,
               enabled: controller.roomCode.value.isNotEmpty,
-              onTap: controller.onTapJoinRoom,
+              child: _BoardButton(
+                label: 'homeJoinRoomButton'.tr,
+                color: _kBlue,
+                enabled: controller.roomCode.value.isNotEmpty,
+                onTap: controller.onTapJoinRoom,
+              ),
             ),
           ),
         ],

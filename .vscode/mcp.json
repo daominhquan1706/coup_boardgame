@@ -6,6 +6,25 @@
 			"headers": {
 				"X-Goog-Api-Key": "AQ.Ab8RN6KFYGIHQukrZDeUiH2iiQq4mDww2Ev0i9wnoUe2KGx67Q"
 			}
+		},
+		"appium-mcp": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"appium-mcp@latest"
+			],
+			"env": {
+				"ANDROID_HOME": "/Users/masterbranch/Library/Android/sdk",
+				"ANDROID_SDK_ROOT": "/Users/masterbranch/Library/Android/sdk"
+			}
+		},
+		"playwright": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"@playwright/mcp@latest"
+			]
 		}
 	}
 }

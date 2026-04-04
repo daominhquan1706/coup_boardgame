@@ -44,7 +44,8 @@ class _GameEndScreen extends StatelessWidget {
       child: SafeArea(
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: viewport.isPhone ? double.infinity : 480),
+            constraints: BoxConstraints(
+                maxWidth: viewport.isPhone ? double.infinity : 480),
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -97,7 +98,8 @@ class _GameEndScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(bool isVictory) {
-    final winnerPlayer = room.players.firstWhereOrNull((p) => p.name == room.winnerId);
+    final winnerPlayer =
+        room.players.firstWhereOrNull((p) => p.name == room.winnerId);
     final winnerShown = winnerPlayer?.shownName ?? room.winnerId ?? '';
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -106,12 +108,20 @@ class _GameEndScreen extends StatelessWidget {
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: isVictory
-              ? [_kGold.withValues(alpha: (0.22)), _kGold.withValues(alpha: (0.05))]
-              : [_kRed.withValues(alpha: (0.18)), _kRed.withValues(alpha: (0.04))],
+              ? [
+                  _kGold.withValues(alpha: (0.22)),
+                  _kGold.withValues(alpha: (0.05))
+                ]
+              : [
+                  _kRed.withValues(alpha: (0.18)),
+                  _kRed.withValues(alpha: (0.04))
+                ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isVictory ? _kGold.withValues(alpha: (0.55)) : _kRed.withValues(alpha: (0.45)),
+          color: isVictory
+              ? _kGold.withValues(alpha: (0.55))
+              : _kRed.withValues(alpha: (0.45)),
           width: 1.5,
         ),
       ),
@@ -119,7 +129,9 @@ class _GameEndScreen extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            isVictory ? Icons.emoji_events_rounded : Icons.sentiment_very_dissatisfied_rounded,
+            isVictory
+                ? Icons.emoji_events_rounded
+                : Icons.sentiment_very_dissatisfied_rounded,
             size: 56,
             color: isVictory ? _kGold : _kRed,
           ),
@@ -135,7 +147,9 @@ class _GameEndScreen extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            isVictory ? 'gameYouWon'.tr : 'gameWinner'.trParams({'name': winnerShown}),
+            isVictory
+                ? 'gameYouWon'.tr
+                : 'gameWinner'.trParams({'name': winnerShown}),
             textAlign: TextAlign.center,
             style: GoogleFonts.rajdhani(
               color: _kTextSecondary,
@@ -148,7 +162,8 @@ class _GameEndScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSection({required IconData icon, required String title, required Widget child}) {
+  Widget _buildSection(
+      {required IconData icon, required String title, required Widget child}) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -202,7 +217,8 @@ class _GameEndScreen extends StatelessWidget {
                 width: 30,
                 child: Text(rankLabel,
                     textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: rank <= 3 ? 16 : 12, color: _kTextSecondary)),
+                    style: TextStyle(
+                        fontSize: rank <= 3 ? 16 : 12, color: _kTextSecondary)),
               ),
               const SizedBox(width: 8),
               Container(
@@ -223,9 +239,12 @@ class _GameEndScreen extends StatelessWidget {
                 child: Center(
                   child: player.isBot
                       ? Icon(Icons.smart_toy_rounded,
-                          size: 14, color: isWinner ? _kGoldLight : _kTextSecondary)
+                          size: 14,
+                          color: isWinner ? _kGoldLight : _kTextSecondary)
                       : Text(
-                          player.shownName.isNotEmpty ? player.shownName[0].toUpperCase() : '?',
+                          player.shownName.isNotEmpty
+                              ? player.shownName[0].toUpperCase()
+                              : '?',
                           style: GoogleFonts.rajdhani(
                             color: isWinner ? _kGoldLight : _kTextPrimary,
                             fontSize: 13,
@@ -241,11 +260,13 @@ class _GameEndScreen extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.rajdhani(
-                    color:
-                        isWinner ? _kGoldLight : (player.isAlive ? _kTextPrimary : _kTextSecondary),
+                    color: isWinner
+                        ? _kGoldLight
+                        : (player.isAlive ? _kTextPrimary : _kTextSecondary),
                     fontSize: 15,
                     fontWeight: isWinner ? FontWeight.w700 : FontWeight.w500,
-                    decoration: player.isAlive ? null : TextDecoration.lineThrough,
+                    decoration:
+                        player.isAlive ? null : TextDecoration.lineThrough,
                     decorationColor: _kTextSecondary,
                   ),
                 ),
@@ -254,37 +275,39 @@ class _GameEndScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Text(r'$',
-                      style: TextStyle(color: _kGold, fontSize: 10, fontWeight: FontWeight.w900)),
+                      style: TextStyle(
+                          color: _kGold,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900)),
                   const SizedBox(width: 2),
                   Text('${player.coins}',
                       style: GoogleFonts.rajdhani(
-                          color: _kGold, fontSize: 14, fontWeight: FontWeight.w700)),
+                          color: _kGold,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700)),
                 ],
               ),
               const SizedBox(width: 10),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: player.cards.map((card) {
-                  final roleColor = CardWidget.roleColor(card.roleType);
-                  return Container(
-                    margin: const EdgeInsets.only(left: 3),
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                    decoration: BoxDecoration(
-                      color: card.isRevealed ? roleColor.withValues(alpha: (0.14)) : _kSurfaceHigh,
-                      borderRadius: BorderRadius.circular(4),
-                      border: Border.all(
-                          color: card.isRevealed ? roleColor.withValues(alpha: (0.55)) : _kBorder),
-                    ),
-                    child: Text(
-                      card.isRevealed ? card.roleType.firestoreValue[0].toUpperCase() : '?',
-                      style: TextStyle(
-                        color: card.isRevealed ? roleColor : _kTextSecondary,
-                        fontSize: 9,
-                        fontWeight: FontWeight.w800,
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 4),
+                    child: SizedBox(
+                      width: 34,
+                      height: 50,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: CardWidget(
+                          roleType: card.roleType,
+                          small: true,
+                          isHidden: false,
+                          isEliminated: false,
+                        ),
                       ),
                     ),
                   );
-                }).toList(),
+                }).toList(growable: false),
               ),
             ],
           ),

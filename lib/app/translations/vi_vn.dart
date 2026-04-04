@@ -19,6 +19,8 @@ const Map<String, String> viVN = {
   "appTitle": "COUP",
   "appSubtitle": "TRÒ CHƠI BÀI",
   "loading": "Đang tải...",
+  "commonCancel": "Hủy",
+  "commonConfirm": "Xác nhận",
   "copy": "Sao chép",
   "host": "CHỦ PHÒNG",
   "you": "bạn",
@@ -84,11 +86,36 @@ const Map<String, String> viVN = {
   "rulesThresholdTitle": "Mốc quan trọng",
   "rulesThresholdBody":
       "Coup tốn 7 xu và không thể bị chặn. Nếu bạn có từ 10 xu trở lên, bạn buộc phải Coup.",
+  "rulesRolesTitle": "Vai trò & Cách chơi",
+  "rulesRolesSubtitle":
+      "Mỗi vai trò có khả năng riêng. Claim vai trò để dùng — nhưng sẵn sàng chứng minh nếu bị challenge!",
+  "rulesDukeTitle": "👑 Duke",
+  "rulesDukeBody":
+      "• **Tax**: Claim Duke để lấy 3 xu từ ngân hàng.\n• **Chặn Foreign Aid**: Khi ai đó claim Foreign Aid, bạn có thể chặn bằng cách claim Duke.\n• **Chiến thuật**: Nguồn thu mạnh đầu game. Dùng Tax để tích xu nhanh cho Coup.",
+  "rulesAssassinTitle": "🗡️ Assassin",
+  "rulesAssassinBody":
+      "• **Assassinate**: Trả 3 xu để loại 1 influence của đối thủ mục tiêu.\n• **Chiến thuật**: Rủi ro cao, phần thưởng lớn. Dùng khi bạn biết lá chủ chốt của đối thủ. Giữ xu cho nước đi mạnh này.",
+  "rulesCaptainTitle": "🏴‍☠️ Captain",
+  "rulesCaptainBody":
+      "• **Steal**: Lấy tối đa 2 xu từ người chơi khác.\n• **Chặn Steal**: Bạn có thể chặn Steal của Captain khác bằng cách claim Captain.\n• **Chiến thuật**: Tuyệt vời để phá đối thủ giàu xu. Kết hợp với Ambassador để kiểm soát bài.",
+  "rulesAmbassadorTitle": "🕊️ Ambassador",
+  "rulesAmbassadorBody":
+      "• **Exchange**: Rút 2 lá từ bộ bài, chọn giữ lá nào, trả lại phần dư.\n• **Chặn Steal**: Bạn có thể chặn Steal của Captain bằng cách claim Ambassador.\n• **Chiến thuật**: Dùng khi cần lá cụ thể hoặc muốn giấu bài thật. Vai trò phòng thủ xuất sắc.",
+  "rulesContessaTitle": "🛡️ Contessa",
+  "rulesContessaBody":
+      "• **Chặn Assassinate**: Ngăn cú Assassinate bằng cách claim Contessa.\n• **Chiến thuật**: Thuần phòng thủ. Giữ lá này kín càng lâu càng tốt — đối thủ sẽ ngại Assassinate nếu nghi ngờ bạn có nó.",
+  "rulesChallengeTitle": "⚔️ Challenge",
+  "rulesChallengeBody":
+      "• **Khi nào Challenge**: Khi bạn tin rằng đối thủ đang bluff về vai trò.\n• **Thành công**: Nếu họ không có lá, họ mất influence và hành động thất bại.\n• **Thất bại**: Nếu họ có lá, BẠN mất influence và họ rút lá mới.\n• **Mẹo**: Challenge khi tự tin hoặc không còn gì để mất.",
+  "rulesBlockTitle": "🚫 Block",
+  "rulesBlockBody":
+      "• **Khi nào Block**: Claim vai trò phản countered hành động sắp tới.\n• **Hành động có thể chặn**: Foreign Aid (Duke), Assassinate (Contessa), Steal (Captain/Ambassador).\n• **Rủi ro**: Block của bạn có thể bị challenge — nếu bluff, bạn mất influence.",
   "settingsHeaderTitle": "Thiết lập ván chơi",
   "settingsHeaderSubtitle": "Điều chỉnh trải nghiệm chơi và ngôn ngữ hiển thị.",
   "settingsAutoActionTitle": "Tự động hành động",
   "settingsAutoActionEnable": "Bật phản hồi tự động",
-  "settingsAutoActionSubtitle": "Game sẽ tự pass hoặc phản hồi khi hết thời gian.",
+  "settingsAutoActionSubtitle":
+      "Game sẽ tự pass hoặc phản hồi khi hết thời gian.",
   "settingsTableInfoTitle": "Thông tin bàn chơi",
   "settingsRoomCode": "Mã phòng",
   "settingsPlayers": "Người chơi",
@@ -117,11 +144,20 @@ const Map<String, String> viVN = {
   "gameSelectTarget": "Chọn người chơi mục tiêu",
   "gameSelectInfluenceToReveal": "Chọn lá để lật",
   "gameRevealThisCard": "Lật lá này",
+  "gameSelectSwapKeepTitle": "Chọn lá muốn giữ",
+  "gameSelectSwapKeepHint": "Chọn đúng @count lá để giữ sau khi trao đổi.",
+  "gameSwapNeedExactSelect": "Bạn cần chọn đúng @count lá.",
+  "gameSwapSourceCurrent": "Lá đang giữ",
+  "gameSwapSourceDraw": "Lá rút từ bộ bài",
+  "gameSwapSectionCurrent": "Bài đang cầm",
+  "gameSwapSectionDrawn": "Bài từ rút",
   "gameNotYourTurn": "Chưa đến lượt bạn",
   "gameYourTurnChooseAction": "Tới lượt bạn. Hãy chọn hành động.",
-  "gameRespondChallengePrompt": "Phản hồi: challenge hành động @action của @actor?",
+  "gameRespondChallengePrompt":
+      "Phản hồi: challenge hành động @action của @actor?",
   "gameRespondBlockPrompt": "Phản hồi: chặn hành động @action của @actor?",
-  "gameRespondBlockChallengePrompt": "Phản hồi: challenge lượt chặn của @actor cho @action?",
+  "gameRespondBlockChallengePrompt":
+      "Phản hồi: challenge lượt chặn của @actor cho @action?",
   "gameWaitingOthersResponse": "Đang chờ người chơi khác phản hồi...",
   "gameAutoIn": "tự động sau @sec giây",
   "gameAutoAction": "Tự động hành động",
@@ -152,10 +188,25 @@ const Map<String, String> viVN = {
   "actionIncomeSub": "+1 xu",
   "actionForeignAidSub": "+2 xu",
   "actionCoupSub": "7 xu",
-  "actionTaxSub": "+3 · Duke",
-  "actionAssassinateSub": "3 xu · Assassin",
-  "actionStealSub": "cướp 2 · Captain",
-  "actionExchangeSub": "Ambassador",
+  "actionTaxSub": "+3 · Công tước",
+  "actionAssassinateSub": "3 xu · Sát thủ",
+  "actionStealSub": "cướp 2 · Thuyền trưởng",
+  "actionExchangeSub": "Sứ thần",
+
+  // Role cards
+  "roleNameDuke": "Công tước",
+  "roleNameAssassin": "Sát thủ",
+  "roleNameContessa": "Nữ bá tước",
+  "roleNameCaptain": "Thuyền trưởng",
+  "roleNameAmbassador": "Sứ thần",
+  "roleNameInquisitor": "Thẩm tra viên",
+  "roleGuideDuke": "Thu thuế · +3 xu",
+  "roleGuideAssassin": "Tốn 3 · Ám sát",
+  "roleGuideContessa": "Chặn ám sát",
+  "roleGuideCaptain": "Cướp 2 xu",
+  "roleGuideAmbassador": "Rút 2 · Đổi bài",
+  "roleGuideInquisitor": "Rút 1 · Kiểm tra",
+  "cardStatusLost": "ĐÃ MẤT",
 
   // Toast/messages
   "msgEnterName": "Vui lòng nhập tên",

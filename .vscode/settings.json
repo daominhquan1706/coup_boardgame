@@ -1,5 +1,5 @@
 {
-  "dart.flutterSdkPath": "/Users/quandao/fvm/versions/3.35.4",
+  "dart.flutterSdkPath": ".fvm/versions/3.41.0",
   "chrome-devtools-mcp-relay.autoConnect": true,
   "chrome-devtools-mcp-relay.additionalMCPServerArguments": "",
   "mcp": {

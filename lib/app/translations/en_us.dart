@@ -19,6 +19,8 @@ const Map<String, String> enUS = {
   "appTitle": "COUP",
   "appSubtitle": "THE BOARD GAME",
   "loading": "Loading...",
+  "commonCancel": "Cancel",
+  "commonConfirm": "Confirm",
   "copy": "Copy",
   "host": "HOST",
   "you": "you",
@@ -70,7 +72,8 @@ const Map<String, String> enUS = {
   "rulesHeaderTitle": "COUP Rules",
   "rulesHeaderSubtitle": "Quick reference while you are in the match.",
   "rulesObjectiveTitle": "Objective",
-  "rulesObjectiveBody": "Be the last player alive by eliminating all opponents’ influence cards.",
+  "rulesObjectiveBody":
+      "Be the last player alive by eliminating all opponents’ influence cards.",
   "rulesTurnFlowTitle": "Turn Flow",
   "rulesTurnFlowBody":
       "Each turn you choose one action: Income, Foreign Aid, Tax, Steal, Exchange, Assassinate, or Coup.",
@@ -83,11 +86,36 @@ const Map<String, String> enUS = {
   "rulesThresholdTitle": "Important Thresholds",
   "rulesThresholdBody":
       "Coup costs 7 coins and cannot be blocked. If you reach 10 or more coins, you must Coup.",
+  "rulesRolesTitle": "Roles & How to Play",
+  "rulesRolesSubtitle":
+      "Each role has a unique ability. Claim a role to use its action — but be ready to prove it if challenged!",
+  "rulesDukeTitle": "👑 Duke",
+  "rulesDukeBody":
+      "• **Tax**: Claim Duke to take 3 coins from the bank.\n• **Block Foreign Aid**: When someone claims Foreign Aid, you can block it by claiming Duke.\n• **Strategy**: Strong early-game income. Use Tax to build up for Coup quickly.",
+  "rulesAssassinTitle": "🗡️ Assassin",
+  "rulesAssassinBody":
+      "• **Assassinate**: Pay 3 coins to eliminate one influence from a target player.\n• **Strategy**: High-risk, high-reward. Use when you know an opponent's key card. Save coins for this powerful move.",
+  "rulesCaptainTitle": "🏴‍☠️ Captain",
+  "rulesCaptainBody":
+      "• **Steal**: Take up to 2 coins from another player.\n• **Block Steal**: You can block another Captain's Steal by claiming Captain.\n• **Strategy**: Great for disrupting rich opponents. Pair with Ambassador for card control.",
+  "rulesAmbassadorTitle": "🕊️ Ambassador",
+  "rulesAmbassadorBody":
+      "• **Exchange**: Draw 2 cards from the deck, choose which to keep, return the rest.\n• **Block Steal**: You can block a Captain's Steal by claiming Ambassador.\n• **Strategy**: Use when you need specific cards or want to hide your true hand. Excellent defensive role.",
+  "rulesContessaTitle": "🛡️ Contessa",
+  "rulesContessaBody":
+      "• **Block Assassinate**: Prevent an assassination attempt by claiming Contessa.\n• **Strategy**: Purely defensive. Keep this card hidden as long as possible — opponents will hesitate to Assassinate if they suspect you have it.",
+  "rulesChallengeTitle": "⚔️ Challenge",
+  "rulesChallengeBody":
+      "• **When to Challenge**: If you believe a player is bluffing about their role.\n• **Success**: If they don't have the card, they lose influence and the action fails.\n• **Failure**: If they have the card, YOU lose influence and they draw a replacement.\n• **Tip**: Challenge when you're confident or have nothing to lose.",
+  "rulesBlockTitle": "🚫 Block",
+  "rulesBlockBody":
+      "• **When to Block**: Claim a role that counters the incoming action.\n• **Blockable Actions**: Foreign Aid (Duke), Assassinate (Contessa), Steal (Captain/Ambassador).\n• **Risk**: Your block can be challenged — if you're bluffing, you lose influence.",
   "settingsHeaderTitle": "Game Settings",
   "settingsHeaderSubtitle": "Adjust in-game preferences and display language.",
   "settingsAutoActionTitle": "Auto Action",
   "settingsAutoActionEnable": "Enable automatic response",
-  "settingsAutoActionSubtitle": "The game will auto-pass or respond when the countdown ends.",
+  "settingsAutoActionSubtitle":
+      "The game will auto-pass or respond when the countdown ends.",
   "settingsTableInfoTitle": "Table Info",
   "settingsRoomCode": "Room code",
   "settingsPlayers": "Players",
@@ -116,11 +144,20 @@ const Map<String, String> enUS = {
   "gameSelectTarget": "Select Target Player",
   "gameSelectInfluenceToReveal": "Choose a card to reveal",
   "gameRevealThisCard": "Reveal this card",
+  "gameSelectSwapKeepTitle": "Choose cards to keep",
+  "gameSelectSwapKeepHint":
+      "Pick exactly @count card(s) to keep after exchange.",
+  "gameSwapNeedExactSelect": "Please choose exactly @count card(s).",
+  "gameSwapSourceCurrent": "Current card",
+  "gameSwapSourceDraw": "Drawn from deck",
+  "gameSwapSectionCurrent": "Cards in hand",
+  "gameSwapSectionDrawn": "Cards from draw",
   "gameNotYourTurn": "Not your turn",
   "gameYourTurnChooseAction": "Your turn. Choose an action.",
   "gameRespondChallengePrompt": "Respond: challenge @actor's @action?",
   "gameRespondBlockPrompt": "Respond: block @actor's @action?",
-  "gameRespondBlockChallengePrompt": "Respond: challenge @actor's block on @action?",
+  "gameRespondBlockChallengePrompt":
+      "Respond: challenge @actor's block on @action?",
   "gameWaitingOthersResponse": "Waiting for other players to respond...",
   "gameAutoIn": "auto in @sec s",
   "gameAutoAction": "Auto action",
@@ -155,6 +192,21 @@ const Map<String, String> enUS = {
   "actionAssassinateSub": "3 coins · Assassin",
   "actionStealSub": "steal 2 · Captain",
   "actionExchangeSub": "Ambassador",
+
+  // Role cards
+  "roleNameDuke": "Duke",
+  "roleNameAssassin": "Assassin",
+  "roleNameContessa": "Contessa",
+  "roleNameCaptain": "Captain",
+  "roleNameAmbassador": "Ambassador",
+  "roleNameInquisitor": "Inquisitor",
+  "roleGuideDuke": "Tax · +3 coins",
+  "roleGuideAssassin": "Pay 3 · Assassinate",
+  "roleGuideContessa": "Block assassination",
+  "roleGuideCaptain": "Steal 2 coins",
+  "roleGuideAmbassador": "Draw 2 · Exchange",
+  "roleGuideInquisitor": "Draw 1 · Inspect",
+  "cardStatusLost": "LOST",
 
   // Toast/messages
   "msgEnterName": "Please enter your name",
