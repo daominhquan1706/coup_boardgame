@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:coup_boardgame/app/themes/app_colors.dart';
-import 'package:coup_boardgame/app/themes/app_text_theme.dart';
+import 'package:coup_boardgame/app/themes/app_theme.dart';
 
 class Loading extends StatelessWidget {
   const Loading({
@@ -38,6 +38,7 @@ class Loading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = AppThemes.themData;
     return Scaffold(
       backgroundColor: AppColors.white.withValues(alpha: opacity ?? 1),
       body: Stack(
@@ -55,7 +56,9 @@ class Loading extends StatelessWidget {
                   child: Center(
                     child: Text(
                       title!,
-                      style: AppTextStyles.base.w700.s16.whiteColor,
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: AppColors.white,
+                      ),
                     ),
                   ),
                 ),

@@ -1,17 +1,20 @@
 import 'package:coup_boardgame/app/themes/app_colors.dart';
+import 'package:coup_boardgame/app/themes/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppToast {
   AppToast._();
 
   static const Color _surface = AppColors.kSurface;
   static const Color _border = AppColors.kBorder;
-  static const Color _text = AppColors.kTextPrimary;
   static const Color _success = AppColors.greenSuccess;
   static const Color _error = AppColors.redError;
   static const Color _info = AppColors.kGold;
+
+  static final _toastTextStyle = AppThemes.themData.textTheme.bodyLarge?.copyWith(
+    fontWeight: FontWeight.w700,
+  );
 
   static void success(String message, {Duration duration = const Duration(milliseconds: 1400)}) {
     _show(
@@ -72,11 +75,7 @@ class AppToast {
                 message,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.rajdhani(
-                  color: _text,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                ),
+                style: _toastTextStyle,
               ),
             ),
           ],

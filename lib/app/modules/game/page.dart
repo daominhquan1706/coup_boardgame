@@ -193,7 +193,8 @@ class _GamePageState extends State<GamePage> {
                                               (tab) => NavigationRailDestination(
                                                 icon:
                                                     Icon(_iconForTab(tab), color: _kTextSecondary),
-                                                selectedIcon: Icon(_iconForTab(tab), color: _kGold),
+                                                selectedIcon:
+                                                    Icon(_iconForTab(tab), color: _kGoldLight),
                                                 label: Text(_labelForTab(tab)),
                                               ),
                                             )

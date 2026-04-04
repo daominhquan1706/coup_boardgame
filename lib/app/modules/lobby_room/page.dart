@@ -3,7 +3,6 @@ import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'controller.dart';
 
@@ -17,7 +16,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopBar(),
+            _buildTopBar(context),
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
@@ -28,13 +27,13 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        _buildRoomCodeCard(),
+                        _buildRoomCodeCard(context),
                         const SizedBox(height: 16),
-                        _buildMyInfoCard(),
+                        _buildMyInfoCard(context),
                         const SizedBox(height: 16),
-                        _buildPlayersCard(room),
+                        _buildPlayersCard(context, room),
                         const SizedBox(height: 16),
-                        if (controller.isHost) _buildHostControls(),
+                        if (controller.isHost) _buildHostControls(context),
                       ],
                     );
                   }),
@@ -47,7 +46,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
       decoration: const BoxDecoration(
@@ -62,12 +61,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             onTap: () => Get.offAllNamed(AppRoutes.home),
             child: Text(
               'COUP',
-              style: GoogleFonts.rajdhani(
-                color: AppColors.kGold,
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 4,
-              ),
+              style: Theme.of(context).appBarTheme.titleTextStyle,
             ),
           ),
           const SizedBox(width: 14),
@@ -75,12 +69,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
           const SizedBox(width: 14),
           Text(
             'lobbyTitle'.tr,
-            style: GoogleFonts.rajdhani(
-              color: AppColors.kTextSecondary,
-              fontSize: 12,
-              letterSpacing: 2.5,
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const Spacer(),
           Obx(() {
@@ -95,12 +84,9 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               ),
               child: Text(
                 'host'.tr,
-                style: const TextStyle(
-                  color: AppColors.kGold,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.2,
-                ),
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      color: AppColors.kGold,
+                    ),
               ),
             );
           }),
@@ -109,7 +95,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
     );
   }
 
-  Widget _buildRoomCodeCard() {
+  Widget _buildRoomCodeCard(BuildContext context) {
     return E2ETag(
       label: 'e2e-lobby-room-code-card',
       child: Container(
@@ -126,22 +112,14 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               children: [
                 Text(
                   'lobbyRoomCode'.tr,
-                  style: GoogleFonts.rajdhani(
-                    color: AppColors.kTextSecondary,
-                    fontSize: 11,
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   controller.roomCode ?? '—',
-                  style: GoogleFonts.rajdhani(
-                    color: AppColors.kGoldLight,
-                    fontSize: 38,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 10,
-                  ),
+                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
+                        letterSpacing: 10,
+                      ),
                 ),
               ],
             ),
@@ -162,11 +140,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     const SizedBox(width: 6),
                     Text(
                       'copy'.tr,
-                      style: GoogleFonts.rajdhani(
-                        color: AppColors.kTextSecondary,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                   ],
                 ),
@@ -178,7 +152,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
     );
   }
 
-  Widget _buildPlayersCard(dynamic room) {
+  Widget _buildPlayersCard(BuildContext context, dynamic room) {
     final players = (room?.players as List<CoupPlayerModel>?) ?? [];
     return Container(
       decoration: BoxDecoration(
@@ -197,12 +171,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 const SizedBox(width: 8),
                 Text(
                   'lobbyPlayers'.tr,
-                  style: GoogleFonts.rajdhani(
-                    color: AppColors.kTextSecondary,
-                    fontSize: 11,
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const SizedBox(width: 8),
                 Container(
@@ -213,11 +182,10 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                   ),
                   child: Text(
                     '${players.length}',
-                    style: const TextStyle(
-                      color: AppColors.kTextPrimary,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.kTextPrimary,
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
                 ),
                 const Spacer(),
@@ -242,24 +210,21 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               child: Text(
                 'lobbyWaitingPlayers'.tr,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.rajdhani(
-                  color: AppColors.kTextSecondary,
-                  fontSize: 14,
-                ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             )
           else
             ...players.asMap().entries.map((entry) {
               final i = entry.key;
               final player = entry.value;
-              return _buildPlayerRow(player, i == players.length - 1);
+              return _buildPlayerRow(context, player, i == players.length - 1);
             }),
         ],
       ),
     );
   }
 
-  Widget _buildPlayerRow(CoupPlayerModel player, bool isLast) {
+  Widget _buildPlayerRow(BuildContext context, CoupPlayerModel player, bool isLast) {
     final isMe = player.name == controller.userName;
     final canKick = controller.isHost && !isMe;
     return Column(
@@ -281,11 +246,10 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 child: Center(
                   child: Text(
                     player.shownName.isNotEmpty ? player.shownName[0].toUpperCase() : '?',
-                    style: TextStyle(
-                      color: isMe ? AppColors.kBlue : AppColors.kTextSecondary,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: isMe ? AppColors.kBlue : AppColors.kTextSecondary,
+                          fontWeight: FontWeight.w700,
+                        ),
                   ),
                 ),
               ),
@@ -298,20 +262,13 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                       children: [
                         Text(
                           player.shownName,
-                          style: GoogleFonts.rajdhani(
-                            color: AppColors.kTextPrimary,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: Theme.of(context).textTheme.bodyLarge,
                         ),
                         if (isMe) ...[
                           const SizedBox(width: 6),
                           Text(
                             '(${"you".tr})',
-                            style: const TextStyle(
-                              color: AppColors.kTextSecondary,
-                              fontSize: 11,
-                            ),
+                            style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
                         if (player.isBot) ...[
@@ -325,12 +282,9 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                             ),
                             child: Text(
                               'lobbyBot'.tr,
-                              style: const TextStyle(
-                                color: AppColors.kGold,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.8,
-                              ),
+                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                    color: AppColors.kGold,
+                                  ),
                             ),
                           ),
                         ],
@@ -354,11 +308,10 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     ),
                     child: Text(
                       'lobbyKick'.tr,
-                      style: GoogleFonts.rajdhani(
-                        color: AppColors.redAccent,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w700,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.redAccent,
+                            fontWeight: FontWeight.w700,
+                          ),
                     ),
                   ),
                 ),
@@ -371,7 +324,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
     );
   }
 
-  Widget _buildHostControls() {
+  Widget _buildHostControls(BuildContext context) {
     return Obx(() {
       final canStart = controller.canStart;
       return Column(
@@ -404,18 +357,15 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     Text(
                       'lobbyStartGame'.tr,
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.rajdhani(
-                        color: canStart ? AppColors.greenLight : AppColors.kTextSecondary,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.5,
-                      ),
+                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: canStart ? AppColors.greenLight : AppColors.kTextSecondary,
+                          ),
                     ),
                     if (!canStart)
                       Text(
                         'lobbyNeedTwoPlayers'.tr,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: AppColors.kTextSecondary, fontSize: 11),
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                   ],
                 ),
@@ -427,7 +377,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
     });
   }
 
-  Widget _buildMyInfoCard() {
+  Widget _buildMyInfoCard(BuildContext context) {
     return Obx(() {
       final me = controller.mePlayer;
       final isReady = me?.isReady ?? false;
@@ -448,12 +398,10 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 const SizedBox(width: 8),
                 Text(
                   'lobbyMyInfo'.tr,
-                  style: GoogleFonts.rajdhani(
-                    color: AppColors.kTextSecondary,
-                    fontSize: 12,
-                    letterSpacing: 1.5,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        letterSpacing: 1.5,
+                        fontWeight: FontWeight.w700,
+                      ),
                 ),
               ],
             ),
@@ -461,11 +409,11 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             TextField(
               controller: controller.displayNameController,
               onChanged: controller.onDisplayNameChanged,
-              style: const TextStyle(color: AppColors.kTextPrimary, fontSize: 14),
+              style: Theme.of(context).textTheme.bodyMedium,
               cursorColor: AppColors.kGold,
               decoration: InputDecoration(
                 hintText: 'homeEnterDisplayName'.tr,
-                hintStyle: const TextStyle(color: AppColors.kTextSecondary, fontSize: 13),
+                hintStyle: Theme.of(context).textTheme.labelLarge,
                 filled: true,
                 fillColor: AppColors.kSurfaceHigh,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -527,11 +475,9 @@ class _ReadyBadge extends StatelessWidget {
       ),
       child: Text(
         isReady ? 'ready'.tr : 'waiting'.tr,
-        style: TextStyle(
-          color: isReady ? AppColors.greenLight : AppColors.kTextSecondary,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: isReady ? AppColors.greenLight : AppColors.kTextSecondary,
+            ),
       ),
     );
   }
@@ -568,11 +514,10 @@ class _SmallButton extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: GoogleFonts.rajdhani(
-                color: color,
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: color,
+                    fontWeight: FontWeight.w700,
+                  ),
             ).paddingOnly(right: 6),
           ],
         ),

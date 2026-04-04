@@ -2,13 +2,13 @@ import 'package:coup_boardgame/app/modules/splash/controller.dart';
 import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class SplashPage extends GetView<SplashController> {
   const SplashPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: AppColors.kBg,
       body: Center(
@@ -29,22 +29,12 @@ class SplashPage extends GetView<SplashController> {
             const SizedBox(height: 24),
             Text(
               'appTitle'.tr,
-              style: GoogleFonts.rajdhani(
-                color: AppColors.kGoldLight,
-                fontSize: 48,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 12,
-              ),
+              style: theme.textTheme.displayLarge,
             ),
             const SizedBox(height: 6),
             Text(
               'appSubtitle'.tr,
-              style: GoogleFonts.rajdhani(
-                color: AppColors.kTextSecondary,
-                fontSize: 13,
-                letterSpacing: 4,
-                fontWeight: FontWeight.w500,
-              ),
+              style: theme.textTheme.titleSmall?.copyWith(fontSize: 13, letterSpacing: 4),
             ),
             const SizedBox(height: 48),
             SizedBox(
@@ -58,11 +48,7 @@ class SplashPage extends GetView<SplashController> {
             const SizedBox(height: 14),
             Text(
               'loading'.tr,
-              style: GoogleFonts.rajdhani(
-                color: AppColors.kTextSecondary,
-                fontSize: 13,
-                letterSpacing: 1,
-              ),
+              style: theme.textTheme.labelLarge?.copyWith(fontSize: 13),
             ),
           ],
         ),

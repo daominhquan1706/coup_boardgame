@@ -6,17 +6,35 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:coup_boardgame/app/themes/app_colors.dart';
-import 'package:coup_boardgame/app/themes/app_text_theme.dart';
+import 'package:coup_boardgame/app/themes/app_theme.dart';
+
+/// Helper to access theme text styles in static context (no BuildContext).
+extension _ThemeAccess on ThemeData {
+  TextStyle get dialogTitle =>
+      textTheme.headlineMedium?.copyWith(color: AppColors.white) ??
+      const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w700);
+  TextStyle get dialogBody =>
+      textTheme.bodyMedium?.copyWith(color: AppColors.white) ??
+      const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w400);
+  TextStyle get snackbarMessage =>
+      textTheme.bodyMedium?.copyWith(color: AppColors.white) ??
+      const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w700);
+  TextStyle get successMessage =>
+      textTheme.bodyMedium?.copyWith(color: AppColors.kTextPrimary) ??
+      const TextStyle(color: AppColors.kTextPrimary, fontSize: 16, fontWeight: FontWeight.w400);
+}
 
 class Common {
   Common._();
+
+  static final _theme = AppThemes.themData;
 
   static void showError(String error) {
     Get.showSnackbar(
       GetSnackBar(
         messageText: Text(
           error,
-          style: AppTextStyles.base.w700.s16.whiteColor,
+          style: _theme.snackbarMessage,
         ),
         margin: const EdgeInsets.all(20),
         borderRadius: 24,
@@ -55,21 +73,19 @@ class Common {
           ? CupertinoAlertDialog(
               title: Text(
                 title ?? 'Delete confirmation',
-                style: AppTextStyles.base.w700.s16.whiteColor,
+                style: _theme.dialogTitle,
                 textAlign: TextAlign.center,
               ),
               content: Text(
                 'Are you sure you want to delete this ${content ?? "feature"}?',
-                style: AppTextStyles.base.w400.s16.whiteColor,
+                style: _theme.dialogBody,
                 textAlign: TextAlign.center,
               ),
               actions: [
                 CupertinoButton(
                   child: const Text(
                     'Cancel',
-                    style: TextStyle(
-                      color: AppColors.red,
-                    ),
+                    style: TextStyle(color: AppColors.red),
                   ),
                   onPressed: () {
                     if (Get.isDialogOpen!) Get.back();
@@ -87,19 +103,17 @@ class Common {
           : AlertDialog(
               title: Text(
                 title ?? 'Delete confirmation',
-                style: AppTextStyles.base.w700.s16.whiteColor,
+                style: _theme.dialogTitle,
               ),
               content: Text(
                 title ?? 'Are you sure you want to delete this feature?',
-                style: AppTextStyles.base.w400.s16.whiteColor,
+                style: _theme.dialogBody,
               ),
               actions: [
                 CupertinoButton(
                   child: const Text(
                     'Cancel',
-                    style: TextStyle(
-                      color: AppColors.red,
-                    ),
+                    style: TextStyle(color: AppColors.red),
                   ),
                   onPressed: () {
                     if (Get.isDialogOpen!) Get.back();
@@ -154,7 +168,7 @@ class Common {
                     padding: const EdgeInsets.all(16),
                     child: Text(
                       title ?? 'Successful',
-                      style: AppTextStyles.base.w400.s16.whiteColor,
+                      style: _theme.successMessage,
                       textAlign: TextAlign.center,
                     ),
                   )

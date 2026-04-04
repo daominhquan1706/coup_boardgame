@@ -1,7 +1,6 @@
 import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
 import 'controller.dart';
 
@@ -21,15 +20,15 @@ class HomePage extends GetView<HomeController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _buildLogo(),
+                  _buildLogo(context),
                   const SizedBox(height: 20),
-                  _buildLanguageSelector(),
+                  _buildLanguageSelector(context),
                   const SizedBox(height: 20),
-                  _buildCreateSection(),
+                  _buildCreateSection(context),
                   const SizedBox(height: 28),
-                  _buildDivider(),
+                  _buildDivider(context),
                   const SizedBox(height: 28),
-                  _buildJoinSection(),
+                  _buildJoinSection(context),
                 ],
               ),
             ),
@@ -39,7 +38,7 @@ class HomePage extends GetView<HomeController> {
     );
   }
 
-  Widget _buildLogo() {
+  Widget _buildLogo(BuildContext context) {
     return Column(
       children: [
         Row(
@@ -49,12 +48,7 @@ class HomePage extends GetView<HomeController> {
             const SizedBox(width: 10),
             Text(
               'appTitle'.tr,
-              style: GoogleFonts.rajdhani(
-                color: AppColors.kGoldLight,
-                fontSize: 36,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 8,
-              ),
+              style: Theme.of(context).textTheme.displayMedium,
             ),
             const SizedBox(width: 10),
             const Icon(Icons.shield_outlined, color: AppColors.kGold, size: 26),
@@ -64,18 +58,13 @@ class HomePage extends GetView<HomeController> {
         Text(
           'appSubtitle'.tr,
           textAlign: TextAlign.center,
-          style: GoogleFonts.rajdhani(
-            color: AppColors.kTextSecondary,
-            fontSize: 11,
-            letterSpacing: 4,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(context).textTheme.titleSmall,
         ),
       ],
     );
   }
 
-  Widget _buildLanguageSelector() {
+  Widget _buildLanguageSelector(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -87,12 +76,7 @@ class HomePage extends GetView<HomeController> {
         children: [
           Text(
             'homeLanguage'.tr,
-            style: GoogleFonts.rajdhani(
-              color: AppColors.kTextSecondary,
-              fontSize: 12,
-              letterSpacing: 1.2,
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
           const Spacer(),
           Obx(
@@ -117,7 +101,7 @@ class HomePage extends GetView<HomeController> {
     );
   }
 
-  Widget _buildCreateSection() {
+  Widget _buildCreateSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -141,18 +125,12 @@ class HomePage extends GetView<HomeController> {
               const SizedBox(width: 10),
               Text(
                 'homeCreateRoomTitle'.tr,
-                style: GoogleFonts.rajdhani(
-                  color: AppColors.kTextPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text('homeCreateRoomDesc'.tr,
-              style: const TextStyle(color: AppColors.kTextSecondary, fontSize: 12)),
+          Text('homeCreateRoomDesc'.tr, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 16),
           E2ETag(
             label: 'e2e-home-create-room-button',
@@ -169,7 +147,7 @@ class HomePage extends GetView<HomeController> {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(BuildContext context) {
     return Row(
       children: [
         const Expanded(child: Divider(color: AppColors.kBorder, thickness: 1)),
@@ -177,12 +155,7 @@ class HomePage extends GetView<HomeController> {
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
             'homeOr'.tr,
-            style: GoogleFonts.rajdhani(
-              color: AppColors.kTextSecondary,
-              fontSize: 12,
-              letterSpacing: 2,
-              fontWeight: FontWeight.w600,
-            ),
+            style: Theme.of(context).textTheme.titleMedium,
           ),
         ),
         const Expanded(child: Divider(color: AppColors.kBorder, thickness: 1)),
@@ -190,7 +163,7 @@ class HomePage extends GetView<HomeController> {
     );
   }
 
-  Widget _buildJoinSection() {
+  Widget _buildJoinSection(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -214,18 +187,12 @@ class HomePage extends GetView<HomeController> {
               const SizedBox(width: 10),
               Text(
                 'homeJoinRoomTitle'.tr,
-                style: GoogleFonts.rajdhani(
-                  color: AppColors.kTextPrimary,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 0.5,
-                ),
+                style: Theme.of(context).textTheme.titleLarge,
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text('homeJoinRoomDesc'.tr,
-              style: const TextStyle(color: AppColors.kTextSecondary, fontSize: 12)),
+          Text('homeJoinRoomDesc'.tr, style: Theme.of(context).textTheme.bodySmall),
           const SizedBox(height: 16),
           E2ETag(
             label: 'e2e-home-join-room-code-input',
@@ -284,11 +251,10 @@ class _LangButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.rajdhani(
-            color: selected ? AppColors.kGoldLight : AppColors.kTextSecondary,
-            fontSize: 12,
-            fontWeight: FontWeight.w700,
-          ),
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: selected ? AppColors.kGoldLight : AppColors.kTextSecondary,
+                fontWeight: FontWeight.w700,
+              ),
         ),
       ),
     );
@@ -311,11 +277,11 @@ class _BoardTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       onChanged: onChanged,
-      style: const TextStyle(color: AppColors.kTextPrimary, fontSize: 14),
+      style: Theme.of(context).textTheme.bodyMedium,
       cursorColor: AppColors.kGold,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: AppColors.kTextSecondary, fontSize: 13),
+        hintStyle: Theme.of(context).textTheme.labelLarge,
         prefixIcon: Icon(prefixIcon, color: AppColors.kTextSecondary, size: 18),
         filled: true,
         fillColor: AppColors.kSurfaceHigh,
@@ -364,12 +330,10 @@ class _BoardButton extends StatelessWidget {
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: GoogleFonts.rajdhani(
-            color: enabled ? color : AppColors.kTextSecondary,
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.8,
-          ),
+          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                color: enabled ? color : AppColors.kTextSecondary,
+                letterSpacing: 0.8,
+              ),
         ),
       ),
     );

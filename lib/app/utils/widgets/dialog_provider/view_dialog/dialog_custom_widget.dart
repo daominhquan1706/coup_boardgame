@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:coup_boardgame/app/themes/app_colors.dart';
-import 'package:coup_boardgame/app/themes/app_text_theme.dart';
 import 'package:coup_boardgame/app/utils/widgets/app_button/base_button.dart';
 import 'package:coup_boardgame/app/utils/widgets/app_divider/app_divider.dart';
 
@@ -27,6 +26,7 @@ class DialogCustomWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Dialog(
       elevation: 0,
       backgroundColor: Colors.transparent,
@@ -54,7 +54,11 @@ class DialogCustomWidget extends StatelessWidget {
                         : Center(
                             child: Text(
                               title ?? "",
-                              style: AppTextStyles.base.w600.blackColor,
+                              style: titleStyle ??
+                                  theme.textTheme.titleLarge?.copyWith(
+                                    color: AppColors.black,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                             ),
                           ),
                   ),

@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/state_manager.dart';
 import 'package:coup_boardgame/app/themes/app_colors.dart';
-import 'package:coup_boardgame/app/themes/app_text_theme.dart';
 import 'package:coup_boardgame/app/translations/app_translations.dart';
 
 class AppTextField extends StatefulWidget {
@@ -29,6 +28,7 @@ class _AppTextFieldState extends State<AppTextField> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
@@ -47,7 +47,9 @@ class _AppTextFieldState extends State<AppTextField> {
                   border: InputBorder.none,
                   hintText: widget.hintText,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-                  hintStyle: AppTextStyles.base.neutral3Color.s14.roboto,
+                  hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.neutral3,
+                  ),
                   suffixIcon: widget.obscureText != null
                       ? GestureDetector(
                           onTap: () => _obscureText.value = !_obscureText.value,
@@ -73,7 +75,9 @@ class _AppTextFieldState extends State<AppTextField> {
               ),
               child: Text(
                 widget.errorText ?? AppTranslationKey.noEmpty,
-                style: AppTextStyles.base.s14.redColor,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.red,
+                ),
               ),
             ),
         ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:coup_boardgame/app/themes/app_colors.dart';
-import 'package:coup_boardgame/app/themes/app_text_theme.dart';
 import 'package:coup_boardgame/app/utils/widgets/app_button/base_button.dart';
 
 class AppButton extends StatelessWidget {
@@ -56,7 +55,13 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = style ?? AppTextStyles.base.w500.s16.whiteColor;
+    final theme = Theme.of(context);
+    final textStyle = style ??
+        theme.textTheme.bodyLarge?.copyWith(
+          color: AppColors.white,
+          fontWeight: FontWeight.w500,
+        ) ??
+        const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w500);
     return Padding(
       padding: margin,
       child: ClipRRect(
