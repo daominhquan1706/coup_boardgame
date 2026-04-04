@@ -1,4 +1,5 @@
 import 'package:coup_boardgame/app/themes/app_colors.dart';
+import 'package:coup_boardgame/app/themes/app_text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
@@ -48,7 +49,7 @@ class HomePage extends GetView<HomeController> {
             const SizedBox(width: 10),
             Text(
               'appTitle'.tr,
-              style: Theme.of(context).textTheme.displayMedium,
+              style: AppTextStyles.display.w700.s36.goldLightColor.ls(8),
             ),
             const SizedBox(width: 10),
             const Icon(Icons.shield_outlined, color: AppColors.kGold, size: 26),
@@ -58,7 +59,7 @@ class HomePage extends GetView<HomeController> {
         Text(
           'appSubtitle'.tr,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleSmall,
+          style: AppTextStyles.title.s11.w500.ls(4),
         ),
       ],
     );
@@ -76,7 +77,7 @@ class HomePage extends GetView<HomeController> {
         children: [
           Text(
             'homeLanguage'.tr,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: AppTextStyles.title,
           ),
           const Spacer(),
           Obx(
@@ -125,12 +126,12 @@ class HomePage extends GetView<HomeController> {
               const SizedBox(width: 10),
               Text(
                 'homeCreateRoomTitle'.tr,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: AppTextStyles.headline.w700.s16.textPrimary.ls(0.5),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text('homeCreateRoomDesc'.tr, style: Theme.of(context).textTheme.bodySmall),
+          Text('homeCreateRoomDesc'.tr, style: AppTextStyles.body.s12.textSecondary),
           const SizedBox(height: 16),
           E2ETag(
             label: 'e2e-home-create-room-button',
@@ -155,7 +156,7 @@ class HomePage extends GetView<HomeController> {
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
             'homeOr'.tr,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: AppTextStyles.title,
           ),
         ),
         const Expanded(child: Divider(color: AppColors.kBorder, thickness: 1)),
@@ -187,12 +188,12 @@ class HomePage extends GetView<HomeController> {
               const SizedBox(width: 10),
               Text(
                 'homeJoinRoomTitle'.tr,
-                style: Theme.of(context).textTheme.titleLarge,
+                style: AppTextStyles.headline.w700.s16.textPrimary.ls(0.5),
               ),
             ],
           ),
           const SizedBox(height: 4),
-          Text('homeJoinRoomDesc'.tr, style: Theme.of(context).textTheme.bodySmall),
+          Text('homeJoinRoomDesc'.tr, style: AppTextStyles.body.s12.textSecondary),
           const SizedBox(height: 16),
           E2ETag(
             label: 'e2e-home-join-room-code-input',
@@ -251,10 +252,9 @@ class _LangButton extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: selected ? AppColors.kGoldLight : AppColors.kTextSecondary,
-                fontWeight: FontWeight.w700,
-              ),
+          style: AppTextStyles.body.s12.w700.copyWith(
+            color: selected ? AppColors.kGoldLight : AppColors.kTextSecondary,
+          ),
         ),
       ),
     );
@@ -277,11 +277,11 @@ class _BoardTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       onChanged: onChanged,
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: AppTextStyles.body,
       cursorColor: AppColors.kGold,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: Theme.of(context).textTheme.labelLarge,
+        hintStyle: AppTextStyles.label,
         prefixIcon: Icon(prefixIcon, color: AppColors.kTextSecondary, size: 18),
         filled: true,
         fillColor: AppColors.kSurfaceHigh,
@@ -330,10 +330,10 @@ class _BoardButton extends StatelessWidget {
         child: Text(
           label,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: enabled ? color : AppColors.kTextSecondary,
-                letterSpacing: 0.8,
-              ),
+          style: AppTextStyles.body.s15.w700.copyWith(
+            color: enabled ? color : AppColors.kTextSecondary,
+            letterSpacing: 0.8,
+          ),
         ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/themes/app_colors.dart';
+import 'package:coup_boardgame/app/themes/app_text_theme.dart';
 import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -61,7 +62,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             onTap: () => Get.offAllNamed(AppRoutes.home),
             child: Text(
               'COUP',
-              style: Theme.of(context).appBarTheme.titleTextStyle,
+              style: AppTextStyles.display.w700.s20.goldColor.ls(4),
             ),
           ),
           const SizedBox(width: 14),
@@ -69,7 +70,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
           const SizedBox(width: 14),
           Text(
             'lobbyTitle'.tr,
-            style: Theme.of(context).textTheme.titleMedium,
+            style: AppTextStyles.title,
           ),
           const Spacer(),
           Obx(() {
@@ -84,9 +85,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               ),
               child: Text(
                 'host'.tr,
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      color: AppColors.kGold,
-                    ),
+                style: AppTextStyles.label.s10.w700.goldColor.ls(1.2),
               ),
             );
           }),
@@ -112,14 +111,12 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               children: [
                 Text(
                   'lobbyRoomCode'.tr,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: AppTextStyles.title,
                 ),
                 const SizedBox(height: 4),
                 Text(
                   controller.roomCode ?? '—',
-                  style: Theme.of(context).textTheme.displayLarge?.copyWith(
-                        letterSpacing: 10,
-                      ),
+                  style: AppTextStyles.display.w700.s38.goldLightColor.ls(10),
                 ),
               ],
             ),
@@ -140,7 +137,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     const SizedBox(width: 6),
                     Text(
                       'copy'.tr,
-                      style: Theme.of(context).textTheme.labelLarge,
+                      style: AppTextStyles.label,
                     ),
                   ],
                 ),
@@ -171,7 +168,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 const SizedBox(width: 8),
                 Text(
                   'lobbyPlayers'.tr,
-                  style: Theme.of(context).textTheme.titleMedium,
+                  style: AppTextStyles.title,
                 ),
                 const SizedBox(width: 8),
                 Container(
@@ -182,10 +179,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                   ),
                   child: Text(
                     '${players.length}',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.kTextPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    style: AppTextStyles.body.s11.w700.textPrimary,
                   ),
                 ),
                 const Spacer(),
@@ -210,7 +204,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               child: Text(
                 'lobbyWaitingPlayers'.tr,
                 textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: AppTextStyles.body,
               ),
             )
           else
@@ -246,9 +240,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 child: Center(
                   child: Text(
                     player.shownName.isNotEmpty ? player.shownName[0].toUpperCase() : '?',
-                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: isMe ? AppColors.kBlue : AppColors.kTextSecondary,
-                          fontWeight: FontWeight.w700,
+                    style: AppTextStyles.body.w700.s14.copyWith(
+                      color: isMe ? AppColors.kBlue : AppColors.kTextSecondary,
                         ),
                   ),
                 ),
@@ -262,13 +255,13 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                       children: [
                         Text(
                           player.shownName,
-                          style: Theme.of(context).textTheme.bodyLarge,
+                          style: AppTextStyles.body,
                         ),
                         if (isMe) ...[
                           const SizedBox(width: 6),
                           Text(
                             '(${"you".tr})',
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: AppTextStyles.body.s11.textSecondary,
                           ),
                         ],
                         if (player.isBot) ...[
@@ -282,9 +275,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                             ),
                             child: Text(
                               'lobbyBot'.tr,
-                              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                    color: AppColors.kGold,
-                                  ),
+                              style: AppTextStyles.label.s9.w700.goldColor.ls(0.8),
                             ),
                           ),
                         ],
@@ -308,10 +299,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     ),
                     child: Text(
                       'lobbyKick'.tr,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppColors.redAccent,
-                            fontWeight: FontWeight.w700,
-                          ),
+                      style: AppTextStyles.body.s11.w700.redAccentColor,
                     ),
                   ),
                 ),
@@ -357,15 +345,15 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     Text(
                       'lobbyStartGame'.tr,
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            color: canStart ? AppColors.greenLight : AppColors.kTextSecondary,
-                          ),
+                      style: AppTextStyles.headline.w700.copyWith(
+                        color: canStart ? AppColors.greenLight : AppColors.kTextSecondary,
+                      ),
                     ),
                     if (!canStart)
                       Text(
                         'lobbyNeedTwoPlayers'.tr,
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: AppTextStyles.body.s11.textSecondary,
                       ),
                   ],
                 ),
@@ -398,10 +386,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 const SizedBox(width: 8),
                 Text(
                   'lobbyMyInfo'.tr,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        letterSpacing: 1.5,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  style: AppTextStyles.title.s12.w700.ls(1.5),
                 ),
               ],
             ),
@@ -409,11 +394,11 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             TextField(
               controller: controller.displayNameController,
               onChanged: controller.onDisplayNameChanged,
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: AppTextStyles.body,
               cursorColor: AppColors.kGold,
               decoration: InputDecoration(
                 hintText: 'homeEnterDisplayName'.tr,
-                hintStyle: Theme.of(context).textTheme.labelLarge,
+                hintStyle: AppTextStyles.label,
                 filled: true,
                 fillColor: AppColors.kSurfaceHigh,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -475,9 +460,9 @@ class _ReadyBadge extends StatelessWidget {
       ),
       child: Text(
         isReady ? 'ready'.tr : 'waiting'.tr,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: isReady ? AppColors.greenLight : AppColors.kTextSecondary,
-            ),
+        style: AppTextStyles.body.s11.copyWith(
+          color: isReady ? AppColors.greenLight : AppColors.kTextSecondary,
+        ),
       ),
     );
   }
@@ -514,10 +499,7 @@ class _SmallButton extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               label,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    color: color,
-                    fontWeight: FontWeight.w700,
-                  ),
+              style: AppTextStyles.label.w700.copyWith(color: color),
             ).paddingOnly(right: 6),
           ],
         ),
