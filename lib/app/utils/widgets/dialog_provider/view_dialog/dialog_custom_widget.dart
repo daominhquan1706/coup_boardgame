@@ -8,14 +8,14 @@ import 'package:coup_boardgame/app/utils/widgets/app_divider/app_divider.dart';
 class DialogCustomWidget extends StatelessWidget {
   const DialogCustomWidget(
     this.content, {
-    Key? key,
+    super.key,
     this.title,
     this.titleStyle,
     this.iconSize = 28,
     this.maxHeight,
     this.maxWidth,
     this.padding,
-  }) : super(key: key);
+  });
 
   final Widget content;
   final String? title;

@@ -6,11 +6,11 @@ import 'package:coup_boardgame/app/themes/app_text_theme.dart';
 
 class Loading extends StatelessWidget {
   const Loading({
-    Key? key,
+    super.key,
     this.title,
     this.opacity,
     this.loadingType = LoadingType.chasingDots,
-  }) : super(key: key);
+  });
 
   final String? title;
   final double? opacity;
@@ -39,7 +39,7 @@ class Loading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white.withOpacity(opacity ?? 1),
+      backgroundColor: AppColors.white.withValues(alpha: opacity ?? 1),
       body: Stack(
         children: [
           Center(

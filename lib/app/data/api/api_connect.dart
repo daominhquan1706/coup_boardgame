@@ -59,13 +59,13 @@ class ApiConnect extends GetConnect {
   }) {
     _checkIfDisposed();
 
-    Map<String, String> _headers = headers ?? <String, String>{};
-    // _headers["Authorization"] = "Bearer " + HiveAdapter.getAccessToken();
+    final mergedHeaders = headers ?? <String, String>{};
+    // mergedHeaders["Authorization"] = "Bearer " + HiveAdapter.getAccessToken();
 
     _reqBody = query;
     return httpClient.get<T>(
       url,
-      headers: _headers,
+      headers: mergedHeaders,
       contentType: contentType,
       query: query,
       decoder: decoder,
@@ -82,13 +82,13 @@ class ApiConnect extends GetConnect {
   }) {
     _checkIfDisposed();
 
-    Map<String, String> _headers = headers ?? <String, String>{};
-    // _headers["Authorization"] = "Bearer " + HiveAdapter.getAccessToken();
+    final mergedHeaders = headers ?? <String, String>{};
+    // mergedHeaders["Authorization"] = "Bearer " + HiveAdapter.getAccessToken();
 
     _reqBody = query;
     return httpClient.delete<T>(
       url,
-      headers: _headers,
+      headers: mergedHeaders,
       contentType: contentType,
       query: query,
       decoder: decoder,
@@ -107,8 +107,8 @@ class ApiConnect extends GetConnect {
   }) {
     _checkIfDisposed();
 
-    Map<String, String> _headers = headers ?? <String, String>{};
-    // _headers["Authorization"] = "Bearer " + HiveAdapter.getAccessToken();
+    final mergedHeaders = headers ?? <String, String>{};
+    // mergedHeaders["Authorization"] = "Bearer " + HiveAdapter.getAccessToken();
     try {
       _reqBody = body;
     } catch (e) {
@@ -118,7 +118,7 @@ class ApiConnect extends GetConnect {
     return httpClient.post<T>(
       url,
       body: body,
-      headers: _headers,
+      headers: mergedHeaders,
       contentType: contentType,
       query: query,
       decoder: decoder,
@@ -138,15 +138,15 @@ class ApiConnect extends GetConnect {
   }) {
     _checkIfDisposed();
 
-    Map<String, String> _headers = headers ?? <String, String>{};
-    // _headers["Authorization"] = "Bearer " + HiveAdapter.getAccessToken();
+    final mergedHeaders = headers ?? <String, String>{};
+    // mergedHeaders["Authorization"] = "Bearer " + HiveAdapter.getAccessToken();
 
     _reqBody = body;
 
     return httpClient.put<T>(
       url,
       body: body,
-      headers: _headers,
+      headers: mergedHeaders,
       contentType: contentType,
       query: query,
       decoder: decoder,

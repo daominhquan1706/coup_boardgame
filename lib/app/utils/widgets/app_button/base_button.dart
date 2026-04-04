@@ -2,27 +2,27 @@ import 'package:flutter/cupertino.dart';
 
 class BaseButton extends StatelessWidget {
   const BaseButton({
-    Key? key,
-    required this.child,
+    super.key,
     required this.onPressed,
     this.color,
     this.disabledColor = CupertinoColors.quaternarySystemFill,
-  }) : super(key: key);
-  final Widget child;
+    required this.child,
+  });
   final VoidCallback? onPressed;
   final Color? color;
   final Color disabledColor;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     return CupertinoButton(
-      child: child,
       onPressed: onPressed,
       padding: EdgeInsets.zero,
-      minSize: 0,
+      minimumSize: Size.zero,
       color: color,
       borderRadius: BorderRadius.zero,
       disabledColor: disabledColor,
+      child: child,
     );
   }
 }

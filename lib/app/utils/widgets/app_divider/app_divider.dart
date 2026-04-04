@@ -3,11 +3,10 @@ import 'package:coup_boardgame/app/themes/app_colors.dart';
 
 class AppDivider extends Divider {
   const AppDivider({
-    Key? key,
+    super.key,
     Color color = AppColors.colorDivider,
     double height = 1.5,
   }) : super(
-          key: key,
           color: color,
           height: height,
           thickness: 1.5,
@@ -15,7 +14,7 @@ class AppDivider extends Divider {
 }
 
 class AppVerticalDivider extends StatelessWidget {
-  const AppVerticalDivider({Key? key}) : super(key: key);
+  const AppVerticalDivider({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +27,10 @@ class AppVerticalDivider extends StatelessWidget {
 
 class AppDefaultVertical extends StatelessWidget {
   const AppDefaultVertical({
-    Key? key,
+    super.key,
     this.height = 0,
     this.color = AppColors.colorDivider,
-  }) : super(key: key);
+  });
   final double height;
   final Color color;
 
@@ -47,10 +46,10 @@ class AppDefaultVertical extends StatelessWidget {
 
 class AppDefaultHorizontal extends StatelessWidget {
   const AppDefaultHorizontal({
-    Key? key,
+    super.key,
     this.height = 0,
     this.color = AppColors.colorDivider,
-  }) : super(key: key);
+  });
   final double height;
   final Color color;
 
@@ -70,11 +69,11 @@ class AppDashDivider extends StatelessWidget {
   final Color color;
 
   const AppDashDivider({
-    Key? key,
+    super.key,
     this.height = 1,
     this.width = 10,
     this.color = AppColors.colorDivider,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +84,8 @@ class AppDashDivider extends StatelessWidget {
         final dashHeight = height;
         final dashCount = (boxWidth / (2 * dashWidth)).floor();
         return Flex(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          direction: Axis.horizontal,
           children: List.generate(dashCount, (_) {
             return SizedBox(
               width: dashWidth,
@@ -94,8 +95,6 @@ class AppDashDivider extends StatelessWidget {
               ),
             );
           }),
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          direction: Axis.horizontal,
         );
       },
     );

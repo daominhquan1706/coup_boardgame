@@ -7,16 +7,16 @@ import 'package:coup_boardgame/app/translations/app_translations.dart';
 
 class AppTextField extends StatefulWidget {
   const AppTextField({
-    Key? key,
+    super.key,
     this.hintText,
     this.errorText,
     this.obscureText,
-  }) : super(key: key);
+  });
   final String? hintText;
   final String? errorText;
   final bool? obscureText;
   @override
-  _AppTextFieldState createState() => _AppTextFieldState();
+  State<AppTextField> createState() => _AppTextFieldState();
 }
 
 class _AppTextFieldState extends State<AppTextField> {

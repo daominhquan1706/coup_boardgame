@@ -5,7 +5,7 @@ import 'package:coup_boardgame/app/utils/widgets/app_button/base_button.dart';
 
 class AppButton extends StatelessWidget {
   AppButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.text,
     this.color = AppColors.kPrimaryColor,
@@ -18,12 +18,12 @@ class AppButton extends StatelessWidget {
     this.height = 48,
     this.width = double.infinity,
     this.borderRadius,
-  }) : super(key: key) {
+  }) {
     isOutline = false;
   }
 
   AppButton.outline({
-    Key? key,
+    super.key,
     required this.onPressed,
     this.text,
     this.color = AppColors.kPrimaryColor,
@@ -36,7 +36,7 @@ class AppButton extends StatelessWidget {
     this.height = 48,
     this.width = double.infinity,
     this.borderRadius,
-  }) : super(key: key) {
+  }) {
     isOutline = true;
   }
 
@@ -56,7 +56,7 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle _style = style ?? AppTextStyles.base.w500.s16.whiteColor;
+    final textStyle = style ?? AppTextStyles.base.w500.s16.whiteColor;
     return Padding(
       padding: margin,
       child: ClipRRect(
@@ -70,7 +70,7 @@ class AppButton extends StatelessWidget {
             padding: padding,
             decoration: BoxDecoration(
               border: Border.all(
-                color: onPressed != null ? color : color.withOpacity(0.4),
+                color: onPressed != null ? color : color.withValues(alpha: 0.4),
               ),
               borderRadius: BorderRadius.circular(6),
             ),
@@ -86,7 +86,7 @@ class AppButton extends StatelessWidget {
                 if (text != null)
                   Text(
                     text ?? "",
-                    style: isOutline ? _style.copyWith(color: color) : _style,
+                    style: isOutline ? textStyle.copyWith(color: color) : textStyle,
                   ),
                 if (suffixIcon != null)
                   Padding(
