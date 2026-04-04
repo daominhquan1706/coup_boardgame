@@ -8,6 +8,7 @@ import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.da
 import 'package:coup_boardgame/app/modules/game/widgets/card_widget.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'package:coup_boardgame/app/constants/local_storage_keys.dart';
+import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
 import 'package:coup_boardgame/app/utils/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
@@ -46,8 +47,7 @@ class GameStartController extends GetxController {
   CoupPlayerModel? get currentPlayerTurn {
     final room = currentRoom.value;
     if (room == null) return null;
-    return room.players
-        .firstWhereOrNull((element) => element.name == room.currentTurn);
+    return room.players.firstWhereOrNull((element) => element.name == room.currentTurn);
   }
 
   bool get isMyTurn {
@@ -55,17 +55,13 @@ class GameStartController extends GetxController {
     if (turnOwner == null || turnOwner.isEmpty) return false;
 
     final me = mePlayer.value;
-    return turnOwner == userName ||
-        turnOwner == me?.name ||
-        turnOwner == me?.shownName;
+    return turnOwner == userName || turnOwner == me?.name || turnOwner == me?.shownName;
   }
 
   bool get canAct {
     final room = currentRoom.value;
     if (room == null) return false;
-    return room.roomState == GameState.playing &&
-        room.phase == GamePhase.action &&
-        isMyTurn;
+    return room.roomState == GameState.playing && room.phase == GamePhase.action && isMyTurn;
   }
 
   bool get isMeAlive => mePlayer.value?.isAlive ?? false;
@@ -99,8 +95,8 @@ class GameStartController extends GetxController {
   bool _requiresManualRevealSelectionInBlock(CoupRoomModel room) {
     final action = room.currentAction;
     if (room.phase != GamePhase.block || action == null) return false;
-    final isRevealAction = action.actionType == CoupActionType.coup ||
-        action.actionType == CoupActionType.assassin;
+    final isRevealAction =
+        action.actionType == CoupActionType.coup || action.actionType == CoupActionType.assassin;
     return isRevealAction && action.target?.name == userName;
   }
 
@@ -113,8 +109,7 @@ class GameStartController extends GetxController {
 
   String displayNameOf(String? playerId) {
     if (playerId == null || playerId.isEmpty) return '...';
-    final player =
-        currentRoom.value?.players.firstWhereOrNull((p) => p.name == playerId);
+    final player = currentRoom.value?.players.firstWhereOrNull((p) => p.name == playerId);
     return player?.shownName ?? playerId;
   }
 
@@ -135,16 +130,12 @@ class GameStartController extends GetxController {
       }
     }
 
-    roomCode =
-        roomCode.isNotEmpty
-            ? roomCode
-            : (Get.parameters['room_code'] ?? Get.parameters['roomCode'] ?? '');
-    userName =
-        userName.isNotEmpty
-            ? userName
-            : (_storage.read<String>(LocalStorageKeys.userName) ??
-                Get.parameters['userName'] ??
-                '');
+    roomCode = roomCode.isNotEmpty
+        ? roomCode
+        : (Get.parameters['room_code'] ?? Get.parameters['roomCode'] ?? '');
+    userName = userName.isNotEmpty
+        ? userName
+        : (_storage.read<String>(LocalStorageKeys.userName) ?? Get.parameters['userName'] ?? '');
   }
 
   @override
@@ -196,8 +187,7 @@ class GameStartController extends GetxController {
     } else if (room.phase == GamePhase.challenge) {
       shouldAuto = canRespondChallenge(room);
     } else if (room.phase == GamePhase.block) {
-      shouldAuto =
-          canRespondBlock(room) && !_requiresManualRevealSelectionInBlock(room);
+      shouldAuto = canRespondBlock(room) && !_requiresManualRevealSelectionInBlock(room);
     } else if (room.phase == GamePhase.blockChallenge) {
       shouldAuto = canRespondBlockChallenge(room);
     }
@@ -220,15 +210,13 @@ class GameStartController extends GetxController {
       try {
         if (latest.phase == GamePhase.action && canAct) {
           await performAction(CoupActionType.income);
-        } else if (latest.phase == GamePhase.challenge &&
-            canRespondChallenge(latest)) {
+        } else if (latest.phase == GamePhase.challenge && canRespondChallenge(latest)) {
           await passChallenge();
         } else if (latest.phase == GamePhase.block &&
             canRespondBlock(latest) &&
             !_requiresManualRevealSelectionInBlock(latest)) {
           await passBlockOpportunity(auto: true);
-        } else if (latest.phase == GamePhase.blockChallenge &&
-            canRespondBlockChallenge(latest)) {
+        } else if (latest.phase == GamePhase.blockChallenge && canRespondBlockChallenge(latest)) {
           await passBlockChallenge();
         }
       } catch (_) {
@@ -238,20 +226,16 @@ class GameStartController extends GetxController {
   }
 
   void _subscribeHistory() {
-    _historyStreamSubscription =
-        _firestoreService.getActionHistoryStream(roomCode).listen((items) {
+    _historyStreamSubscription = _firestoreService.getActionHistoryStream(roomCode).listen((items) {
       historyEntries.assignAll(items);
     });
   }
 
   void _subscribeRoom() {
-    AppToast.info('msgLoadingGame'.tr,
-        duration: const Duration(milliseconds: 900));
-    _roomStreamSubscription =
-        _firestoreService.getRoomStream(roomCode).listen((room) async {
+    AppToast.info('msgLoadingGame'.tr, duration: const Duration(milliseconds: 900));
+    _roomStreamSubscription = _firestoreService.getRoomStream(roomCode).listen((room) async {
       currentRoom.value = room;
-      mePlayer.value =
-          room.players.firstWhereOrNull((element) => element.name == userName);
+      mePlayer.value = room.players.firstWhereOrNull((element) => element.name == userName);
       _scheduleAutoDecision(room);
       _maybeHandlePendingRevealSelection(room);
       _maybeHandlePendingExchangeSelection(room);
@@ -322,13 +306,11 @@ class GameStartController extends GetxController {
   }
 
   Future<void> passChallenge() async {
-    await _firestoreService.respondToChallenge(roomCode, userName,
-        challenge: false);
+    await _firestoreService.respondToChallenge(roomCode, userName, challenge: false);
   }
 
   Future<void> challengeAction() async {
-    await _firestoreService.respondToChallenge(roomCode, userName,
-        challenge: true);
+    await _firestoreService.respondToChallenge(roomCode, userName, challenge: true);
   }
 
   Future<void> passBlockOpportunity({bool auto = false}) async {
@@ -367,13 +349,11 @@ class GameStartController extends GetxController {
   }
 
   Future<void> passBlockChallenge() async {
-    await _firestoreService.respondToBlockChallenge(roomCode, userName,
-        challenge: false);
+    await _firestoreService.respondToBlockChallenge(roomCode, userName, challenge: false);
   }
 
   Future<void> challengeBlock() async {
-    await _firestoreService.respondToBlockChallenge(roomCode, userName,
-        challenge: true);
+    await _firestoreService.respondToBlockChallenge(roomCode, userName, challenge: true);
   }
 
   Future<CoupPlayerModel?> _buildDialogTargetPlayer() async {
@@ -385,28 +365,24 @@ class GameStartController extends GetxController {
         .map(
           (player) => ListTile(
             dense: true,
-            leading: const Icon(Icons.person_outline,
-                color: Color(0xFFEDD97A), size: 18),
+            leading: const Icon(Icons.person_outline, color: AppColors.kGoldLight, size: 18),
             title: Text(
               player.shownName,
-              style: const TextStyle(
-                  color: Color(0xFFE8EDF5), fontWeight: FontWeight.w600),
+              style: const TextStyle(color: AppColors.kTextPrimary, fontWeight: FontWeight.w600),
             ),
             onTap: () => Get.back(result: player),
           ),
         )
         .toList(growable: false);
 
-    return _showStyledChoiceDialog<CoupPlayerModel>(
-        'gameSelectTarget'.tr, options);
+    return _showStyledChoiceDialog<CoupPlayerModel>('gameSelectTarget'.tr, options);
   }
 
   Future<String?> _selectInfluenceToReveal() async {
     final me = mePlayer.value;
     if (me == null) return null;
 
-    final hiddenCards =
-        me.cards.where((card) => !card.isRevealed).toList(growable: false);
+    final hiddenCards = me.cards.where((card) => !card.isRevealed).toList(growable: false);
     if (hiddenCards.isEmpty) return null;
 
     final revealCandidates = hiddenCards
@@ -430,10 +406,10 @@ class GameStartController extends GetxController {
   ) {
     return Get.dialog<String>(
       Dialog(
-        backgroundColor: const Color(0xFF18243E),
+        backgroundColor: AppColors.kSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFF2A3A5E)),
+          side: const BorderSide(color: AppColors.kBorder),
         ),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 460),
@@ -446,7 +422,7 @@ class GameStartController extends GetxController {
                 Text(
                   'gameSelectInfluenceToReveal'.tr,
                   style: const TextStyle(
-                    color: Color(0xFFEDD97A),
+                    color: AppColors.kGoldLight,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),
@@ -460,8 +436,7 @@ class GameStartController extends GetxController {
                     return _buildExchangeCandidateCard(
                       candidate: candidate,
                       selected: false,
-                      onTap: () =>
-                          Get.back(result: candidate.roleType.firestoreValue),
+                      onTap: () => Get.back(result: candidate.roleType.firestoreValue),
                     );
                   }).toList(growable: false),
                 ),
@@ -494,8 +469,7 @@ class GameStartController extends GetxController {
       return;
     }
 
-    if (_isRevealSelectionDialogOpen ||
-        _handledRevealSelectionActionId == actionId) {
+    if (_isRevealSelectionDialogOpen || _handledRevealSelectionActionId == actionId) {
       return;
     }
 
@@ -549,8 +523,7 @@ class GameStartController extends GetxController {
       return;
     }
 
-    if (_isExchangeSelectionDialogOpen ||
-        _handledExchangeSelectionActionId == actionId) {
+    if (_isExchangeSelectionDialogOpen || _handledExchangeSelectionActionId == actionId) {
       return;
     }
 
@@ -559,8 +532,7 @@ class GameStartController extends GetxController {
 
     Future<void>(() async {
       try {
-        final keepInfluences =
-            await _selectInfluencesToKeepForPendingExchange(action);
+        final keepInfluences = await _selectInfluencesToKeepForPendingExchange(action);
         if (keepInfluences == null) {
           _handledExchangeSelectionActionId = null;
           final latest = currentRoom.value;
@@ -621,9 +593,7 @@ class GameStartController extends GetxController {
         id: 'pool_$i',
         roleType: roleType,
         isFromDraw: !isCurrentCard,
-        sourceLabel: isCurrentCard
-            ? 'gameSwapSourceCurrent'.tr
-            : 'gameSwapSourceDraw'.tr,
+        sourceLabel: isCurrentCard ? 'gameSwapSourceCurrent'.tr : 'gameSwapSourceDraw'.tr,
       );
       candidates.add(candidate);
       if (isCurrentCard && defaultSelectedIds.length < hiddenToKeep) {
@@ -650,12 +620,10 @@ class GameStartController extends GetxController {
     Set<String>? initialSelectedIds,
   }) {
     final selectedIds = <String>{...(initialSelectedIds ?? const <String>{})};
-    final currentCards = candidates
-        .where((candidate) => !candidate.isFromDraw)
-        .toList(growable: false);
-    final drawnCards = candidates
-        .where((candidate) => candidate.isFromDraw)
-        .toList(growable: false);
+    final currentCards =
+        candidates.where((candidate) => !candidate.isFromDraw).toList(growable: false);
+    final drawnCards =
+        candidates.where((candidate) => candidate.isFromDraw).toList(growable: false);
 
     return Get.dialog<List<String>>(
       StatefulBuilder(
@@ -683,10 +651,10 @@ class GameStartController extends GetxController {
           }
 
           return Dialog(
-            backgroundColor: const Color(0xFF18243E),
+            backgroundColor: AppColors.kSurface,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
-              side: const BorderSide(color: Color(0xFF2A3A5E)),
+              side: const BorderSide(color: AppColors.kBorder),
             ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 460),
@@ -699,17 +667,15 @@ class GameStartController extends GetxController {
                     Text(
                       'gameSelectSwapKeepTitle'.tr,
                       style: const TextStyle(
-                        color: Color(0xFFEDD97A),
+                        color: AppColors.kGoldLight,
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'gameSelectSwapKeepHint'
-                          .trParams({'count': '$hiddenToKeep'}),
-                      style: const TextStyle(
-                          color: Color(0xFF7A8CA8), fontSize: 12),
+                      'gameSelectSwapKeepHint'.trParams({'count': '$hiddenToKeep'}),
+                      style: const TextStyle(color: AppColors.kTextSecondary, fontSize: 12),
                     ),
                     const SizedBox(height: 8),
                     Align(
@@ -717,7 +683,7 @@ class GameStartController extends GetxController {
                       child: Text(
                         '${selectedIds.length}/$hiddenToKeep',
                         style: const TextStyle(
-                          color: Color(0xFFD4AF37),
+                          color: AppColors.kGold,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                         ),
@@ -756,23 +722,20 @@ class GameStartController extends GetxController {
                         onPressed: () {
                           if (selectedIds.length != hiddenToKeep) {
                             AppToast.info(
-                              'gameSwapNeedExactSelect'
-                                  .trParams({'count': '$hiddenToKeep'}),
+                              'gameSwapNeedExactSelect'.trParams({'count': '$hiddenToKeep'}),
                             );
                             return;
                           }
 
                           final keep = candidates
-                              .where((candidate) =>
-                                  selectedIds.contains(candidate.id))
-                              .map((candidate) =>
-                                  candidate.roleType.firestoreValue)
+                              .where((candidate) => selectedIds.contains(candidate.id))
+                              .map((candidate) => candidate.roleType.firestoreValue)
                               .toList(growable: false);
                           Get.back(result: keep);
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFD4AF37),
-                          foregroundColor: const Color(0xFF0F1728),
+                          backgroundColor: AppColors.kGold,
+                          foregroundColor: AppColors.kBg,
                         ),
                         child: Text('commonConfirm'.tr),
                       ),
@@ -801,16 +764,16 @@ class GameStartController extends GetxController {
         width: 92,
         padding: const EdgeInsets.fromLTRB(6, 6, 6, 8),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF24385D) : const Color(0xFF121D33),
+          color: selected ? AppColors.kBorder : AppColors.kSurface,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: selected ? const Color(0xFFD4AF37) : const Color(0xFF2A3A5E),
+            color: selected ? AppColors.kGold : AppColors.kBorder,
             width: selected ? 1.6 : 1.0,
           ),
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: const Color(0xFFD4AF37).withValues(alpha: 0.28),
+                    color: AppColors.kGold.withValues(alpha: 0.28),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -835,7 +798,7 @@ class GameStartController extends GetxController {
                     child: Icon(
                       Icons.check_circle_rounded,
                       size: 16,
-                      color: Color(0xFFD4AF37),
+                      color: AppColors.kGold,
                     ),
                   ),
               ],
@@ -847,7 +810,7 @@ class GameStartController extends GetxController {
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Color(0xFF9FB3D9),
+                color: AppColors.kTextSecondary,
                 fontSize: 10.5,
                 fontWeight: FontWeight.w600,
               ),
@@ -870,7 +833,7 @@ class GameStartController extends GetxController {
         Text(
           title,
           style: const TextStyle(
-            color: Color(0xFF9FB3D9),
+            color: AppColors.kTextSecondary,
             fontSize: 11.5,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.3,
@@ -897,10 +860,10 @@ class GameStartController extends GetxController {
   Future<T?> _showStyledChoiceDialog<T>(String title, List<Widget> options) {
     return Get.dialog<T>(
       Dialog(
-        backgroundColor: const Color(0xFF18243E),
+        backgroundColor: AppColors.kSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: const BorderSide(color: Color(0xFF2A3A5E)),
+          side: const BorderSide(color: AppColors.kBorder),
         ),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 420),
@@ -913,7 +876,7 @@ class GameStartController extends GetxController {
                 Text(
                   title,
                   style: const TextStyle(
-                    color: Color(0xFFEDD97A),
+                    color: AppColors.kGoldLight,
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
                   ),

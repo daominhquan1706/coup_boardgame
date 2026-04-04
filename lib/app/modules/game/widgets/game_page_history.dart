@@ -112,9 +112,7 @@ class _HistoryPanel extends StatelessWidget {
 
   String _rawLine(GameHistoryEntry entry) {
     final actor = controller.displayNameOf(entry.actorName);
-    final target = entry.targetName == null
-        ? null
-        : controller.displayNameOf(entry.targetName);
+    final target = entry.targetName == null ? null : controller.displayNameOf(entry.targetName);
     final action = _actionLabel(entry.actionType);
 
     switch (entry.eventType) {
@@ -153,13 +151,11 @@ class _HistoryPanel extends StatelessWidget {
     }
   }
 
-  Future<void> _copyAllLogs(
-      List<_HistoryGroup> groups, int? timelineStartMs) async {
+  Future<void> _copyAllLogs(List<_HistoryGroup> groups, int? timelineStartMs) async {
     final buffer = StringBuffer();
     for (final group in groups) {
       for (final entry in group.entries) {
-        buffer.writeln(
-            '[${_fmtTime(entry.createdAt, timelineStartMs)}] ${_rawLine(entry)}');
+        buffer.writeln('[${_fmtTime(entry.createdAt, timelineStartMs)}] ${_rawLine(entry)}');
       }
     }
     await Clipboard.setData(ClipboardData(text: buffer.toString().trim()));
@@ -189,8 +185,7 @@ class _HistoryPanel extends StatelessWidget {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.history_rounded,
-                              size: 18, color: _kGold),
+                          const Icon(Icons.history_rounded, size: 18, color: _kGold),
                           const SizedBox(width: 8),
                           Text(
                             'gameHistory'.tr,
@@ -207,8 +202,7 @@ class _HistoryPanel extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            'gameEvents'
-                                .trParams({'count': '${entries.length}'}),
+                            'gameEvents'.trParams({'count': '${entries.length}'}),
                             style: GoogleFonts.rajdhani(
                               color: _kTextSecondary,
                               fontSize: 12,
@@ -220,15 +214,12 @@ class _HistoryPanel extends StatelessWidget {
                             const SizedBox(width: 6),
                             IconButton(
                               tooltip: 'gameCopyLogs'.tr,
-                              onPressed: () =>
-                                  _copyAllLogs(groups, timelineStartMs),
+                              onPressed: () => _copyAllLogs(groups, timelineStartMs),
                               splashRadius: 18,
                               iconSize: 18,
-                              constraints: const BoxConstraints(
-                                  minWidth: 28, minHeight: 28),
+                              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                               padding: const EdgeInsets.all(4),
-                              icon:
-                                  const Icon(Icons.copy_rounded, color: _kGold),
+                              icon: const Icon(Icons.copy_rounded, color: _kGold),
                             ),
                           ],
                         ],
@@ -237,8 +228,7 @@ class _HistoryPanel extends StatelessWidget {
                   )
                 : Row(
                     children: [
-                      const Icon(Icons.history_rounded,
-                          size: 18, color: _kGold),
+                      const Icon(Icons.history_rounded, size: 18, color: _kGold),
                       const SizedBox(width: 8),
                       Text(
                         'gameHistory'.tr,
@@ -263,12 +253,10 @@ class _HistoryPanel extends StatelessWidget {
                       if (groups.isNotEmpty)
                         IconButton(
                           tooltip: 'gameCopyLogs'.tr,
-                          onPressed: () =>
-                              _copyAllLogs(groups, timelineStartMs),
+                          onPressed: () => _copyAllLogs(groups, timelineStartMs),
                           splashRadius: 18,
                           iconSize: 18,
-                          constraints:
-                              const BoxConstraints(minWidth: 28, minHeight: 28),
+                          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                           padding: const EdgeInsets.all(4),
                           icon: const Icon(Icons.copy_rounded, color: _kGold),
                         ),
@@ -289,8 +277,7 @@ class _HistoryPanel extends StatelessWidget {
                     ),
                   )
                 : ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 14, vertical: 10),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                     itemCount: groups.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (context, index) => _HistoryGroupCard(
@@ -365,18 +352,18 @@ class _HistoryGroupCard extends StatelessWidget {
   Color _eventAccent(GameHistoryEntry entry) {
     if (entry.eventType == 'coins_changed') {
       final delta = entry.coinDelta ?? 0;
-      return delta < 0 ? const Color(0xFFEF4444) : const Color(0xFF10B981);
+      return delta < 0 ? AppColors.redError : AppColors.greenEmerald;
     }
     if (entry.eventType == 'influence_revealed') {
-      return const Color(0xFFF59E0B);
+      return AppColors.kGoldAmber;
     }
 
     switch (entry.eventType) {
       case 'challenge_called':
       case 'block_challenge_called':
-        return const Color(0xFFD97706);
+        return AppColors.kGoldDark;
       case 'block_called':
-        return const Color(0xFF7C3AED);
+        return AppColors.eventPurple;
       default:
         break;
     }
@@ -386,19 +373,19 @@ class _HistoryGroupCard extends StatelessWidget {
 
     switch (entry.actionType) {
       case 'income':
-        return const Color(0xFF10B981);
+        return AppColors.greenEmerald;
       case 'foreign_aid':
-        return const Color(0xFF06B6D4);
+        return AppColors.eventCyan;
       case 'tax':
-        return const Color(0xFF8B5CF6);
+        return AppColors.eventViolet;
       case 'assassinate':
-        return const Color(0xFFEF4444);
+        return AppColors.redError;
       case 'steal':
-        return const Color(0xFF3B82F6);
+        return AppColors.kBlue;
       case 'exchange':
-        return const Color(0xFF14B8A6);
+        return AppColors.eventTeal;
       case 'coup':
-        return const Color(0xFFF59E0B);
+        return AppColors.kGoldAmber;
       default:
         return _kTextSecondary;
     }
@@ -406,9 +393,7 @@ class _HistoryGroupCard extends StatelessWidget {
 
   List<InlineSpan> _spans(GameHistoryEntry entry) {
     final actor = controller.displayNameOf(entry.actorName);
-    final target = entry.targetName == null
-        ? null
-        : controller.displayNameOf(entry.targetName);
+    final target = entry.targetName == null ? null : controller.displayNameOf(entry.targetName);
     final actionLabel = _actionLabel(entry.actionType);
     final actionColor = _eventAccent(entry);
     final base = GoogleFonts.rajdhani(
@@ -440,8 +425,7 @@ class _HistoryGroupCard extends StatelessWidget {
         spans.add(TextSpan(
           text: '$sign$delta',
           style: GoogleFonts.rajdhani(
-            color:
-                delta < 0 ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+            color: delta < 0 ? AppColors.redError : AppColors.greenEmerald,
             fontSize: 11.8,
             fontWeight: FontWeight.w700,
           ),
@@ -453,10 +437,8 @@ class _HistoryGroupCard extends StatelessWidget {
         return spans;
       case 'influence_revealed':
         final roleType = CoupRoleTypeX.tryFromFirestoreValue(entry.claimedCard);
-        final card =
-            roleType?.localizedName ?? _localizedRoleLabel(entry.claimedCard);
-        final revealColor =
-            roleType == null ? actionColor : CardWidget.roleColor(roleType);
+        final card = roleType?.localizedName ?? _localizedRoleLabel(entry.claimedCard);
+        final revealColor = roleType == null ? actionColor : CardWidget.roleColor(roleType);
         spans.add(TextSpan(text: ' reveal ', style: base));
         spans.add(TextSpan(
           text: card,
@@ -468,8 +450,7 @@ class _HistoryGroupCard extends StatelessWidget {
         ));
         return spans;
       case 'challenge_called':
-        spans.add(TextSpan(
-            text: " ${'gameChallenge'.tr.toLowerCase()} ", style: base));
+        spans.add(TextSpan(text: " ${'gameChallenge'.tr.toLowerCase()} ", style: base));
         if (target != null) {
           spans.add(TextSpan(text: target, style: strong));
           spans.add(TextSpan(text: ' (', style: base));
@@ -481,20 +462,15 @@ class _HistoryGroupCard extends StatelessWidget {
         return spans;
       case 'challenge_pass':
         spans.add(TextSpan(
-            text: " ${'gamePassedChallenge'.trParams({'actor': ''}).trim()}",
-            style: base));
+            text: " ${'gamePassedChallenge'.trParams({'actor': ''}).trim()}", style: base));
         return spans;
       case 'block_called':
         final roleType = CoupRoleTypeX.tryFromFirestoreValue(entry.claimedCard);
-        final card = roleType?.localizedName ??
-            _localizedRoleLabel(entry.claimedCard, fallback: '');
-        final roleColor =
-            roleType == null ? actionColor : CardWidget.roleColor(roleType);
+        final card =
+            roleType?.localizedName ?? _localizedRoleLabel(entry.claimedCard, fallback: '');
+        final roleColor = roleType == null ? actionColor : CardWidget.roleColor(roleType);
         spans.add(TextSpan(
-            text: " ${'gameBlockedWith'.trParams({
-                  'actor': '',
-                  'card': ''
-                }).trim()} ",
+            text: " ${'gameBlockedWith'.trParams({'actor': '', 'card': ''}).trim()} ",
             style: base));
         spans.add(TextSpan(
           text: card,
@@ -507,14 +483,10 @@ class _HistoryGroupCard extends StatelessWidget {
         return spans;
       case 'block_pass':
         spans.add(TextSpan(
-            text: " ${'gamePassedBlockOpportunity'.trParams({
-                  'actor': ''
-                }).trim()}",
-            style: base));
+            text: " ${'gamePassedBlockOpportunity'.trParams({'actor': ''}).trim()}", style: base));
         return spans;
       case 'block_challenge_called':
-        spans.add(TextSpan(
-            text: " ${'gameChallengeBlock'.tr.toLowerCase()} ", style: base));
+        spans.add(TextSpan(text: " ${'gameChallengeBlock'.tr.toLowerCase()} ", style: base));
         if (target != null) {
           spans.add(TextSpan(text: target, style: strong));
         } else {
@@ -522,8 +494,7 @@ class _HistoryGroupCard extends StatelessWidget {
         }
         return spans;
       case 'block_challenge_pass':
-        spans.add(TextSpan(
-            text: " ${'gameAcceptBlock'.tr.toLowerCase()}", style: base));
+        spans.add(TextSpan(text: " ${'gameAcceptBlock'.tr.toLowerCase()}", style: base));
         return spans;
       default:
         spans.add(TextSpan(text: " ${'gameUsedAction'.tr} ", style: base));
@@ -554,8 +525,7 @@ class _HistoryGroupCard extends StatelessWidget {
               Container(
                 width: 6,
                 height: 6,
-                decoration: BoxDecoration(
-                    color: _eventAccent(root), shape: BoxShape.circle),
+                decoration: BoxDecoration(color: _eventAccent(root), shape: BoxShape.circle),
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -624,9 +594,7 @@ class _TimelineEntryRow extends StatelessWidget {
                   Expanded(
                     child: Container(
                       width: 2,
-                      color: isFirst
-                          ? Colors.transparent
-                          : _kBorder.withValues(alpha: (0.6)),
+                      color: isFirst ? Colors.transparent : _kBorder.withValues(alpha: (0.6)),
                     ),
                   ),
                   Container(
@@ -640,9 +608,7 @@ class _TimelineEntryRow extends StatelessWidget {
                   Expanded(
                     child: Container(
                       width: 2,
-                      color: isLast
-                          ? Colors.transparent
-                          : _kBorder.withValues(alpha: (0.6)),
+                      color: isLast ? Colors.transparent : _kBorder.withValues(alpha: (0.6)),
                     ),
                   ),
                 ],
@@ -671,8 +637,7 @@ class _SummaryRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _SummaryRow(
-      {required this.icon, required this.label, required this.value});
+  const _SummaryRow({required this.icon, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {

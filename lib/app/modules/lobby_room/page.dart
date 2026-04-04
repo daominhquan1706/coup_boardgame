@@ -1,4 +1,5 @@
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
+import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -6,25 +7,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
 import 'controller.dart';
 
-const Color _kBg = Color(0xFF0F1728);
-const Color _kSurface = Color(0xFF18243E);
-const Color _kSurfaceHigh = Color(0xFF1E2D4E);
-const Color _kBorder = Color(0xFF2A3A5E);
-const Color _kGold = Color(0xFFD4AF37);
-const Color _kGoldLight = Color(0xFFEDD97A);
-const Color _kTextPrimary = Color(0xFFE8EDF5);
-const Color _kTextSecondary = Color(0xFF7A8CA8);
-const Color _kBlue = Color(0xFF3B82F6);
-const Color _kGreen = Color(0xFF2ECC71);
-const Color _kRed = Color(0xFFE74C3C);
-
 class LobbyRoomPage extends GetView<LobbyRoomController> {
   const LobbyRoomPage({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: AppColors.kBg,
       body: SafeArea(
         child: Column(
           children: [
@@ -62,19 +51,19 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
       decoration: const BoxDecoration(
-        color: _kSurface,
-        border: Border(bottom: BorderSide(color: _kBorder)),
+        color: AppColors.kSurface,
+        border: Border(bottom: BorderSide(color: AppColors.kBorder)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.shield_outlined, color: _kGold, size: 18),
+          const Icon(Icons.shield_outlined, color: AppColors.kGold, size: 18),
           const SizedBox(width: 8),
           GestureDetector(
             onTap: () => Get.offAllNamed(AppRoutes.home),
             child: Text(
               'COUP',
               style: GoogleFonts.rajdhani(
-                color: _kGold,
+                color: AppColors.kGold,
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 4,
@@ -82,12 +71,12 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             ),
           ),
           const SizedBox(width: 14),
-          Container(width: 1, height: 16, color: _kBorder),
+          Container(width: 1, height: 16, color: AppColors.kBorder),
           const SizedBox(width: 14),
           Text(
             'lobbyTitle'.tr,
             style: GoogleFonts.rajdhani(
-              color: _kTextSecondary,
+              color: AppColors.kTextSecondary,
               fontSize: 12,
               letterSpacing: 2.5,
               fontWeight: FontWeight.w600,
@@ -100,14 +89,14 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             return Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: _kGold.withValues(alpha: 0.12),
+                color: AppColors.kGold.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: _kGold.withValues(alpha: 0.4)),
+                border: Border.all(color: AppColors.kGold.withValues(alpha: 0.4)),
               ),
               child: Text(
                 'host'.tr,
                 style: const TextStyle(
-                  color: _kGold,
+                  color: AppColors.kGold,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.2,
@@ -126,9 +115,9 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
         decoration: BoxDecoration(
-          color: _kSurface,
+          color: AppColors.kSurface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _kBorder),
+          border: Border.all(color: AppColors.kBorder),
         ),
         child: Row(
           children: [
@@ -138,7 +127,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 Text(
                   'lobbyRoomCode'.tr,
                   style: GoogleFonts.rajdhani(
-                    color: _kTextSecondary,
+                    color: AppColors.kTextSecondary,
                     fontSize: 11,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
@@ -148,7 +137,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 Text(
                   controller.roomCode ?? '—',
                   style: GoogleFonts.rajdhani(
-                    color: _kGoldLight,
+                    color: AppColors.kGoldLight,
                     fontSize: 38,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 10,
@@ -162,19 +151,19 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                 decoration: BoxDecoration(
-                  color: _kSurfaceHigh,
+                  color: AppColors.kSurfaceHigh,
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: _kBorder),
+                  border: Border.all(color: AppColors.kBorder),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.copy_outlined, color: _kTextSecondary, size: 14),
+                    const Icon(Icons.copy_outlined, color: AppColors.kTextSecondary, size: 14),
                     const SizedBox(width: 6),
                     Text(
                       'copy'.tr,
                       style: GoogleFonts.rajdhani(
-                        color: _kTextSecondary,
+                        color: AppColors.kTextSecondary,
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
@@ -193,9 +182,9 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
     final players = (room?.players as List<CoupPlayerModel>?) ?? [];
     return Container(
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: AppColors.kSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: AppColors.kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -204,12 +193,12 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
             child: Row(
               children: [
-                const Icon(Icons.people_outline, size: 15, color: _kTextSecondary),
+                const Icon(Icons.people_outline, size: 15, color: AppColors.kTextSecondary),
                 const SizedBox(width: 8),
                 Text(
                   'lobbyPlayers'.tr,
                   style: GoogleFonts.rajdhani(
-                    color: _kTextSecondary,
+                    color: AppColors.kTextSecondary,
                     fontSize: 11,
                     letterSpacing: 2,
                     fontWeight: FontWeight.w600,
@@ -219,13 +208,13 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(
-                    color: _kSurfaceHigh,
+                    color: AppColors.kSurfaceHigh,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
                     '${players.length}',
                     style: const TextStyle(
-                      color: _kTextPrimary,
+                      color: AppColors.kTextPrimary,
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
                     ),
@@ -239,14 +228,14 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     child: _SmallButton(
                       label: 'lobbyAddBot'.tr,
                       icon: Icons.smart_toy_outlined,
-                      color: _kGold,
+                      color: AppColors.kGold,
                       onTap: controller.addAI,
                     ),
                   ),
               ],
             ),
           ),
-          const Divider(height: 1, thickness: 1, color: _kBorder),
+          const Divider(height: 1, thickness: 1, color: AppColors.kBorder),
           if (players.isEmpty)
             Padding(
               padding: const EdgeInsets.all(24),
@@ -254,7 +243,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 'lobbyWaitingPlayers'.tr,
                 textAlign: TextAlign.center,
                 style: GoogleFonts.rajdhani(
-                  color: _kTextSecondary,
+                  color: AppColors.kTextSecondary,
                   fontSize: 14,
                 ),
               ),
@@ -284,16 +273,16 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isMe ? const Color(0xFF3B82F6).withValues(alpha: 0.15) : _kSurfaceHigh,
+                  color: isMe ? AppColors.kBlue.withValues(alpha: 0.15) : AppColors.kSurfaceHigh,
                   border: Border.all(
-                    color: isMe ? const Color(0xFF3B82F6).withValues(alpha: 0.5) : _kBorder,
+                    color: isMe ? AppColors.kBlue.withValues(alpha: 0.5) : AppColors.kBorder,
                   ),
                 ),
                 child: Center(
                   child: Text(
                     player.shownName.isNotEmpty ? player.shownName[0].toUpperCase() : '?',
                     style: TextStyle(
-                      color: isMe ? const Color(0xFF3B82F6) : _kTextSecondary,
+                      color: isMe ? AppColors.kBlue : AppColors.kTextSecondary,
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -310,7 +299,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                         Text(
                           player.shownName,
                           style: GoogleFonts.rajdhani(
-                            color: _kTextPrimary,
+                            color: AppColors.kTextPrimary,
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
                           ),
@@ -320,7 +309,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                           Text(
                             '(${"you".tr})',
                             style: const TextStyle(
-                              color: _kTextSecondary,
+                              color: AppColors.kTextSecondary,
                               fontSize: 11,
                             ),
                           ),
@@ -330,14 +319,14 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
                             decoration: BoxDecoration(
-                              color: _kGold.withValues(alpha: 0.1),
+                              color: AppColors.kGold.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: _kGold.withValues(alpha: 0.3)),
+                              border: Border.all(color: AppColors.kGold.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               'lobbyBot'.tr,
                               style: const TextStyle(
-                                color: _kGold,
+                                color: AppColors.kGold,
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
                                 letterSpacing: 0.8,
@@ -359,14 +348,14 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                     decoration: BoxDecoration(
-                      color: _kRed.withValues(alpha: 0.12),
+                      color: AppColors.redAccent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: _kRed.withValues(alpha: 0.4)),
+                      border: Border.all(color: AppColors.redAccent.withValues(alpha: 0.4)),
                     ),
                     child: Text(
                       'lobbyKick'.tr,
                       style: GoogleFonts.rajdhani(
-                        color: _kRed,
+                        color: AppColors.redAccent,
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
@@ -377,7 +366,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             ],
           ),
         ),
-        if (!isLast) const Divider(height: 1, thickness: 1, color: _kBorder),
+        if (!isLast) const Divider(height: 1, thickness: 1, color: AppColors.kBorder),
       ],
     );
   }
@@ -401,10 +390,13 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 duration: const Duration(milliseconds: 150),
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 decoration: BoxDecoration(
-                  color: canStart ? _kGreen.withValues(alpha: 0.14) : _kSurfaceHigh,
+                  color: canStart
+                      ? AppColors.greenLight.withValues(alpha: 0.14)
+                      : AppColors.kSurfaceHigh,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color: canStart ? _kGreen.withValues(alpha: 0.55) : _kBorder,
+                    color:
+                        canStart ? AppColors.greenLight.withValues(alpha: 0.55) : AppColors.kBorder,
                   ),
                 ),
                 child: Column(
@@ -413,7 +405,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                       'lobbyStartGame'.tr,
                       textAlign: TextAlign.center,
                       style: GoogleFonts.rajdhani(
-                        color: canStart ? _kGreen : _kTextSecondary,
+                        color: canStart ? AppColors.greenLight : AppColors.kTextSecondary,
                         fontSize: 17,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.5,
@@ -423,7 +415,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                       Text(
                         'lobbyNeedTwoPlayers'.tr,
                         textAlign: TextAlign.center,
-                        style: const TextStyle(color: _kTextSecondary, fontSize: 11),
+                        style: const TextStyle(color: AppColors.kTextSecondary, fontSize: 11),
                       ),
                   ],
                 ),
@@ -443,21 +435,21 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
       return Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: _kSurface,
+          color: AppColors.kSurface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: _kBorder),
+          border: Border.all(color: AppColors.kBorder),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
               children: [
-                const Icon(Icons.person_outline, size: 16, color: _kTextSecondary),
+                const Icon(Icons.person_outline, size: 16, color: AppColors.kTextSecondary),
                 const SizedBox(width: 8),
                 Text(
                   'lobbyMyInfo'.tr,
                   style: GoogleFonts.rajdhani(
-                    color: _kTextSecondary,
+                    color: AppColors.kTextSecondary,
                     fontSize: 12,
                     letterSpacing: 1.5,
                     fontWeight: FontWeight.w700,
@@ -469,21 +461,21 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             TextField(
               controller: controller.displayNameController,
               onChanged: controller.onDisplayNameChanged,
-              style: const TextStyle(color: _kTextPrimary, fontSize: 14),
-              cursorColor: _kGold,
+              style: const TextStyle(color: AppColors.kTextPrimary, fontSize: 14),
+              cursorColor: AppColors.kGold,
               decoration: InputDecoration(
                 hintText: 'homeEnterDisplayName'.tr,
-                hintStyle: const TextStyle(color: _kTextSecondary, fontSize: 13),
+                hintStyle: const TextStyle(color: AppColors.kTextSecondary, fontSize: 13),
                 filled: true,
-                fillColor: _kSurfaceHigh,
+                fillColor: AppColors.kSurfaceHigh,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: _kBorder),
+                  borderSide: const BorderSide(color: AppColors.kBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: _kGold, width: 1.3),
+                  borderSide: const BorderSide(color: AppColors.kGold, width: 1.3),
                 ),
               ),
             ),
@@ -494,7 +486,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                   child: _SmallButton(
                     label: 'lobbyEditName'.tr,
                     icon: Icons.edit_outlined,
-                    color: _kBlue,
+                    color: AppColors.kBlue,
                     onTap: controller.updateMyDisplayName,
                   ),
                 ),
@@ -504,7 +496,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                     child: _SmallButton(
                       label: isReady ? 'lobbyUnready'.tr : 'lobbyReady'.tr,
                       icon: isReady ? Icons.pause_circle_outline : Icons.check_circle_outline,
-                      color: isReady ? _kTextSecondary : _kGreen,
+                      color: isReady ? AppColors.kTextSecondary : AppColors.greenLight,
                       onTap: controller.toggleReady,
                     ),
                   ),
@@ -527,16 +519,16 @@ class _ReadyBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: isReady ? _kGreen.withValues(alpha: 0.12) : _kSurfaceHigh,
+        color: isReady ? AppColors.greenLight.withValues(alpha: 0.12) : AppColors.kSurfaceHigh,
         borderRadius: BorderRadius.circular(5),
         border: Border.all(
-          color: isReady ? _kGreen.withValues(alpha: 0.4) : _kBorder,
+          color: isReady ? AppColors.greenLight.withValues(alpha: 0.4) : AppColors.kBorder,
         ),
       ),
       child: Text(
         isReady ? 'ready'.tr : 'waiting'.tr,
         style: TextStyle(
-          color: isReady ? _kGreen : _kTextSecondary,
+          color: isReady ? AppColors.greenLight : AppColors.kTextSecondary,
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),

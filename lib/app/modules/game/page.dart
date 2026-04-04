@@ -6,6 +6,7 @@ import 'package:coup_boardgame/app/data/model/firestore_model/coup_card_model.da
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
 import 'package:coup_boardgame/app/modules/game/widgets/card_widget.dart';
+import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
 import 'package:coup_boardgame/app/utils/widgets/app_toast.dart';
 import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
@@ -25,16 +26,16 @@ part 'widgets/game_page_end_screen.dart';
 part 'widgets/game_page_widgets.dart';
 part 'widgets/game_page_motion.dart';
 
-// ─── Design tokens ───────────────────────────────────────────────────────────
-const Color _kBg = Color(0xFF0F1728);
-const Color _kSurface = Color(0xFF18243E);
-const Color _kSurfaceHigh = Color(0xFF1E2D4E);
-const Color _kBorder = Color(0xFF2A3A5E);
-const Color _kGold = Color(0xFFD4AF37);
-const Color _kGoldLight = Color(0xFFEDD97A);
-const Color _kTextPrimary = Color(0xFFE8EDF5);
-const Color _kTextSecondary = Color(0xFF7A8CA8);
-const Color _kRed = Color(0xFFE74C3C);
+// ─── Design tokens (aliases to AppColors for convenience within game module) ──
+const _kBg = AppColors.kBg;
+const _kSurface = AppColors.kSurface;
+const _kSurfaceHigh = AppColors.kSurfaceHigh;
+const _kBorder = AppColors.kBorder;
+const _kGold = AppColors.kGold;
+const _kGoldLight = AppColors.kGoldLight;
+const _kTextPrimary = AppColors.kTextPrimary;
+const _kTextSecondary = AppColors.kTextSecondary;
+const _kRed = AppColors.redAccent;
 
 class _GameViewport {
   final double width;
@@ -100,11 +101,9 @@ class _GamePageState extends State<GamePage> {
   }) {
     switch (tab) {
       case _GameScreenTab.game:
-        return _GameBoardTab(
-            room: room, controller: controller, viewport: viewport);
+        return _GameBoardTab(room: room, controller: controller, viewport: viewport);
       case _GameScreenTab.history:
-        return _HistoryTabView(
-            entries: entries, controller: controller, viewport: viewport);
+        return _HistoryTabView(entries: entries, controller: controller, viewport: viewport);
       case _GameScreenTab.rules:
         return const _RulesTabView();
       case _GameScreenTab.settings:
@@ -143,12 +142,10 @@ class _GamePageState extends State<GamePage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const CircularProgressIndicator(
-                        color: _kGold, strokeWidth: 2),
+                    const CircularProgressIndicator(color: _kGold, strokeWidth: 2),
                     const SizedBox(height: 16),
                     Text('msgLoadingGame'.tr,
-                        style: GoogleFonts.rajdhani(
-                            color: _kTextSecondary, fontSize: 14)),
+                        style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 14)),
                   ],
                 ),
               )
@@ -168,8 +165,7 @@ class _GamePageState extends State<GamePage> {
                                       width: 96,
                                       decoration: const BoxDecoration(
                                         color: _kSurface,
-                                        border: Border(
-                                            right: BorderSide(color: _kBorder)),
+                                        border: Border(right: BorderSide(color: _kBorder)),
                                       ),
                                       child: NavigationRail(
                                         backgroundColor: Colors.transparent,
@@ -177,33 +173,27 @@ class _GamePageState extends State<GamePage> {
                                         labelType: NavigationRailLabelType.all,
                                         minWidth: 68,
                                         minExtendedWidth: 96,
-                                        selectedLabelTextStyle:
-                                            GoogleFonts.rajdhani(
+                                        selectedLabelTextStyle: GoogleFonts.rajdhani(
                                           color: _kGold,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                         ),
-                                        unselectedLabelTextStyle:
-                                            GoogleFonts.rajdhani(
+                                        unselectedLabelTextStyle: GoogleFonts.rajdhani(
                                           color: _kTextSecondary,
                                           fontSize: 11.5,
                                           fontWeight: FontWeight.w600,
                                         ),
                                         onDestinationSelected: (index) {
                                           setState(() {
-                                            _currentTab =
-                                                _GameScreenTab.values[index];
+                                            _currentTab = _GameScreenTab.values[index];
                                           });
                                         },
                                         destinations: _GameScreenTab.values
                                             .map(
-                                              (tab) =>
-                                                  NavigationRailDestination(
-                                                icon: Icon(_iconForTab(tab),
-                                                    color: _kTextSecondary),
-                                                selectedIcon: Icon(
-                                                    _iconForTab(tab),
-                                                    color: _kGold),
+                                              (tab) => NavigationRailDestination(
+                                                icon:
+                                                    Icon(_iconForTab(tab), color: _kTextSecondary),
+                                                selectedIcon: Icon(_iconForTab(tab), color: _kGold),
                                                 label: Text(_labelForTab(tab)),
                                               ),
                                             )

@@ -68,7 +68,7 @@ class Common {
                   child: const Text(
                     'Cancel',
                     style: TextStyle(
-                      color: Colors.redAccent,
+                      color: AppColors.red,
                     ),
                   ),
                   onPressed: () {
@@ -98,7 +98,7 @@ class Common {
                   child: const Text(
                     'Cancel',
                     style: TextStyle(
-                      color: Colors.redAccent,
+                      color: AppColors.red,
                     ),
                   ),
                   onPressed: () {
@@ -114,7 +114,7 @@ class Common {
                 ),
               ],
             ),
-      barrierColor: Colors.black26,
+      barrierColor: AppColors.black.withValues(alpha: 0.15),
       transitionCurve: Curves.easeInOutBack,
     );
     return result;
@@ -141,7 +141,7 @@ class Common {
                 children: [
                   const SizedBox(height: 16),
                   const CircleAvatar(
-                    backgroundColor: Colors.green,
+                    backgroundColor: AppColors.green,
                     child: Icon(
                       Icons.check,
                       color: AppColors.white,
@@ -164,7 +164,7 @@ class Common {
           );
         },
       ),
-      barrierColor: Colors.black26,
+      barrierColor: AppColors.black.withValues(alpha: 0.15),
       transitionCurve: Curves.easeInOutBack,
     ).then((val) {
       if (timer.isActive) {

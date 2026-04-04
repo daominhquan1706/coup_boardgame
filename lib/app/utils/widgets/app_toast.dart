@@ -1,3 +1,4 @@
+import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -5,15 +6,14 @@ import 'package:google_fonts/google_fonts.dart';
 class AppToast {
   AppToast._();
 
-  static const Color _surface = Color(0xFF18243E);
-  static const Color _border = Color(0xFF2A3A5E);
-  static const Color _text = Color(0xFFE8EDF5);
-  static const Color _success = Color(0xFF16A34A);
-  static const Color _error = Color(0xFFDC2626);
-  static const Color _info = Color(0xFFD4AF37);
+  static const Color _surface = AppColors.kSurface;
+  static const Color _border = AppColors.kBorder;
+  static const Color _text = AppColors.kTextPrimary;
+  static const Color _success = AppColors.greenSuccess;
+  static const Color _error = AppColors.redError;
+  static const Color _info = AppColors.kGold;
 
-  static void success(String message,
-      {Duration duration = const Duration(milliseconds: 1400)}) {
+  static void success(String message, {Duration duration = const Duration(milliseconds: 1400)}) {
     _show(
       message: message,
       icon: Icons.check_circle_rounded,
@@ -22,8 +22,7 @@ class AppToast {
     );
   }
 
-  static void error(String message,
-      {Duration duration = const Duration(milliseconds: 1800)}) {
+  static void error(String message, {Duration duration = const Duration(milliseconds: 1800)}) {
     _show(
       message: message,
       icon: Icons.error_rounded,
@@ -32,8 +31,7 @@ class AppToast {
     );
   }
 
-  static void info(String message,
-      {Duration duration = const Duration(milliseconds: 1500)}) {
+  static void info(String message, {Duration duration = const Duration(milliseconds: 1500)}) {
     _show(
       message: message,
       icon: Icons.info_rounded,
@@ -49,9 +47,8 @@ class AppToast {
     required Duration duration,
   }) {
     final screenWidth = Get.width;
-    final toastMaxWidth = screenWidth < 520
-        ? ((screenWidth - 24).clamp(240, screenWidth)).toDouble()
-        : 420.0;
+    final toastMaxWidth =
+        screenWidth < 520 ? ((screenWidth - 24).clamp(240, screenWidth)).toDouble() : 420.0;
 
     Get.closeAllSnackbars();
     Get.showSnackbar(

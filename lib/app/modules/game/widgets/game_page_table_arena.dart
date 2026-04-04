@@ -140,12 +140,12 @@ class _TableArena extends StatelessWidget {
             gradient: const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF143148), Color(0xFF102332)],
+              colors: [AppColors.boardBgDark, AppColors.boardBgDarker],
             ),
             border: Border.all(color: _kBorder),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: (0.28)),
+                color: AppColors.black.withValues(alpha: (0.28)),
                 blurRadius: 24,
                 offset: const Offset(0, 18),
               ),
@@ -183,7 +183,7 @@ class _TableArena extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 18),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: (0.12)),
+                    color: AppColors.black.withValues(alpha: (0.12)),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(color: _kBorder),
                   ),
@@ -245,11 +245,11 @@ class _OpponentSeat extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: player.isBot
-              ? [const Color(0xFF334155), const Color(0xFF1E293B)]
-              : [const Color(0xFF3B82F6), const Color(0xFF1D4ED8)],
+              ? [AppColors.boardCardBg, AppColors.boardCardBgDark]
+              : [AppColors.kBlue, AppColors.kBlueDark],
         ),
         border: Border.all(
-          color: isCurrentTurn ? _kGold : Colors.white.withValues(alpha: (0.22)),
+          color: isCurrentTurn ? _kGold : AppColors.white.withValues(alpha: (0.22)),
           width: isCurrentTurn ? 1.8 : 1,
         ),
       ),
@@ -257,13 +257,13 @@ class _OpponentSeat extends StatelessWidget {
       child: player.isBot
           ? Icon(
               Icons.smart_toy_rounded,
-              color: Colors.white.withValues(alpha: (0.9)),
+              color: AppColors.white.withValues(alpha: (0.9)),
               size: avatarSize * 0.5,
             )
           : Text(
               player.shownName.isNotEmpty ? player.shownName[0].toUpperCase() : '?',
               style: GoogleFonts.rajdhani(
-                color: Colors.white,
+                color: AppColors.white,
                 fontSize: avatarSize * 0.44,
                 fontWeight: FontWeight.w800,
               ),
@@ -435,7 +435,7 @@ class _MeSeat extends StatelessWidget {
           BoxShadow(
             color: isCurrentTurn
                 ? _kGold.withValues(alpha: (0.16))
-                : Colors.black.withValues(alpha: (0.18)),
+                : AppColors.black.withValues(alpha: (0.18)),
             blurRadius: isCurrentTurn ? 22 : 14,
             offset: const Offset(0, 10),
           ),
@@ -545,7 +545,7 @@ class _MeInfluenceCard extends StatelessWidget {
                       child: Icon(
                         Icons.close_rounded,
                         size: width * 0.86,
-                        color: const Color(0xCCDC2626),
+                        color: AppColors.redError.withValues(alpha: 0.8),
                       ),
                     ),
                   ),

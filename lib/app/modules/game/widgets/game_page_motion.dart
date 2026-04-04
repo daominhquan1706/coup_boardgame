@@ -124,8 +124,8 @@ class _AnimatedCoinValueState extends State<_AnimatedCoinValue>
     final deltaColor = delta == null || delta == 0
         ? _kGold
         : delta.isNegative
-            ? const Color(0xFFFB7185)
-            : const Color(0xFF4ADE80);
+            ? AppColors.redRose
+            : AppColors.greenMint;
 
     return Stack(
       clipBehavior: Clip.none,

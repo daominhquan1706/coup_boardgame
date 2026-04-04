@@ -6,8 +6,7 @@ class _ActionPanel extends StatelessWidget {
   final GameStartController controller;
   final bool compact;
 
-  const _ActionPanel(
-      {required this.room, required this.controller, this.compact = false});
+  const _ActionPanel({required this.room, required this.controller, this.compact = false});
 
   @override
   Widget build(BuildContext context) {
@@ -44,10 +43,8 @@ class _ActionPanel extends StatelessWidget {
 
   Widget _buildDecisionBanner(BuildContext context) {
     final action = room.currentAction;
-    final actorName =
-        action == null ? null : controller.displayNameOf(action.source.name);
-    final actionLabel =
-        action?.actionType.firestoreType.replaceAll('_', ' ').toUpperCase();
+    final actorName = action == null ? null : controller.displayNameOf(action.source.name);
+    final actionLabel = action?.actionType.firestoreType.replaceAll('_', ' ').toUpperCase();
     final viewport = _GameViewport.of(context);
 
     String text;
@@ -55,8 +52,7 @@ class _ActionPanel extends StatelessWidget {
     if (phase == GamePhase.action) {
       text = controller.isMyTurn
           ? 'gameYourTurnChooseAction'.tr
-          : 'gameWaitingFor'
-              .trParams({'name': controller.displayNameOf(room.currentTurn)});
+          : 'gameWaitingFor'.trParams({'name': controller.displayNameOf(room.currentTurn)});
     } else if (phase == GamePhase.challenge && action != null) {
       text = controller.canRespondChallenge(room)
           ? 'gameRespondChallengePrompt'
@@ -110,8 +106,7 @@ class _ActionPanel extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.info_outline,
-                          size: 14, color: _kTextSecondary),
+                      const Icon(Icons.info_outline, size: 14, color: _kTextSecondary),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
@@ -141,8 +136,7 @@ class _ActionPanel extends StatelessWidget {
               )
             : Row(
                 children: [
-                  const Icon(Icons.info_outline,
-                      size: 14, color: _kTextSecondary),
+                  const Icon(Icons.info_outline, size: 14, color: _kTextSecondary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -180,8 +174,7 @@ class _ActionPanel extends StatelessWidget {
           const SizedBox(
             width: 12,
             height: 12,
-            child: CircularProgressIndicator(
-                strokeWidth: 1.4, color: _kTextSecondary),
+            child: CircularProgressIndicator(strokeWidth: 1.4, color: _kTextSecondary),
           ),
           const SizedBox(width: 8),
           Text(
@@ -197,9 +190,8 @@ class _ActionPanel extends StatelessWidget {
     Widget content;
     switch (room.phase) {
       case GamePhase.action:
-        content = controller.isMyTurn
-            ? _ActionButtons(controller: controller)
-            : _buildWaitingIndicator();
+        content =
+            controller.isMyTurn ? _ActionButtons(controller: controller) : _buildWaitingIndicator();
         break;
       case GamePhase.challenge:
         content = controller.canRespondChallenge(room)
@@ -259,10 +251,7 @@ class _ActionButtons extends StatelessWidget {
     final coins = me?.coins ?? 0;
     final hiddenRoles = me == null
         ? <CoupRoleType>{}
-        : me.cards
-            .where((card) => !card.isRevealed)
-            .map((card) => card.roleType)
-            .toSet();
+        : me.cards.where((card) => !card.isRevealed).map((card) => card.roleType).toSet();
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -281,8 +270,7 @@ class _ActionButtons extends StatelessWidget {
           if (action == CoupActionType.coup && coins < 7) enabled = false;
           if (coins >= 10 && action != CoupActionType.coup) enabled = false;
           final claimedRole = action.claimedRole;
-          final isFakeAction =
-              claimedRole != null && !hiddenRoles.contains(claimedRole);
+          final isFakeAction = claimedRole != null && !hiddenRoles.contains(claimedRole);
           return (action: action, enabled: enabled, isFakeAction: isFakeAction);
         }).toList()
           ..sort((a, b) {
@@ -404,11 +392,11 @@ class _ActionTile extends StatelessWidget {
   Color get _color {
     switch (action) {
       case CoupActionType.income:
-        return const Color(0xFF059669);
+        return AppColors.greenEmeraldDark;
       case CoupActionType.foreignAid:
-        return const Color(0xFF0891B2);
+        return AppColors.greenTeal;
       case CoupActionType.coup:
-        return const Color(0xFFDC2626);
+        return AppColors.redError;
       default:
         final role = action.claimedRole;
         return CardWidget.roleColor(role);
@@ -425,8 +413,7 @@ class _ActionTile extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         constraints: BoxConstraints(minHeight: height, maxHeight: height),
-        padding:
-            EdgeInsets.symmetric(horizontal: compact ? 8 : 10, vertical: 0),
+        padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 10, vertical: 0),
         decoration: BoxDecoration(
           color: enabled ? color.withValues(alpha: (0.15)) : _kSurfaceHigh,
           borderRadius: BorderRadius.circular(compact ? 11 : 12),
@@ -434,12 +421,8 @@ class _ActionTile extends StatelessWidget {
             color: enabled ? color.withValues(alpha: (0.60)) : _kBorder,
             width: enabled ? 1.2 : 1,
           ),
-          boxShadow: enabled
-              ? [
-                  BoxShadow(
-                      color: color.withValues(alpha: (0.12)), blurRadius: 8)
-                ]
-              : null,
+          boxShadow:
+              enabled ? [BoxShadow(color: color.withValues(alpha: (0.12)), blurRadius: 8)] : null,
         ),
         child: Stack(
           clipBehavior: Clip.none,
@@ -477,14 +460,12 @@ class _ActionTile extends StatelessWidget {
                   width: compact ? 14 : 16,
                   height: compact ? 14 : 16,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF59E0B),
+                    color: AppColors.kGoldAmber,
                     borderRadius: BorderRadius.circular(999),
-                    border:
-                        Border.all(color: const Color(0xFF3E2A06), width: 1),
+                    border: Border.all(color: AppColors.kGoldAmberDark, width: 1),
                     boxShadow: [
                       BoxShadow(
-                        color:
-                            const Color(0xFFF59E0B).withValues(alpha: (0.34)),
+                        color: AppColors.kGoldAmber.withValues(alpha: (0.34)),
                         blurRadius: 8,
                       ),
                     ],
@@ -493,7 +474,7 @@ class _ActionTile extends StatelessWidget {
                   child: Text(
                     '!',
                     style: TextStyle(
-                      color: Colors.black.withValues(alpha: (0.85)),
+                      color: AppColors.black.withValues(alpha: (0.85)),
                       fontSize: compact ? 9.5 : 10.5,
                       fontWeight: FontWeight.w900,
                     ),
@@ -520,7 +501,7 @@ class _ChallengeButtons extends StatelessWidget {
           child: _PhaseActionButton(
             label: 'gameChallenge'.tr.toUpperCase(),
             icon: Icons.gavel_rounded,
-            toneColor: const Color(0xFFD97706),
+            toneColor: AppColors.kGoldDark,
             onTap: controller.challengeAction,
           ),
         ),
@@ -558,8 +539,7 @@ class _BlockButtons extends StatelessWidget {
 
     final buttons = <Widget>[];
     for (final role in blockRoles) {
-      final roleType =
-          CoupRoleType.values.firstWhereOrNull((r) => r.firestoreValue == role);
+      final roleType = CoupRoleType.values.firstWhereOrNull((r) => r.firestoreValue == role);
       buttons.add(
         Expanded(
           child: _PhaseActionButton(
@@ -608,7 +588,7 @@ class _BlockChallengeButtons extends StatelessWidget {
           child: _PhaseActionButton(
             label: 'gameChallengeBlock'.tr.toUpperCase(),
             icon: Icons.gavel_rounded,
-            toneColor: const Color(0xFFDC2626),
+            toneColor: AppColors.redError,
             onTap: controller.challengeBlock,
           ),
         ),
@@ -649,8 +629,7 @@ class _PhaseActionButton extends StatelessWidget {
         height: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color:
-              accent == null ? _kSurfaceHigh : accent.withValues(alpha: (0.15)),
+          color: accent == null ? _kSurfaceHigh : accent.withValues(alpha: (0.15)),
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
             color: accent == null ? _kBorder : accent.withValues(alpha: (0.60)),
@@ -658,10 +637,7 @@ class _PhaseActionButton extends StatelessWidget {
           ),
           boxShadow: accent == null
               ? null
-              : [
-                  BoxShadow(
-                      color: accent.withValues(alpha: (0.12)), blurRadius: 8)
-                ],
+              : [BoxShadow(color: accent.withValues(alpha: (0.12)), blurRadius: 8)],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,

@@ -1,19 +1,9 @@
+import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
 import 'controller.dart';
-
-const Color _kBg = Color(0xFF0F1728);
-const Color _kSurface = Color(0xFF18243E);
-const Color _kSurfaceHigh = Color(0xFF1E2D4E);
-const Color _kBorder = Color(0xFF2A3A5E);
-const Color _kGold = Color(0xFFD4AF37);
-const Color _kGoldLight = Color(0xFFEDD97A);
-const Color _kTextPrimary = Color(0xFFE8EDF5);
-const Color _kTextSecondary = Color(0xFF7A8CA8);
-const Color _kGreen = Color(0xFF2ECC71);
-const Color _kBlue = Color(0xFF3B82F6);
 
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
@@ -21,7 +11,7 @@ class HomePage extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _kBg,
+      backgroundColor: AppColors.kBg,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -55,19 +45,19 @@ class HomePage extends GetView<HomeController> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.shield_outlined, color: _kGold, size: 26),
+            const Icon(Icons.shield_outlined, color: AppColors.kGold, size: 26),
             const SizedBox(width: 10),
             Text(
               'appTitle'.tr,
               style: GoogleFonts.rajdhani(
-                color: _kGoldLight,
+                color: AppColors.kGoldLight,
                 fontSize: 36,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 8,
               ),
             ),
             const SizedBox(width: 10),
-            const Icon(Icons.shield_outlined, color: _kGold, size: 26),
+            const Icon(Icons.shield_outlined, color: AppColors.kGold, size: 26),
           ],
         ),
         const SizedBox(height: 4),
@@ -75,7 +65,7 @@ class HomePage extends GetView<HomeController> {
           'appSubtitle'.tr,
           textAlign: TextAlign.center,
           style: GoogleFonts.rajdhani(
-            color: _kTextSecondary,
+            color: AppColors.kTextSecondary,
             fontSize: 11,
             letterSpacing: 4,
             fontWeight: FontWeight.w500,
@@ -89,16 +79,16 @@ class HomePage extends GetView<HomeController> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: AppColors.kSurface,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: AppColors.kBorder),
       ),
       child: Row(
         children: [
           Text(
             'homeLanguage'.tr,
             style: GoogleFonts.rajdhani(
-              color: _kTextSecondary,
+              color: AppColors.kTextSecondary,
               fontSize: 12,
               letterSpacing: 1.2,
               fontWeight: FontWeight.w600,
@@ -131,9 +121,9 @@ class HomePage extends GetView<HomeController> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: AppColors.kSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: AppColors.kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -143,16 +133,16 @@ class HomePage extends GetView<HomeController> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: _kGreen.withValues(alpha: 0.12),
+                  color: AppColors.greenLight.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(Icons.add_circle_outline, color: _kGreen, size: 16),
+                child: const Icon(Icons.add_circle_outline, color: AppColors.greenLight, size: 16),
               ),
               const SizedBox(width: 10),
               Text(
                 'homeCreateRoomTitle'.tr,
                 style: GoogleFonts.rajdhani(
-                  color: _kTextPrimary,
+                  color: AppColors.kTextPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
@@ -162,14 +152,14 @@ class HomePage extends GetView<HomeController> {
           ),
           const SizedBox(height: 4),
           Text('homeCreateRoomDesc'.tr,
-              style: const TextStyle(color: _kTextSecondary, fontSize: 12)),
+              style: const TextStyle(color: AppColors.kTextSecondary, fontSize: 12)),
           const SizedBox(height: 16),
           E2ETag(
             label: 'e2e-home-create-room-button',
             button: true,
             child: _BoardButton(
               label: 'homeCreateRoomButton'.tr,
-              color: _kGreen,
+              color: AppColors.greenLight,
               enabled: true,
               onTap: controller.onTapCreateRoom,
             ),
@@ -182,20 +172,20 @@ class HomePage extends GetView<HomeController> {
   Widget _buildDivider() {
     return Row(
       children: [
-        const Expanded(child: Divider(color: _kBorder, thickness: 1)),
+        const Expanded(child: Divider(color: AppColors.kBorder, thickness: 1)),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14),
           child: Text(
             'homeOr'.tr,
             style: GoogleFonts.rajdhani(
-              color: _kTextSecondary,
+              color: AppColors.kTextSecondary,
               fontSize: 12,
               letterSpacing: 2,
               fontWeight: FontWeight.w600,
             ),
           ),
         ),
-        const Expanded(child: Divider(color: _kBorder, thickness: 1)),
+        const Expanded(child: Divider(color: AppColors.kBorder, thickness: 1)),
       ],
     );
   }
@@ -204,9 +194,9 @@ class HomePage extends GetView<HomeController> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: _kSurface,
+        color: AppColors.kSurface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _kBorder),
+        border: Border.all(color: AppColors.kBorder),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -216,16 +206,16 @@ class HomePage extends GetView<HomeController> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: _kBlue.withValues(alpha: 0.12),
+                  color: AppColors.kBlue.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(Icons.login_outlined, color: _kBlue, size: 16),
+                child: const Icon(Icons.login_outlined, color: AppColors.kBlue, size: 16),
               ),
               const SizedBox(width: 10),
               Text(
                 'homeJoinRoomTitle'.tr,
                 style: GoogleFonts.rajdhani(
-                  color: _kTextPrimary,
+                  color: AppColors.kTextPrimary,
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.5,
@@ -234,7 +224,8 @@ class HomePage extends GetView<HomeController> {
             ],
           ),
           const SizedBox(height: 4),
-          Text('homeJoinRoomDesc'.tr, style: const TextStyle(color: _kTextSecondary, fontSize: 12)),
+          Text('homeJoinRoomDesc'.tr,
+              style: const TextStyle(color: AppColors.kTextSecondary, fontSize: 12)),
           const SizedBox(height: 16),
           E2ETag(
             label: 'e2e-home-join-room-code-input',
@@ -255,7 +246,7 @@ class HomePage extends GetView<HomeController> {
               enabled: controller.roomCode.value.isNotEmpty,
               child: _BoardButton(
                 label: 'homeJoinRoomButton'.tr,
-                color: _kBlue,
+                color: AppColors.kBlue,
                 enabled: controller.roomCode.value.isNotEmpty,
                 onTap: controller.onTapJoinRoom,
               ),
@@ -285,16 +276,16 @@ class _LangButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: selected ? _kGold.withValues(alpha: 0.14) : _kSurfaceHigh,
+          color: selected ? AppColors.kGold.withValues(alpha: 0.14) : AppColors.kSurfaceHigh,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: selected ? _kGold.withValues(alpha: 0.55) : _kBorder,
+            color: selected ? AppColors.kGold.withValues(alpha: 0.55) : AppColors.kBorder,
           ),
         ),
         child: Text(
           label,
           style: GoogleFonts.rajdhani(
-            color: selected ? _kGoldLight : _kTextSecondary,
+            color: selected ? AppColors.kGoldLight : AppColors.kTextSecondary,
             fontSize: 12,
             fontWeight: FontWeight.w700,
           ),
@@ -320,22 +311,22 @@ class _BoardTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextField(
       onChanged: onChanged,
-      style: const TextStyle(color: _kTextPrimary, fontSize: 14),
-      cursorColor: _kGold,
+      style: const TextStyle(color: AppColors.kTextPrimary, fontSize: 14),
+      cursorColor: AppColors.kGold,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: const TextStyle(color: _kTextSecondary, fontSize: 13),
-        prefixIcon: Icon(prefixIcon, color: _kTextSecondary, size: 18),
+        hintStyle: const TextStyle(color: AppColors.kTextSecondary, fontSize: 13),
+        prefixIcon: Icon(prefixIcon, color: AppColors.kTextSecondary, size: 18),
         filled: true,
-        fillColor: _kSurfaceHigh,
+        fillColor: AppColors.kSurfaceHigh,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _kBorder),
+          borderSide: const BorderSide(color: AppColors.kBorder),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: _kGold, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.kGold, width: 1.5),
         ),
       ),
     );
@@ -364,17 +355,17 @@ class _BoardButton extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(vertical: 13),
         decoration: BoxDecoration(
-          color: enabled ? color.withValues(alpha: 0.14) : _kSurfaceHigh,
+          color: enabled ? color.withValues(alpha: 0.14) : AppColors.kSurfaceHigh,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: enabled ? color.withValues(alpha: 0.6) : _kBorder,
+            color: enabled ? color.withValues(alpha: 0.6) : AppColors.kBorder,
           ),
         ),
         child: Text(
           label,
           textAlign: TextAlign.center,
           style: GoogleFonts.rajdhani(
-            color: enabled ? color : _kTextSecondary,
+            color: enabled ? color : AppColors.kTextSecondary,
             fontSize: 15,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.8,
