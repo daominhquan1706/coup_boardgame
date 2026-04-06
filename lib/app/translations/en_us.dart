@@ -89,19 +89,19 @@ const Map<String, String> enUS = {
   "rulesRolesTitle": "Roles & How to Play",
   "rulesRolesSubtitle":
       "Each role has a unique ability. Claim a role to use its action — but be ready to prove it if challenged!",
-  "rulesDukeTitle": "👑 Duke",
+  "rulesDukeTitle": "Duke",
   "rulesDukeBody":
       "• **Tax**: Claim Duke to take 3 coins from the bank.\n• **Block Foreign Aid**: When someone claims Foreign Aid, you can block it by claiming Duke.\n• **Strategy**: Strong early-game income. Use Tax to build up for Coup quickly.",
-  "rulesAssassinTitle": "🗡️ Assassin",
+  "rulesAssassinTitle": "Assassin",
   "rulesAssassinBody":
       "• **Assassinate**: Pay 3 coins to eliminate one influence from a target player.\n• **Strategy**: High-risk, high-reward. Use when you know an opponent's key card. Save coins for this powerful move.",
-  "rulesCaptainTitle": "🏴‍☠️ Captain",
+  "rulesCaptainTitle": "Captain",
   "rulesCaptainBody":
       "• **Steal**: Take up to 2 coins from another player.\n• **Block Steal**: You can block another Captain's Steal by claiming Captain.\n• **Strategy**: Great for disrupting rich opponents. Pair with Ambassador for card control.",
-  "rulesAmbassadorTitle": "🕊️ Ambassador",
+  "rulesAmbassadorTitle": "Ambassador",
   "rulesAmbassadorBody":
       "• **Exchange**: Draw 2 cards from the deck, choose which to keep, return the rest.\n• **Block Steal**: You can block a Captain's Steal by claiming Ambassador.\n• **Strategy**: Use when you need specific cards or want to hide your true hand. Excellent defensive role.",
-  "rulesContessaTitle": "🛡️ Contessa",
+  "rulesContessaTitle": "Contessa",
   "rulesContessaBody":
       "• **Block Assassinate**: Prevent an assassination attempt by claiming Contessa.\n• **Strategy**: Purely defensive. Keep this card hidden as long as possible — opponents will hesitate to Assassinate if they suspect you have it.",
   "rulesChallengeTitle": "⚔️ Challenge",
@@ -154,11 +154,23 @@ const Map<String, String> enUS = {
   "gameSwapSectionDrawn": "Cards from draw",
   "gameNotYourTurn": "Not your turn",
   "gameYourTurnChooseAction": "Your turn. Choose an action.",
+  "gameOpenActions": "Action",
+  "gameYourCards": "Your cards",
+  "gameActionAvailable": "Available Actions",
+  "gameActionDisabled": "Disabled Actions",
+  "gameActionSectionHint":
+      "Disabled actions are unavailable until requirements are met.",
   "gameRespondChallengePrompt": "Respond: challenge @actor's @action?",
+  "gameRespondChallengePromptTarget":
+      "Respond: challenge @actor's @action on @target?",
   "gameRespondBlockPrompt": "Respond: block @actor's @action?",
   "gameRespondBlockChallengePrompt":
       "Respond: challenge @actor's block on @action?",
   "gameWaitingOthersResponse": "Waiting for other players to respond...",
+  "gameWaitingOthersChallenge": "Waiting for other players to challenge...",
+  "gameWaitingChallenge": "Waiting for challenge responses...",
+  "gameWaitingBlock": "Waiting for block responses...",
+  "gameWaitingBlockChallenge": "Waiting for block challenge responses...",
   "gameAutoIn": "auto in @sec s",
   "gameAutoAction": "Auto action",
   "gameBackToLobby": "Back to lobby",
@@ -192,6 +204,18 @@ const Map<String, String> enUS = {
   "actionAssassinateSub": "3 coins · Assassin",
   "actionStealSub": "steal 2 · Captain",
   "actionExchangeSub": "Ambassador",
+  "actionBlock": "Block",
+  "actionInspect": "Inspect",
+  "actionIncomeDesc": "Gain 1 coin",
+  "actionForeignAidDesc": "Gain 2 coins",
+  "actionCoupDesc": "Pay 7 coins to remove a player's influence",
+  "actionTaxDesc": "Gain 3 coins (requires Duke)",
+  "actionStealDesc": "Take 2 coins from a player (requires Captain)",
+  "actionExchangeDesc": "Draw 2 cards, then return 2 (requires Ambassador)",
+  "actionAssassinateDesc":
+      "Pay 3 coins to remove 1 influence (requires Assassin)",
+  "actionBlockDesc": "Block assassination",
+  "actionInspectDesc": "Draw 1 · Inspect",
 
   // Role cards
   "roleNameDuke": "Duke",
@@ -223,6 +247,7 @@ const Map<String, String> enUS = {
   "msgWinner": "Winner: @name",
   "msgNameUpdated": "Name updated",
   "msgNameUpdateFailed": "Unable to save name",
+  "msgReadyUpdateFailed": "Unable to update ready status",
   "msgYouWereKicked": "You were removed from the room",
 
   // Phase labels

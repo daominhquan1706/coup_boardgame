@@ -81,7 +81,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
               decoration: BoxDecoration(
                 color: AppColors.kGold.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: AppColors.kGold.withValues(alpha: 0.4)),
+                border:
+                    Border.all(color: AppColors.kGold.withValues(alpha: 0.4)),
               ),
               child: Text(
                 'host'.tr,
@@ -115,7 +116,7 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  controller.roomCode ?? '—',
+                  controller.roomCode,
                   style: AppTextStyles.display.w700.s38.goldLightColor.ls(10),
                 ),
               ],
@@ -124,7 +125,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             GestureDetector(
               onTap: controller.copyCode,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
                 decoration: BoxDecoration(
                   color: AppColors.kSurfaceHigh,
                   borderRadius: BorderRadius.circular(8),
@@ -133,7 +135,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.copy_outlined, color: AppColors.kTextSecondary, size: 14),
+                    const Icon(Icons.copy_outlined,
+                        color: AppColors.kTextSecondary, size: 14),
                     const SizedBox(width: 6),
                     Text(
                       'copy'.tr,
@@ -164,7 +167,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             padding: const EdgeInsets.fromLTRB(18, 14, 18, 10),
             child: Row(
               children: [
-                const Icon(Icons.people_outline, size: 15, color: AppColors.kTextSecondary),
+                const Icon(Icons.people_outline,
+                    size: 15, color: AppColors.kTextSecondary),
                 const SizedBox(width: 8),
                 Text(
                   'lobbyPlayers'.tr,
@@ -172,7 +176,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 ),
                 const SizedBox(width: 8),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.kSurfaceHigh,
                     borderRadius: BorderRadius.circular(10),
@@ -218,7 +223,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
     );
   }
 
-  Widget _buildPlayerRow(BuildContext context, CoupPlayerModel player, bool isLast) {
+  Widget _buildPlayerRow(
+      BuildContext context, CoupPlayerModel player, bool isLast) {
     final isMe = player.name == controller.userName;
     final canKick = controller.isHost && !isMe;
     return Column(
@@ -232,17 +238,23 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: isMe ? AppColors.kBlue.withValues(alpha: 0.15) : AppColors.kSurfaceHigh,
+                  color: isMe
+                      ? AppColors.kBlue.withValues(alpha: 0.15)
+                      : AppColors.kSurfaceHigh,
                   border: Border.all(
-                    color: isMe ? AppColors.kBlue.withValues(alpha: 0.5) : AppColors.kBorder,
+                    color: isMe
+                        ? AppColors.kBlue.withValues(alpha: 0.5)
+                        : AppColors.kBorder,
                   ),
                 ),
                 child: Center(
                   child: Text(
-                    player.shownName.isNotEmpty ? player.shownName[0].toUpperCase() : '?',
+                    player.shownName.isNotEmpty
+                        ? player.shownName[0].toUpperCase()
+                        : '?',
                     style: AppTextStyles.body.w700.s14.copyWith(
                       color: isMe ? AppColors.kBlue : AppColors.kTextSecondary,
-                        ),
+                    ),
                   ),
                 ),
               ),
@@ -267,15 +279,19 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                         if (player.isBot) ...[
                           const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 5, vertical: 1),
                             decoration: BoxDecoration(
                               color: AppColors.kGold.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: AppColors.kGold.withValues(alpha: 0.3)),
+                              border: Border.all(
+                                  color:
+                                      AppColors.kGold.withValues(alpha: 0.3)),
                             ),
                             child: Text(
                               'lobbyBot'.tr,
-                              style: AppTextStyles.label.s9.w700.goldColor.ls(0.8),
+                              style:
+                                  AppTextStyles.label.s9.w700.goldColor.ls(0.8),
                             ),
                           ),
                         ],
@@ -291,11 +307,13 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 GestureDetector(
                   onTap: () => controller.kickPlayer(player.name),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                     decoration: BoxDecoration(
                       color: AppColors.redAccent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: AppColors.redAccent.withValues(alpha: 0.4)),
+                      border: Border.all(
+                          color: AppColors.redAccent.withValues(alpha: 0.4)),
                     ),
                     child: Text(
                       'lobbyKick'.tr,
@@ -307,7 +325,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
             ],
           ),
         ),
-        if (!isLast) const Divider(height: 1, thickness: 1, color: AppColors.kBorder),
+        if (!isLast)
+          const Divider(height: 1, thickness: 1, color: AppColors.kBorder),
       ],
     );
   }
@@ -336,8 +355,9 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                       : AppColors.kSurfaceHigh,
                   borderRadius: BorderRadius.circular(10),
                   border: Border.all(
-                    color:
-                        canStart ? AppColors.greenLight.withValues(alpha: 0.55) : AppColors.kBorder,
+                    color: canStart
+                        ? AppColors.greenLight.withValues(alpha: 0.55)
+                        : AppColors.kBorder,
                   ),
                 ),
                 child: Column(
@@ -346,7 +366,9 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                       'lobbyStartGame'.tr,
                       textAlign: TextAlign.center,
                       style: AppTextStyles.headline.w700.copyWith(
-                        color: canStart ? AppColors.greenLight : AppColors.kTextSecondary,
+                        color: canStart
+                            ? AppColors.greenLight
+                            : AppColors.kTextSecondary,
                       ),
                     ),
                     if (!canStart)
@@ -382,7 +404,8 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
           children: [
             Row(
               children: [
-                const Icon(Icons.person_outline, size: 16, color: AppColors.kTextSecondary),
+                const Icon(Icons.person_outline,
+                    size: 16, color: AppColors.kTextSecondary),
                 const SizedBox(width: 8),
                 Text(
                   'lobbyMyInfo'.tr,
@@ -401,14 +424,16 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                 hintStyle: AppTextStyles.label,
                 filled: true,
                 fillColor: AppColors.kSurfaceHigh,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
                   borderSide: const BorderSide(color: AppColors.kBorder),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(color: AppColors.kGold, width: 1.3),
+                  borderSide:
+                      const BorderSide(color: AppColors.kGold, width: 1.3),
                 ),
               ),
             ),
@@ -428,8 +453,12 @@ class LobbyRoomPage extends GetView<LobbyRoomController> {
                   Expanded(
                     child: _SmallButton(
                       label: isReady ? 'lobbyUnready'.tr : 'lobbyReady'.tr,
-                      icon: isReady ? Icons.pause_circle_outline : Icons.check_circle_outline,
-                      color: isReady ? AppColors.kTextSecondary : AppColors.greenLight,
+                      icon: isReady
+                          ? Icons.pause_circle_outline
+                          : Icons.check_circle_outline,
+                      color: isReady
+                          ? AppColors.kTextSecondary
+                          : AppColors.greenLight,
                       onTap: controller.toggleReady,
                     ),
                   ),
@@ -452,10 +481,14 @@ class _ReadyBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: isReady ? AppColors.greenLight.withValues(alpha: 0.12) : AppColors.kSurfaceHigh,
+        color: isReady
+            ? AppColors.greenLight.withValues(alpha: 0.12)
+            : AppColors.kSurfaceHigh,
         borderRadius: BorderRadius.circular(5),
         border: Border.all(
-          color: isReady ? AppColors.greenLight.withValues(alpha: 0.4) : AppColors.kBorder,
+          color: isReady
+              ? AppColors.greenLight.withValues(alpha: 0.4)
+              : AppColors.kBorder,
         ),
       ),
       child: Text(

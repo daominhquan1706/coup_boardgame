@@ -5,8 +5,8 @@ import 'package:coup_boardgame/app/themes/app_colors.dart';
 class AppThemes {
   AppThemes._();
 
-  /// Rajdhani text theme — used app-wide for headings, labels, body text.
-  static final TextTheme _rajdhaniText = GoogleFonts.rajdhaniTextTheme();
+  /// Nunito text theme — used app-wide for headings, labels, body text.
+  static final TextTheme _nunitoText = GoogleFonts.nunitoTextTheme();
 
   static final ThemeData themData = ThemeData(
     useMaterial3: true,
@@ -30,53 +30,53 @@ class AppThemes {
     ),
 
     // ─── Text Theme ──────────────────────────────────────────────────
-    textTheme: _rajdhaniText.copyWith(
+    textTheme: _nunitoText.copyWith(
       // Display / Large titles
-      displayLarge: _rajdhaniText.displayLarge?.copyWith(
+      displayLarge: _nunitoText.displayLarge?.copyWith(
         color: AppColors.kGoldLight,
         fontWeight: FontWeight.w700,
         letterSpacing: 8,
       ),
-      displayMedium: _rajdhaniText.displayMedium?.copyWith(
+      displayMedium: _nunitoText.displayMedium?.copyWith(
         color: AppColors.kGoldLight,
         fontWeight: FontWeight.w700,
         letterSpacing: 6,
       ),
-      displaySmall: _rajdhaniText.displaySmall?.copyWith(
+      displaySmall: _nunitoText.displaySmall?.copyWith(
         color: AppColors.kGoldLight,
         fontWeight: FontWeight.w700,
         letterSpacing: 4,
       ),
 
       // Headings
-      headlineLarge: _rajdhaniText.headlineLarge?.copyWith(
+      headlineLarge: _nunitoText.headlineLarge?.copyWith(
         color: AppColors.kTextPrimary,
         fontWeight: FontWeight.w700,
         letterSpacing: 1,
       ),
-      headlineMedium: _rajdhaniText.headlineMedium?.copyWith(
+      headlineMedium: _nunitoText.headlineMedium?.copyWith(
         color: AppColors.kTextPrimary,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.5,
       ),
-      headlineSmall: _rajdhaniText.headlineSmall?.copyWith(
+      headlineSmall: _nunitoText.headlineSmall?.copyWith(
         color: AppColors.kTextPrimary,
         fontWeight: FontWeight.w600,
       ),
 
       // Titles (section labels)
-      titleLarge: _rajdhaniText.titleLarge?.copyWith(
+      titleLarge: _nunitoText.titleLarge?.copyWith(
         color: AppColors.kTextPrimary,
         fontWeight: FontWeight.w600,
         letterSpacing: 1,
       ),
-      titleMedium: _rajdhaniText.titleMedium?.copyWith(
+      titleMedium: _nunitoText.titleMedium?.copyWith(
         color: AppColors.kTextSecondary,
         fontWeight: FontWeight.w600,
         letterSpacing: 2,
         fontSize: 11,
       ),
-      titleSmall: _rajdhaniText.titleSmall?.copyWith(
+      titleSmall: _nunitoText.titleSmall?.copyWith(
         color: AppColors.kTextSecondary,
         fontWeight: FontWeight.w600,
         letterSpacing: 2,
@@ -84,34 +84,34 @@ class AppThemes {
       ),
 
       // Body text
-      bodyLarge: _rajdhaniText.bodyLarge?.copyWith(
+      bodyLarge: _nunitoText.bodyLarge?.copyWith(
         color: AppColors.kTextPrimary,
         fontWeight: FontWeight.w600,
         fontSize: 14,
       ),
-      bodyMedium: _rajdhaniText.bodyMedium?.copyWith(
+      bodyMedium: _nunitoText.bodyMedium?.copyWith(
         color: AppColors.kTextPrimary,
         fontWeight: FontWeight.w400,
         fontSize: 14,
       ),
-      bodySmall: _rajdhaniText.bodySmall?.copyWith(
+      bodySmall: _nunitoText.bodySmall?.copyWith(
         color: AppColors.kTextSecondary,
         fontWeight: FontWeight.w400,
         fontSize: 11,
       ),
 
       // Labels / badges
-      labelLarge: _rajdhaniText.labelLarge?.copyWith(
+      labelLarge: _nunitoText.labelLarge?.copyWith(
         color: AppColors.kTextSecondary,
         fontWeight: FontWeight.w600,
         fontSize: 13,
       ),
-      labelMedium: _rajdhaniText.labelMedium?.copyWith(
+      labelMedium: _nunitoText.labelMedium?.copyWith(
         color: AppColors.kTextSecondary,
         fontWeight: FontWeight.w600,
         fontSize: 11,
       ),
-      labelSmall: _rajdhaniText.labelSmall?.copyWith(
+      labelSmall: _nunitoText.labelSmall?.copyWith(
         color: AppColors.kTextSecondary,
         fontWeight: FontWeight.w700,
         fontSize: 9,
@@ -125,7 +125,7 @@ class AppThemes {
       foregroundColor: AppColors.kGold,
       elevation: 0,
       centerTitle: true,
-      titleTextStyle: GoogleFonts.rajdhani(
+      titleTextStyle: GoogleFonts.nunito(
         color: AppColors.kGold,
         fontSize: 20,
         fontWeight: FontWeight.w700,
@@ -157,12 +157,12 @@ class AppThemes {
         borderRadius: BorderRadius.circular(12),
         side: const BorderSide(color: AppColors.kBorder),
       ),
-      titleTextStyle: GoogleFonts.rajdhani(
+      titleTextStyle: GoogleFonts.nunito(
         color: AppColors.kTextPrimary,
         fontSize: 18,
         fontWeight: FontWeight.w700,
       ),
-      contentTextStyle: GoogleFonts.rajdhani(
+      contentTextStyle: GoogleFonts.nunito(
         color: AppColors.kTextSecondary,
         fontSize: 14,
         fontWeight: FontWeight.w400,
@@ -178,7 +178,7 @@ class AppThemes {
           borderRadius: BorderRadius.circular(10),
           side: const BorderSide(color: AppColors.kBorder),
         ),
-        textStyle: GoogleFonts.rajdhani(
+        textStyle: GoogleFonts.nunito(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           letterSpacing: 1,

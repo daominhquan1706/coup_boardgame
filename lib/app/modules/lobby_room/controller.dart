@@ -22,13 +22,13 @@ class LobbyRoomController extends GetxController {
 
   final GetStorage _storage = GetStorage();
 
-  String? get roomCode =>
-      Get.parameters['room_code'] ?? Get.parameters['roomCode'] ?? '';
+  String get roomCode =>
+      (Get.parameters['room_code'] ?? Get.parameters['roomCode'] ?? '').trim();
   // stable player id
-  String? get userName =>
-      _storage.read<String>(LocalStorageKeys.userName) ??
-      Get.parameters['userName'] ??
-      '';
+  String get userName => (_storage.read<String>(LocalStorageKeys.userName) ??
+          Get.parameters['userName'] ??
+          '')
+      .trim();
   String get defaultDisplayName =>
       _storage.read<String>(LocalStorageKeys.displayName) ??
       Get.parameters['displayName'] ??
@@ -45,6 +45,9 @@ class LobbyRoomController extends GetxController {
   bool _isUpdatingDisplayName = false;
   bool _shouldRetryDisplayNameSync = false;
   String _lastSubmittedDisplayName = '';
+  bool _hasJoinedRoom = false;
+  bool _isVerifyingMembership = false;
+  bool _hasSeenMeInRoomStream = false;
 
   FirestoreService get _firestoreService => Get.find<FirestoreService>();
 
@@ -72,65 +75,11 @@ class LobbyRoomController extends GetxController {
   @override
   void onReady() {
     super.onReady();
-    if ((roomCode ?? '').isNotEmpty && (userName ?? '').isNotEmpty) {
-      _firestoreService.getRoom(roomCode!).then((value) {
-        room.value = value;
-      });
-
-      _roomStreamSubscription =
-          _firestoreService.getRoomStream(roomCode!).listen((value) {
-        room.value = value;
-
-        final me =
-            value.players.firstWhereOrNull((player) => player.name == userName);
-        if (me == null) {
-          AppToast.info('msgYouWereKicked'.tr);
-          Get.offAllNamed(AppRoutes.home);
-          return;
-        }
-
-        final shown = me.shownName;
-        _lastSubmittedDisplayName = shown;
-        if (displayNameController.text != shown) {
-          displayNameController.text = shown;
-        }
-
-        if (shouldAutoReadyOnEnter &&
-            !_didApplyAutoReady &&
-            value.roomState == GameState.waiting) {
-          _didApplyAutoReady = true;
-          if (!me.isReady) {
-            unawaited(_firestoreService.updatePlayerReady(roomCode!, me.name,
-                isReady: true));
-          }
-        }
-
-        if (value.roomState == GameState.playing) {
-          Get.offNamed(
-            AppRoutes.gameStartPath(roomCode!),
-            arguments: {
-              'roomCode': roomCode,
-              'userName': userName,
-            },
-          );
-        }
-      });
-
-      _firestoreService.joinRoom(
-        roomCode!,
-        CoupPlayerModel(
-          name: userName!,
-          displayName: defaultDisplayName,
-          isReady: false,
-          cards: [],
-          isAlive: true,
-          coins: 2,
-          isBot: false,
-        ),
-      );
-    } else {
+    if (roomCode.isEmpty || userName.isEmpty) {
       Get.offAllNamed(AppRoutes.home);
+      return;
     }
+    unawaited(_initializeLobby());
   }
 
   @override
@@ -153,11 +102,11 @@ class LobbyRoomController extends GetxController {
       return;
     }
 
-    await _firestoreService.startGame(roomCode!);
+    await _firestoreService.startGame(roomCode);
   }
 
   Future<void> copyCode() async {
-    await Clipboard.setData(ClipboardData(text: roomCode!));
+    await Clipboard.setData(ClipboardData(text: roomCode));
     AppToast.success('msgRoomCodeCopied'.tr,
         duration: const Duration(milliseconds: 900));
   }
@@ -168,17 +117,56 @@ class LobbyRoomController extends GetxController {
       return;
     }
 
-    await _firestoreService.addBot(roomCode!);
+    await _firestoreService.addBot(roomCode);
   }
 
   Future<void> toggleReady() async {
+    if (isHost || userName.isEmpty) return;
+    final roomState = room.value?.roomState;
+    if (roomState != null && roomState != GameState.waiting) {
+      AppToast.error('msgReadyUpdateFailed'.tr);
+      return;
+    }
+
+    var currentReady = false;
+    var isBot = false;
     final me = mePlayer;
-    if (me == null || me.isBot || isHost) return;
-    await _firestoreService.updatePlayerReady(
-      roomCode!,
-      me.name,
-      isReady: !me.isReady,
-    );
+
+    if (me != null) {
+      currentReady = me.isReady;
+      isBot = me.isBot;
+    } else {
+      try {
+        final fresh = await _firestoreService.getPlayer(roomCode, userName);
+        currentReady = fresh.isReady;
+        isBot = fresh.isBot;
+      } catch (_) {
+        AppToast.error('msgReadyUpdateFailed'.tr);
+        return;
+      }
+    }
+
+    if (isBot) return;
+
+    try {
+      await _firestoreService.updatePlayerReady(
+        roomCode,
+        userName,
+        isReady: !currentReady,
+      );
+
+      // Optimistic state update for faster UI response on guest devices.
+      room.update((current) {
+        final target = current?.players
+            .firstWhereOrNull((player) => player.name == userName);
+        if (target != null) {
+          target.isReady = !currentReady;
+        }
+      });
+      room.refresh();
+    } catch (_) {
+      AppToast.error('msgReadyUpdateFailed'.tr);
+    }
   }
 
   void onDisplayNameChanged(String value) {
@@ -211,7 +199,7 @@ class LobbyRoomController extends GetxController {
 
     _isUpdatingDisplayName = true;
     final success = await _firestoreService.updatePlayerDisplayName(
-        roomCode!, me.name, name);
+        roomCode, me.name, name);
     _isUpdatingDisplayName = false;
     if (_shouldRetryDisplayNameSync) {
       _shouldRetryDisplayNameSync = false;
@@ -242,11 +230,102 @@ class LobbyRoomController extends GetxController {
   }
 
   Future<void> kickPlayer(String targetPlayerId) async {
-    if (!isHost || userName == null) return;
+    if (!isHost || userName.isEmpty) return;
     await _firestoreService.kickPlayer(
-      roomCode!,
-      hostId: userName!,
+      roomCode,
+      hostId: userName,
       targetPlayerId: targetPlayerId,
     );
+  }
+
+  Future<void> _initializeLobby() async {
+    try {
+      await _firestoreService.joinRoom(
+        roomCode,
+        CoupPlayerModel(
+          name: userName,
+          displayName: defaultDisplayName,
+          isReady: false,
+          cards: [],
+          isAlive: true,
+          coins: 2,
+          isBot: false,
+        ),
+      );
+      _hasJoinedRoom = true;
+    } catch (_) {
+      AppToast.error('msgFailedJoinRoom'.tr);
+      Get.offAllNamed(AppRoutes.home);
+      return;
+    }
+
+    try {
+      room.value = await _firestoreService.getRoom(roomCode);
+    } catch (_) {
+      // Stream below remains the source of truth.
+    }
+
+    _roomStreamSubscription =
+        _firestoreService.getRoomStream(roomCode).listen((value) {
+      room.value = value;
+
+      final me =
+          value.players.firstWhereOrNull((player) => player.name == userName);
+      if (me == null) {
+        // Avoid false "kicked" redirects during initial stream sync right after join.
+        if (_hasJoinedRoom && _hasSeenMeInRoomStream) {
+          unawaited(_verifyMembershipBeforeRedirect());
+        }
+        return;
+      }
+      _hasSeenMeInRoomStream = true;
+
+      final shown = me.shownName;
+      _lastSubmittedDisplayName = shown;
+      if (displayNameController.text != shown) {
+        displayNameController.text = shown;
+      }
+
+      if (shouldAutoReadyOnEnter &&
+          !_didApplyAutoReady &&
+          value.roomState == GameState.waiting) {
+        _didApplyAutoReady = true;
+        if (!me.isReady) {
+          unawaited(_firestoreService.updatePlayerReady(roomCode, me.name,
+              isReady: true));
+        }
+      }
+
+      if (value.roomState == GameState.playing) {
+        Get.offNamed(
+          AppRoutes.gameStartPath(roomCode),
+          arguments: {
+            'roomCode': roomCode,
+            'userName': userName,
+          },
+        );
+      }
+    });
+  }
+
+  Future<void> _verifyMembershipBeforeRedirect() async {
+    if (_isVerifyingMembership || !_hasJoinedRoom) return;
+    _isVerifyingMembership = true;
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+
+    var stillInRoom = false;
+    try {
+      await _firestoreService.getPlayer(roomCode, userName);
+      stillInRoom = true;
+    } catch (_) {
+      stillInRoom = false;
+    } finally {
+      _isVerifyingMembership = false;
+    }
+
+    if (!stillInRoom && !isClosed) {
+      AppToast.info('msgYouWereKicked'.tr);
+      Get.offAllNamed(AppRoutes.home);
+    }
   }
 }

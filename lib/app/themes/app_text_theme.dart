@@ -232,6 +232,5 @@ extension AppLetterSpacing on TextStyle {
 
 extension AppFontFamily on TextStyle {
   /// fontFamily: GoogleFonts.roboto().fontFamily,
-  TextStyle get roboto =>
-      copyWith(fontFamily: GoogleFonts.roboto().fontFamily);
+  TextStyle get roboto => copyWith(fontFamily: GoogleFonts.roboto().fontFamily);
 }

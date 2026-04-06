@@ -77,7 +77,7 @@ class _GameEndScreen extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'gameEndGame'.tr.toUpperCase(),
-                          style: GoogleFonts.rajdhani(
+                          style: GoogleFonts.nunito(
                             color: Colors.black,
                             fontSize: 16,
                             fontWeight: FontWeight.w800,
@@ -126,7 +126,7 @@ class _GameEndScreen extends StatelessWidget {
           const SizedBox(height: 10),
           Text(
             isVictory ? 'gameVictory'.tr : 'gameDefeated'.tr,
-            style: GoogleFonts.rajdhani(
+            style: GoogleFonts.nunito(
               color: isVictory ? _kGoldLight : _kRed,
               fontSize: 34,
               fontWeight: FontWeight.w900,
@@ -137,7 +137,7 @@ class _GameEndScreen extends StatelessWidget {
           Text(
             isVictory ? 'gameYouWon'.tr : 'gameWinner'.trParams({'name': winnerShown}),
             textAlign: TextAlign.center,
-            style: GoogleFonts.rajdhani(
+            style: GoogleFonts.nunito(
               color: _kTextSecondary,
               fontSize: 14,
               fontWeight: FontWeight.w500,
@@ -165,7 +165,7 @@ class _GameEndScreen extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 title.toUpperCase(),
-                style: GoogleFonts.rajdhani(
+                style: GoogleFonts.nunito(
                   color: _kGold,
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
@@ -226,7 +226,7 @@ class _GameEndScreen extends StatelessWidget {
                           size: 14, color: isWinner ? _kGoldLight : _kTextSecondary)
                       : Text(
                           player.shownName.isNotEmpty ? player.shownName[0].toUpperCase() : '?',
-                          style: GoogleFonts.rajdhani(
+                          style: GoogleFonts.nunito(
                             color: isWinner ? _kGoldLight : _kTextPrimary,
                             fontSize: 13,
                             fontWeight: FontWeight.w800,
@@ -240,7 +240,7 @@ class _GameEndScreen extends StatelessWidget {
                   player.shownName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.rajdhani(
+                  style: GoogleFonts.nunito(
                     color:
                         isWinner ? _kGoldLight : (player.isAlive ? _kTextPrimary : _kTextSecondary),
                     fontSize: 15,
@@ -257,7 +257,7 @@ class _GameEndScreen extends StatelessWidget {
                       style: TextStyle(color: _kGold, fontSize: 10, fontWeight: FontWeight.w900)),
                   const SizedBox(width: 2),
                   Text('${player.coins}',
-                      style: GoogleFonts.rajdhani(
+                      style: GoogleFonts.nunito(
                           color: _kGold, fontSize: 14, fontWeight: FontWeight.w700)),
                 ],
               ),

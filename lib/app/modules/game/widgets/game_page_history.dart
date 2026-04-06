@@ -189,7 +189,7 @@ class _HistoryPanel extends StatelessWidget {
                           const SizedBox(width: 8),
                           Text(
                             'gameHistory'.tr,
-                            style: GoogleFonts.rajdhani(
+                            style: GoogleFonts.nunito(
                               color: _kGoldLight,
                               fontSize: 18,
                               fontWeight: FontWeight.w700,
@@ -203,7 +203,7 @@ class _HistoryPanel extends StatelessWidget {
                         children: [
                           Text(
                             'gameEvents'.trParams({'count': '${entries.length}'}),
-                            style: GoogleFonts.rajdhani(
+                            style: GoogleFonts.nunito(
                               color: _kTextSecondary,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -232,7 +232,7 @@ class _HistoryPanel extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         'gameHistory'.tr,
-                        style: GoogleFonts.rajdhani(
+                        style: GoogleFonts.nunito(
                           color: _kGoldLight,
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -242,7 +242,7 @@ class _HistoryPanel extends StatelessWidget {
                       const Spacer(),
                       Text(
                         'gameEvents'.trParams({'count': '${entries.length}'}),
-                        style: GoogleFonts.rajdhani(
+                        style: GoogleFonts.nunito(
                           color: _kTextSecondary,
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -269,7 +269,7 @@ class _HistoryPanel extends StatelessWidget {
                 ? Center(
                     child: Text(
                       'gameNoActions'.tr,
-                      style: GoogleFonts.rajdhani(
+                      style: GoogleFonts.nunito(
                         color: _kTextSecondary,
                         fontSize: 14,
                         letterSpacing: 0.5,
@@ -396,17 +396,17 @@ class _HistoryGroupCard extends StatelessWidget {
     final target = entry.targetName == null ? null : controller.displayNameOf(entry.targetName);
     final actionLabel = _actionLabel(entry.actionType);
     final actionColor = _eventAccent(entry);
-    final base = GoogleFonts.rajdhani(
+    final base = GoogleFonts.nunito(
       color: _kTextSecondary,
       fontSize: 11.5,
       fontWeight: FontWeight.w500,
     );
-    final strong = GoogleFonts.rajdhani(
+    final strong = GoogleFonts.nunito(
       color: _kTextPrimary,
       fontSize: 11.8,
       fontWeight: FontWeight.w700,
     );
-    final actionStrong = GoogleFonts.rajdhani(
+    final actionStrong = GoogleFonts.nunito(
       color: actionColor,
       fontSize: 11.8,
       fontWeight: FontWeight.w700,
@@ -424,7 +424,7 @@ class _HistoryGroupCard extends StatelessWidget {
         spans.add(TextSpan(text: ' ', style: base));
         spans.add(TextSpan(
           text: '$sign$delta',
-          style: GoogleFonts.rajdhani(
+          style: GoogleFonts.nunito(
             color: delta < 0 ? AppColors.redError : AppColors.greenEmerald,
             fontSize: 11.8,
             fontWeight: FontWeight.w700,
@@ -442,7 +442,7 @@ class _HistoryGroupCard extends StatelessWidget {
         spans.add(TextSpan(text: ' reveal ', style: base));
         spans.add(TextSpan(
           text: card,
-          style: GoogleFonts.rajdhani(
+          style: GoogleFonts.nunito(
             color: revealColor,
             fontSize: 11.8,
             fontWeight: FontWeight.w700,
@@ -474,7 +474,7 @@ class _HistoryGroupCard extends StatelessWidget {
             style: base));
         spans.add(TextSpan(
           text: card,
-          style: GoogleFonts.rajdhani(
+          style: GoogleFonts.nunito(
             color: roleColor,
             fontSize: 11.8,
             fontWeight: FontWeight.w700,
@@ -531,7 +531,7 @@ class _HistoryGroupCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   _actionLabel(root.actionType).toUpperCase(),
-                  style: GoogleFonts.rajdhani(
+                  style: GoogleFonts.nunito(
                     color: _eventAccent(root),
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -541,7 +541,7 @@ class _HistoryGroupCard extends StatelessWidget {
               ),
               Text(
                 _timeLabel(root.createdAt),
-                style: GoogleFonts.rajdhani(
+                style: GoogleFonts.nunito(
                   color: _kTextSecondary,
                   fontSize: 10.5,
                   fontWeight: FontWeight.w600,
@@ -619,7 +619,7 @@ class _TimelineEntryRow extends StatelessWidget {
             const SizedBox(width: 6),
             Text(
               timeLabel,
-              style: GoogleFonts.rajdhani(
+              style: GoogleFonts.nunito(
                 color: _kTextSecondary.withValues(alpha: (0.9)),
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
@@ -648,7 +648,7 @@ class _SummaryRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.rajdhani(
+            style: GoogleFonts.nunito(
               color: _kTextSecondary,
               fontSize: 13,
               fontWeight: FontWeight.w500,
@@ -657,7 +657,7 @@ class _SummaryRow extends StatelessWidget {
         ),
         Text(
           value,
-          style: GoogleFonts.rajdhani(
+          style: GoogleFonts.nunito(
             color: _kTextPrimary,
             fontSize: 14,
             fontWeight: FontWeight.w700,

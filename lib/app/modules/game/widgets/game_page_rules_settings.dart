@@ -18,7 +18,11 @@ class _RulesTabView extends StatelessWidget {
       (title: 'rulesDukeTitle', body: 'rulesDukeBody', roleType: CoupRoleType.duke),
       (title: 'rulesAssassinTitle', body: 'rulesAssassinBody', roleType: CoupRoleType.assassin),
       (title: 'rulesCaptainTitle', body: 'rulesCaptainBody', roleType: CoupRoleType.captain),
-      (title: 'rulesAmbassadorTitle', body: 'rulesAmbassadorBody', roleType: CoupRoleType.ambassador),
+      (
+        title: 'rulesAmbassadorTitle',
+        body: 'rulesAmbassadorBody',
+        roleType: CoupRoleType.ambassador
+      ),
       (title: 'rulesContessaTitle', body: 'rulesContessaBody', roleType: CoupRoleType.contessa),
       (title: 'rulesChallengeTitle', body: 'rulesChallengeBody', roleType: null),
       (title: 'rulesBlockTitle', body: 'rulesBlockBody', roleType: null),
@@ -34,15 +38,15 @@ class _RulesTabView extends StatelessWidget {
     final isMobile = viewport.isMobile; // < 720px
 
     final crossAxisCount = isWide ? 2 : 1;
-    final mainAxisSpacing = isMobile ? 10.0 : 12.0;
-    final crossAxisSpacing = isMobile ? 10.0 : 14.0;
+    final mainAxisSpacing = isMobile ? 8.0 : 10.0;
+    final crossAxisSpacing = isMobile ? 8.0 : 10.0;
 
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
-        isMobile ? 12 : 16,
-        12,
-        isMobile ? 12 : 16,
-        16,
+        isMobile ? 10 : 14,
+        10,
+        isMobile ? 10 : 14,
+        14,
       ),
       child: Align(
         alignment: Alignment.topCenter,
@@ -57,19 +61,18 @@ class _RulesTabView extends StatelessWidget {
                 subtitle: 'rulesHeaderSubtitle'.tr,
                 icon: Icons.menu_book_rounded,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               // ── General Rules Grid ──
               _ResponsiveGrid(
                 crossAxisCount: crossAxisCount,
                 mainAxisSpacing: mainAxisSpacing,
                 crossAxisSpacing: crossAxisSpacing,
-                children: sections
-                    .map((s) => _InfoCard(title: s.title.tr, body: s.body.tr))
-                    .toList(),
+                children:
+                    sections.map((s) => _InfoCard(title: s.title.tr, body: s.body.tr)).toList(),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: 12),
 
               // ── Roles Header ──
               _InfoHeader(
@@ -77,7 +80,7 @@ class _RulesTabView extends StatelessWidget {
                 subtitle: 'rulesRolesSubtitle'.tr,
                 icon: Icons.groups_rounded,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
 
               // ── Roles Grid ──
               _ResponsiveGrid(
@@ -134,21 +137,9 @@ class _ResponsiveGrid extends StatelessWidget {
       crossAxisCount: crossAxisCount,
       mainAxisSpacing: mainAxisSpacing,
       crossAxisSpacing: crossAxisSpacing,
-      childAspectRatio: _estimateAspectRatio(crossAxisCount),
+      childAspectRatio: 2.2,
       children: children,
     );
-  }
-
-  double _estimateAspectRatio(int columns) {
-    // Higher ratio for more columns since cards get narrower
-    switch (columns) {
-      case 2:
-        return 1.35;
-      case 3:
-        return 1.1;
-      default:
-        return 1.5;
-    }
   }
 }
 
@@ -168,8 +159,7 @@ class _SettingsTabView extends StatelessWidget {
       child: Align(
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints:
-              BoxConstraints(maxWidth: viewport.isCompact ? double.infinity : 980),
+          constraints: BoxConstraints(maxWidth: viewport.isCompact ? double.infinity : 980),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -207,7 +197,7 @@ class _SettingsTabView extends StatelessWidget {
                     onChanged: controller.setAutoActionEnabled,
                     title: Text(
                       'settingsAutoActionEnable'.tr,
-                      style: GoogleFonts.rajdhani(
+                      style: GoogleFonts.nunito(
                         color: _kTextPrimary,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -215,7 +205,7 @@ class _SettingsTabView extends StatelessWidget {
                     ),
                     subtitle: Text(
                       'settingsAutoActionSubtitle'.tr,
-                      style: GoogleFonts.rajdhani(
+                      style: GoogleFonts.nunito(
                         color: _kTextSecondary,
                         fontSize: 13,
                       ),
@@ -278,45 +268,45 @@ class _InfoHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: _kSurface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: _kBorder),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 40,
-            height: 40,
+            width: 36,
+            height: 36,
             decoration: BoxDecoration(
               color: _kGold.withValues(alpha: (0.12)),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(color: _kGold.withValues(alpha: (0.3))),
             ),
-            child: Icon(icon, color: _kGold, size: 20),
+            child: Icon(icon, color: _kGold, size: 18),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.rajdhani(
+                  style: GoogleFonts.nunito(
                     color: _kTextPrimary,
-                    fontSize: 20,
+                    fontSize: 18,
                     fontWeight: FontWeight.w700,
-                    letterSpacing: 0.6,
+                    letterSpacing: 0.4,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
                   subtitle,
-                  style: GoogleFonts.rajdhani(
+                  style: GoogleFonts.nunito(
                     color: _kTextSecondary,
-                    fontSize: 14,
+                    fontSize: 13,
                     height: 1.3,
                   ),
                 ),
@@ -340,17 +330,17 @@ class _RoleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewport = _GameViewport.of(context);
     final isMobile = viewport.isMobile;
-    final cardPadding = isMobile ? 12.0 : 14.0;
-    final cardWidth = isMobile ? 56.0 : 64.0;
-    final gap = isMobile ? 10.0 : 14.0;
-    final titleSize = isMobile ? 15.0 : 17.0;
-    final bodySize = isMobile ? 13.0 : 14.0;
+    final cardPadding = isMobile ? 10.0 : 12.0;
+    final cardWidth = isMobile ? 48.0 : 56.0;
+    final gap = isMobile ? 8.0 : 10.0;
+    final titleSize = isMobile ? 14.0 : 16.0;
+    final bodySize = isMobile ? 12.0 : 13.0;
 
     return Container(
       padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
         color: _kSurface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _kBorder),
       ),
       child: roleType != null
@@ -363,7 +353,12 @@ class _RoleCard extends StatelessWidget {
                 ),
                 SizedBox(width: gap),
                 Expanded(
-                  child: _RoleText(title: title, body: body, titleSize: titleSize, bodySize: bodySize),
+                  child: _RoleText(
+                      title: title,
+                      body: body,
+                      titleSize: titleSize,
+                      bodySize: bodySize,
+                      icon: roleType!.icon),
                 ),
               ],
             )
@@ -377,12 +372,14 @@ class _RoleText extends StatelessWidget {
   final String body;
   final double titleSize;
   final double bodySize;
+  final IconData? icon;
 
   const _RoleText({
     required this.title,
     required this.body,
     required this.titleSize,
     required this.bodySize,
+    this.icon,
   });
 
   @override
@@ -391,19 +388,29 @@ class _RoleText extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.rajdhani(
-            color: _kGoldLight,
-            fontSize: titleSize,
-            fontWeight: FontWeight.w700,
-            height: 1.2,
-          ),
+        Row(
+          children: [
+            if (icon != null) ...[
+              Icon(icon, size: titleSize * 0.9, color: _kGoldLight),
+              const SizedBox(width: 4),
+            ],
+            Expanded(
+              child: Text(
+                title,
+                style: GoogleFonts.nunito(
+                  color: _kGoldLight,
+                  fontSize: titleSize,
+                  fontWeight: FontWeight.w700,
+                  height: 1.2,
+                ),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 3),
         Text(
           body,
-          style: GoogleFonts.rajdhani(
+          style: GoogleFonts.nunito(
             color: _kTextPrimary,
             fontSize: bodySize,
             height: 1.3,
@@ -424,15 +431,15 @@ class _InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewport = _GameViewport.of(context);
     final isMobile = viewport.isMobile;
-    final padding = isMobile ? 12.0 : 14.0;
-    final titleSize = isMobile ? 15.0 : 17.0;
-    final bodySize = isMobile ? 13.0 : 14.0;
+    final padding = isMobile ? 10.0 : 12.0;
+    final titleSize = isMobile ? 14.0 : 16.0;
+    final bodySize = isMobile ? 12.0 : 13.0;
 
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
         color: _kSurface,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: _kBorder),
       ),
       child: Column(
@@ -441,17 +448,17 @@ class _InfoCard extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.rajdhani(
+            style: GoogleFonts.nunito(
               color: _kGoldLight,
               fontSize: titleSize,
               fontWeight: FontWeight.w700,
               height: 1.2,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 3),
           Text(
             body,
-            style: GoogleFonts.rajdhani(
+            style: GoogleFonts.nunito(
               color: _kTextPrimary,
               fontSize: bodySize,
               height: 1.3,
@@ -483,7 +490,7 @@ class _SettingsSection extends StatelessWidget {
         children: [
           Text(
             title,
-            style: GoogleFonts.rajdhani(
+            style: GoogleFonts.nunito(
               color: _kGoldLight,
               fontSize: 16,
               fontWeight: FontWeight.w700,
@@ -518,7 +525,7 @@ class _LanguageChip extends StatelessWidget {
         ),
         child: Text(
           label,
-          style: GoogleFonts.rajdhani(
+          style: GoogleFonts.nunito(
             color: selected ? _kGoldLight : _kTextPrimary,
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -542,7 +549,7 @@ class _SettingsMetaRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: GoogleFonts.rajdhani(
+            style: GoogleFonts.nunito(
               color: _kTextSecondary,
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -551,7 +558,7 @@ class _SettingsMetaRow extends StatelessWidget {
         ),
         Text(
           value,
-          style: GoogleFonts.rajdhani(
+          style: GoogleFonts.nunito(
             color: _kTextPrimary,
             fontSize: 14,
             fontWeight: FontWeight.w700,

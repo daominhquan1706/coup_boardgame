@@ -2,6 +2,8 @@
   "name": "coup_boardgame_e2e",
   "private": true,
   "scripts": {
+    "build:web": "fvm flutter build web --release --no-wasm-dry-run",
+    "deploy:hosting": "npm run build:web && npx firebase-tools deploy --only hosting",
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",

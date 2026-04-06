@@ -30,7 +30,7 @@ class _TopBar extends StatelessWidget {
                 Flexible(
                   child: Text(
                     'ROOM $roomCode',
-                    style: GoogleFonts.rajdhani(
+                    style: GoogleFonts.nunito(
                       color: _kTextSecondary,
                       fontSize: viewport.isPhone ? 13 : 14,
                       letterSpacing: 2,
@@ -78,7 +78,7 @@ class _TopBar extends StatelessWidget {
                 ),
                 child: Text(
                   'gameEndGame'.tr.toUpperCase(),
-                  style: GoogleFonts.rajdhani(
+                  style: GoogleFonts.nunito(
                     color: Colors.white,
                     fontSize: viewport.isPhone ? 12 : 13,
                     fontWeight: FontWeight.w800,

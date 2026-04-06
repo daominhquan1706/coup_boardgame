@@ -104,6 +104,81 @@ extension CoupActionTypeX on CoupActionType {
         return CoupActionType.income;
     }
   }
+
+  /// Display text for the action button.
+  String get actionText {
+    switch (this) {
+      case CoupActionType.income:
+        return 'actionIncome'.tr;
+      case CoupActionType.foreignAid:
+        return 'actionForeignAid'.tr;
+      case CoupActionType.coup:
+        return 'actionCoup'.tr;
+      case CoupActionType.duke:
+        return 'actionTax'.tr;
+      case CoupActionType.captain:
+        return 'actionSteal'.tr;
+      case CoupActionType.ambassador:
+        return 'actionExchange'.tr;
+      case CoupActionType.assassin:
+        return 'actionAssassinate'.tr;
+      case CoupActionType.contessa:
+        return 'actionBlock'.tr;
+      case CoupActionType.inquisitor:
+        return 'actionInspect'.tr;
+    }
+  }
+
+  /// Emoji representing the action.
+  String get actionEmoji {
+    switch (this) {
+      case CoupActionType.income:
+        return '💰';
+      case CoupActionType.foreignAid:
+        return '🌍';
+      case CoupActionType.coup:
+        return '⚔️';
+      case CoupActionType.duke:
+        return '🏛️';
+      case CoupActionType.captain:
+        return '💳';
+      case CoupActionType.ambassador:
+        return '🔄';
+      case CoupActionType.assassin:
+        return '⚡';
+      case CoupActionType.contessa:
+        return '🛡️';
+      case CoupActionType.inquisitor:
+        return '🔍';
+    }
+  }
+
+  /// Short description key for the action.
+  String get actionDescKey {
+    switch (this) {
+      case CoupActionType.income:
+        return 'actionIncomeDesc';
+      case CoupActionType.foreignAid:
+        return 'actionForeignAidDesc';
+      case CoupActionType.coup:
+        return 'actionCoupDesc';
+      case CoupActionType.duke:
+        return 'actionTaxDesc';
+      case CoupActionType.captain:
+        return 'actionStealDesc';
+      case CoupActionType.ambassador:
+        return 'actionExchangeDesc';
+      case CoupActionType.assassin:
+        return 'actionAssassinateDesc';
+      case CoupActionType.contessa:
+        return 'actionBlockDesc';
+      case CoupActionType.inquisitor:
+        return 'actionInspectDesc';
+    }
+  }
+
+  /// Localized short description of the action.
+  String get actionDesc => actionDescKey.tr;
 }
 
 enum CoupRoleType {
@@ -209,6 +284,42 @@ extension CoupCardTypeExtension on CoupRoleType {
     }
   }
 
+  /// Emoji representing the role.
+  String get emoji {
+    switch (this) {
+      case CoupRoleType.duke:
+        return '👑';
+      case CoupRoleType.assassin:
+        return '🗡️';
+      case CoupRoleType.contessa:
+        return '🛡️';
+      case CoupRoleType.captain:
+        return '🏴☠️';
+      case CoupRoleType.ambassador:
+        return '🤝';
+      case CoupRoleType.inquisitor:
+        return '🔍';
+    }
+  }
+
+  /// Rule text describing the role's ability.
+  String get ruleText {
+    switch (this) {
+      case CoupRoleType.duke:
+        return 'Tax: Take three coins from the treasury.';
+      case CoupRoleType.assassin:
+        return 'Assassinate: Pay three coins and try to assassinate another player.';
+      case CoupRoleType.contessa:
+        return 'Block: Block an assassination attempt against yourself.';
+      case CoupRoleType.captain:
+        return 'Steal: Take two coins from another player.';
+      case CoupRoleType.ambassador:
+        return 'Exchange: Draw two cards from the Court (the deck), choose which (if any) to exchange with your cards, and return two.';
+      case CoupRoleType.inquisitor:
+        return 'Inspect: Draw one card from the Court (the deck), choose which (if any) to exchange with your cards, and return one.';
+    }
+  }
+
   String get localizedName => titleKey.tr;
 
   String get localizedInitial {
@@ -231,23 +342,6 @@ extension CoupCardTypeExtension on CoupRoleType {
         return 'Ambassador';
       case CoupRoleType.inquisitor:
         return 'Inquisitor';
-    }
-  }
-
-  String get description {
-    switch (this) {
-      case CoupRoleType.duke:
-        return 'Tax: Take three coins from the treasury.';
-      case CoupRoleType.assassin:
-        return 'Assassinate: Pay three coins and try to assassinate another player.';
-      case CoupRoleType.contessa:
-        return 'Block: Block an assassination attempt against yourself.';
-      case CoupRoleType.captain:
-        return 'Steal: Take two coins from another player.';
-      case CoupRoleType.ambassador:
-        return 'Exchange: Draw two cards from the Court (the deck), choose which (if any) to exchange with your cards, and return two.';
-      case CoupRoleType.inquisitor:
-        return 'Exchange: Draw one card from the Court (the deck), choose which (if any) to exchange with your cards, and return one.';
     }
   }
 

@@ -44,6 +44,9 @@ class _ActionPanel extends StatelessWidget {
   Widget _buildDecisionBanner(BuildContext context) {
     final action = room.currentAction;
     final actorName = action == null ? null : controller.displayNameOf(action.source.name);
+    final targetId = action?.target?.name;
+    final targetName =
+        targetId == null || targetId.isEmpty ? null : controller.displayNameOf(targetId);
     final actionLabel = action?.actionType.firestoreType.replaceAll('_', ' ').toUpperCase();
     final viewport = _GameViewport.of(context);
 
@@ -55,8 +58,14 @@ class _ActionPanel extends StatelessWidget {
           : 'gameWaitingFor'.trParams({'name': controller.displayNameOf(room.currentTurn)});
     } else if (phase == GamePhase.challenge && action != null) {
       text = controller.canRespondChallenge(room)
-          ? 'gameRespondChallengePrompt'
-              .trParams({'actor': actorName ?? '', 'action': actionLabel ?? ''})
+          ? ((targetName != null && targetName.isNotEmpty)
+              ? 'gameRespondChallengePromptTarget'.trParams({
+                  'actor': actorName ?? '',
+                  'action': actionLabel ?? '',
+                  'target': targetName,
+                })
+              : 'gameRespondChallengePrompt'
+                  .trParams({'actor': actorName ?? '', 'action': actionLabel ?? ''}))
           : 'gameWaitingOthersResponse'.tr;
     } else if (phase == GamePhase.block && action != null) {
       text = controller.canRespondBlock(room)
@@ -111,7 +120,7 @@ class _ActionPanel extends StatelessWidget {
                       Expanded(
                         child: Text(
                           text,
-                          style: GoogleFonts.rajdhani(
+                          style: GoogleFonts.nunito(
                             color: _kTextPrimary,
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
@@ -125,7 +134,7 @@ class _ActionPanel extends StatelessWidget {
                     if (count <= 0) return const SizedBox.shrink();
                     return Text(
                       'gameAutoIn'.trParams({'sec': '$count'}),
-                      style: GoogleFonts.rajdhani(
+                      style: GoogleFonts.nunito(
                         color: _kGold,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -141,7 +150,7 @@ class _ActionPanel extends StatelessWidget {
                   Expanded(
                     child: Text(
                       text,
-                      style: GoogleFonts.rajdhani(
+                      style: GoogleFonts.nunito(
                         color: _kTextPrimary,
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
@@ -153,7 +162,7 @@ class _ActionPanel extends StatelessWidget {
                     if (count <= 0) return const SizedBox.shrink();
                     return Text(
                       ' ${'gameAutoIn'.trParams({'sec': '$count'})}',
-                      style: GoogleFonts.rajdhani(
+                      style: GoogleFonts.nunito(
                         color: _kGold,
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
@@ -166,7 +175,7 @@ class _ActionPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildWaitingIndicator() {
+  Widget _buildWaitingIndicator({String? message}) {
     return Center(
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -178,8 +187,8 @@ class _ActionPanel extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Text(
-            'gameWaitingOthersResponse'.tr,
-            style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 12),
+            message ?? 'gameWaitingOthersResponse'.tr,
+            style: GoogleFonts.nunito(color: _kTextSecondary, fontSize: 12),
           ),
         ],
       ),
@@ -196,7 +205,9 @@ class _ActionPanel extends StatelessWidget {
       case GamePhase.challenge:
         content = controller.canRespondChallenge(room)
             ? _ChallengeButtons(controller: controller)
-            : _buildWaitingIndicator();
+            : _buildWaitingIndicator(
+                message: 'gameWaitingOthersChallenge'.tr,
+              );
         break;
       case GamePhase.block:
         content = controller.canRespondBlock(room)
@@ -247,61 +258,293 @@ class _ActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final options = _actionOptions(controller);
+    return _GamePressable(
+      onTap: () => _openActionsSheet(context, options),
+      child: Container(
+        height: double.infinity,
+        decoration: BoxDecoration(
+          color: _kGold.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: _kGold.withValues(alpha: 0.45), width: 1.2),
+          boxShadow: [
+            BoxShadow(
+              color: _kGold.withValues(alpha: 0.12),
+              blurRadius: 8,
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.bolt_rounded, color: _kGoldLight, size: 16),
+            const SizedBox(width: 8),
+            Text(
+              'gameOpenActions'.tr,
+              style: GoogleFonts.nunito(
+                color: _kGoldLight,
+                fontSize: 12.5,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  List<_ActionOption> _actionOptions(GameStartController controller) {
     final me = controller.mePlayer.value;
     final coins = me?.coins ?? 0;
     final hiddenRoles = me == null
         ? <CoupRoleType>{}
         : me.cards.where((card) => !card.isRevealed).map((card) => card.roleType).toSet();
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final viewport = _GameViewport.of(context);
-        const spacing = 6.0;
-        final minChipWidth = viewport.isPhone ? 84.0 : 92.0;
-        final chipWidth = ((constraints.maxWidth - (spacing * 3)) / 4)
-            .clamp(minChipWidth, viewport.isPhone ? 96.0 : 108.0)
-            .toDouble();
-        const compactTile = true;
-        final tileHeight = viewport.isPhone ? 40.0 : 44.0;
+    return CoupFunction.normalAction().map((action) {
+      var enabled = controller.canAct;
+      if (action == CoupActionType.assassin && coins < 3) enabled = false;
+      if (action == CoupActionType.coup && coins < 7) enabled = false;
+      if (coins >= 10 && action != CoupActionType.coup) enabled = false;
+      final claimedRole = action.claimedRole;
+      final isFakeAction = claimedRole != null && !hiddenRoles.contains(claimedRole);
+      return _ActionOption(
+        action: action,
+        enabled: enabled,
+        isFakeAction: isFakeAction,
+      );
+    }).toList()
+      ..sort((a, b) {
+        if (a.enabled == b.enabled) {
+          return a.action.index.compareTo(b.action.index);
+        }
+        return a.enabled ? -1 : 1;
+      });
+  }
 
-        final options = CoupFunction.normalAction().map((action) {
-          var enabled = controller.canAct;
-          if (action == CoupActionType.assassin && coins < 3) enabled = false;
-          if (action == CoupActionType.coup && coins < 7) enabled = false;
-          if (coins >= 10 && action != CoupActionType.coup) enabled = false;
-          final claimedRole = action.claimedRole;
-          final isFakeAction = claimedRole != null && !hiddenRoles.contains(claimedRole);
-          return (action: action, enabled: enabled, isFakeAction: isFakeAction);
-        }).toList()
-          ..sort((a, b) {
-            if (a.enabled == b.enabled) {
-              return a.action.index.compareTo(b.action.index);
-            }
-            return a.enabled ? -1 : 1;
-          });
+  Future<void> _openActionsSheet(BuildContext context, List<_ActionOption> options) async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.45),
+      builder: (sheetContext) {
+        final width = MediaQuery.sizeOf(sheetContext).width;
+        final sheetMaxWidth = width >= 1500
+            ? 1160.0
+            : width >= 1280
+                ? 1060.0
+                : width >= 960
+                    ? 920.0
+                    : width;
+        final crossAxisCount = width >= 1280
+            ? 4
+            : width >= 900
+                ? 3
+                : 2;
+        final tileHeight = width < 640 ? 104.0 : 96.0;
+        final enabledOptions = options.where((o) => o.enabled).toList();
+        final disabledOptions = options.where((o) => !o.enabled).toList();
+        final myCards = controller.mePlayer.value?.cards ?? const <CoupCardModel>[];
 
-        return SizedBox(
-          height: tileHeight,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            itemCount: options.length,
-            separatorBuilder: (_, __) => const SizedBox(width: spacing),
-            itemBuilder: (context, index) {
-              final option = options[index];
-              final action = option.action;
-
-              return SizedBox(
-                width: chipWidth,
-                child: _ActionTile(
-                  action: action,
-                  enabled: option.enabled,
-                  compact: compactTile,
-                  height: tileHeight,
-                  showFakeBadge: option.isFakeAction,
-                  onTap: () => controller.performAction(action),
+        Widget buildSection({
+          required String title,
+          required List<_ActionOption> sectionOptions,
+          required Color titleColor,
+          required IconData icon,
+        }) {
+          return Container(
+            padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+            decoration: BoxDecoration(
+              color: _kSurfaceHigh.withValues(alpha: 0.38),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: _kBorder.withValues(alpha: 0.8)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(icon, size: 15, color: titleColor),
+                    const SizedBox(width: 6),
+                    Text(
+                      title,
+                      style: GoogleFonts.nunito(
+                        color: titleColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 0.15,
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            },
+                const SizedBox(height: 8),
+                GridView.builder(
+                  itemCount: sectionOptions.length,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: crossAxisCount,
+                    crossAxisSpacing: 9,
+                    mainAxisSpacing: 9,
+                    mainAxisExtent: tileHeight,
+                  ),
+                  itemBuilder: (_, index) {
+                    final option = sectionOptions[index];
+                    return _ActionTile(
+                      action: option.action,
+                      enabled: option.enabled,
+                      showFakeBadge: option.isFakeAction,
+                      onTap: () {
+                        Navigator.of(sheetContext).pop();
+                        controller.performAction(option.action);
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
+          );
+        }
+
+        return Align(
+          alignment: Alignment.bottomCenter,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: sheetMaxWidth),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                border: Border.all(color: _kBorder.withValues(alpha: 0.9)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.45),
+                    blurRadius: 24,
+                    offset: const Offset(0, -6),
+                  ),
+                ],
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF1A254A),
+                    Color(0xFF1B274F),
+                    Color(0xFF182347),
+                  ],
+                ),
+              ),
+              padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: _kBorder,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: _kBorder.withValues(alpha: 0.85)),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          _kGold.withValues(alpha: 0.10),
+                          AppColors.kBlueLight.withValues(alpha: 0.12),
+                        ],
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: _kGold.withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(color: _kGold.withValues(alpha: 0.45)),
+                          ),
+                          child:
+                              const Icon(Icons.auto_awesome_rounded, color: _kGoldLight, size: 16),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'gameOpenActions'.tr,
+                                style: GoogleFonts.nunito(
+                                  color: _kTextPrimary,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.2,
+                                ),
+                              ),
+                              Text(
+                                'gameYourTurnChooseAction'.tr,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.nunito(
+                                  color: _kTextSecondary,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        _MyCardsPreview(cards: myCards),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  if (enabledOptions.isNotEmpty)
+                    buildSection(
+                      title: 'gameActionAvailable'.tr,
+                      sectionOptions: enabledOptions,
+                      titleColor: AppColors.greenLight,
+                      icon: Icons.check_circle_rounded,
+                    ),
+                  if (disabledOptions.isNotEmpty) ...[
+                    const SizedBox(height: 10),
+                    buildSection(
+                      title: 'gameActionDisabled'.tr,
+                      sectionOptions: disabledOptions,
+                      titleColor: _kTextSecondary,
+                      icon: Icons.lock_rounded,
+                    ),
+                  ],
+                  if (enabledOptions.isEmpty && disabledOptions.isEmpty)
+                    Text(
+                      'gameNoActions'.tr,
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.nunito(
+                        color: _kTextSecondary,
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'gameActionSectionHint'.tr,
+                    style: GoogleFonts.nunito(
+                      color: _kTextSecondary,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         );
       },
@@ -309,25 +552,95 @@ class _ActionButtons extends StatelessWidget {
   }
 }
 
-class _ActionTile extends StatelessWidget {
+class _MyCardsPreview extends StatelessWidget {
+  final List<CoupCardModel> cards;
+
+  const _MyCardsPreview({required this.cards});
+
+  @override
+  Widget build(BuildContext context) {
+    final previewCards = cards.isEmpty ? [null, null] : List<CoupCardModel?>.from(cards);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 5),
+      decoration: BoxDecoration(
+        color: _kSurface.withValues(alpha: 0.55),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: _kBorder.withValues(alpha: 0.9)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Text(
+            'gameYourCards'.tr,
+            style: GoogleFonts.nunito(
+              color: _kTextSecondary,
+              fontSize: 9.5,
+              fontWeight: FontWeight.w800,
+              height: 1,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (var i = 0; i < previewCards.length; i++) ...[
+                if (i > 0) const SizedBox(width: 4),
+                SizedBox(
+                  width: 33,
+                  height: 48,
+                  child: FittedBox(
+                    fit: BoxFit.contain,
+                    child: CardWidget(
+                      roleType: previewCards[i]?.roleType,
+                      isHidden: previewCards[i] == null,
+                      isEliminated: previewCards[i]?.isRevealed ?? false,
+                      small: true,
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionOption {
   final CoupActionType action;
   final bool enabled;
-  final bool compact;
-  final double height;
+  final bool isFakeAction;
+
+  const _ActionOption({
+    required this.action,
+    required this.enabled,
+    required this.isFakeAction,
+  });
+}
+
+class _ActionTile extends StatefulWidget {
+  final CoupActionType action;
+  final bool enabled;
   final bool showFakeBadge;
   final VoidCallback onTap;
 
   const _ActionTile({
     required this.action,
     required this.enabled,
-    this.compact = false,
-    this.height = 60,
     this.showFakeBadge = false,
     required this.onTap,
   });
 
+  @override
+  State<_ActionTile> createState() => _ActionTileState();
+}
+
+class _ActionTileState extends State<_ActionTile> {
+  bool _hovered = false;
+
   String get _label {
-    switch (action) {
+    switch (widget.action) {
       case CoupActionType.income:
         return 'actionIncome'.tr;
       case CoupActionType.foreignAid:
@@ -343,33 +656,33 @@ class _ActionTile extends StatelessWidget {
       case CoupActionType.ambassador:
         return 'actionExchange'.tr;
       default:
-        return action.firestoreType;
+        return widget.action.firestoreType;
     }
   }
 
-  String get _compactLabel {
-    switch (action) {
+  String get _description {
+    switch (widget.action) {
       case CoupActionType.income:
-        return 'Income';
+        return 'actionIncomeDesc'.tr;
       case CoupActionType.foreignAid:
-        return 'Aid';
+        return 'actionForeignAidDesc'.tr;
       case CoupActionType.coup:
-        return 'Coup';
+        return 'actionCoupDesc'.tr;
       case CoupActionType.duke:
-        return 'Tax';
+        return 'actionTaxDesc'.tr;
       case CoupActionType.assassin:
-        return 'Assassin';
+        return 'actionAssassinateDesc'.tr;
       case CoupActionType.captain:
-        return 'Steal';
+        return 'actionStealDesc'.tr;
       case CoupActionType.ambassador:
-        return 'Swap';
+        return 'actionExchangeDesc'.tr;
       default:
-        return _label;
+        return '';
     }
   }
 
   IconData get _icon {
-    switch (action) {
+    switch (widget.action) {
       case CoupActionType.income:
         return Icons.savings_rounded;
       case CoupActionType.foreignAid:
@@ -390,98 +703,211 @@ class _ActionTile extends StatelessWidget {
   }
 
   Color get _color {
-    switch (action) {
+    switch (widget.action) {
       case CoupActionType.income:
         return AppColors.greenEmeraldDark;
       case CoupActionType.foreignAid:
         return AppColors.greenTeal;
       case CoupActionType.coup:
         return AppColors.redError;
+      case CoupActionType.assassin:
+        return AppColors.assassinAccent;
       default:
-        final role = action.claimedRole;
+        final role = widget.action.claimedRole;
         return CardWidget.roleColor(role);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final enabled = widget.enabled;
     final color = enabled ? _color : _kTextSecondary;
-    final label = _compactLabel;
-
-    return _GamePressable(
-      onTap: enabled ? onTap : null,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        constraints: BoxConstraints(minHeight: height, maxHeight: height),
-        padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 10, vertical: 0),
-        decoration: BoxDecoration(
-          color: enabled ? color.withValues(alpha: (0.15)) : _kSurfaceHigh,
-          borderRadius: BorderRadius.circular(compact ? 11 : 12),
-          border: Border.all(
-            color: enabled ? color.withValues(alpha: (0.60)) : _kBorder,
-            width: enabled ? 1.2 : 1,
-          ),
-          boxShadow:
-              enabled ? [BoxShadow(color: color.withValues(alpha: (0.12)), blurRadius: 8)] : null,
-        ),
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Positioned.fill(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Icon(_icon, size: compact ? 14 : 15, color: color),
-                  const SizedBox(width: 4),
-                  Flexible(
-                    child: Text(
-                      label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: color,
-                        fontSize: compact ? 10 : 11,
-                        fontWeight: FontWeight.w700,
-                        height: 1,
-                        letterSpacing: 0.1,
-                      ),
-                    ),
-                  ),
-                ],
+    final desc = _description;
+    final scale = _hovered && enabled ? 1.018 : 1.0;
+    final cardTop = enabled ? color.withValues(alpha: 0.18) : _kSurfaceHigh.withValues(alpha: 0.85);
+    final cardBottom =
+        enabled ? color.withValues(alpha: 0.10) : _kSurfaceHigh.withValues(alpha: 0.65);
+    return MouseRegion(
+      cursor: enabled ? SystemMouseCursors.click : SystemMouseCursors.basic,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedScale(
+        duration: const Duration(milliseconds: 130),
+        curve: Curves.easeOut,
+        scale: scale,
+        child: _GamePressable(
+          onTap: enabled ? widget.onTap : null,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 180),
+            padding: const EdgeInsets.fromLTRB(9, 7, 9, 7),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [cardTop, cardBottom],
               ),
-            ),
-            if (showFakeBadge)
-              Positioned(
-                top: -1,
-                right: -1,
-                child: Container(
-                  width: compact ? 14 : 16,
-                  height: compact ? 14 : 16,
-                  decoration: BoxDecoration(
-                    color: AppColors.kGoldAmber,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(color: AppColors.kGoldAmberDark, width: 1),
-                    boxShadow: [
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: enabled ? color.withValues(alpha: 0.60) : _kBorder,
+                width: enabled ? 1.2 : 1,
+              ),
+              boxShadow: enabled
+                  ? [
                       BoxShadow(
-                        color: AppColors.kGoldAmber.withValues(alpha: (0.34)),
-                        blurRadius: 8,
+                        color: color.withValues(alpha: _hovered ? 0.30 : 0.16),
+                        blurRadius: _hovered ? 18 : 12,
+                        offset: const Offset(0, 2),
                       ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    '!',
-                    style: TextStyle(
-                      color: AppColors.black.withValues(alpha: (0.85)),
-                      fontSize: compact ? 9.5 : 10.5,
-                      fontWeight: FontWeight.w900,
+                    ]
+                  : null,
+            ),
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 22,
+                          height: 22,
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.14),
+                            borderRadius: BorderRadius.circular(999),
+                            border: Border.all(color: color.withValues(alpha: 0.32)),
+                          ),
+                          child: Icon(_icon, size: 13, color: color),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            _label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.nunito(
+                              color: color,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.1,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      desc,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: GoogleFonts.nunito(
+                        color: enabled ? _kTextPrimary.withValues(alpha: 0.88) : _kTextSecondary,
+                        fontSize: 10.9,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                      ),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        if (_costTag != null) _metaTag(_costTag!, color),
+                        if (_needTargetTag != null) ...[
+                          const SizedBox(width: 4),
+                          _metaTag(_needTargetTag!, color),
+                        ],
+                        if (_claimTag != null) ...[
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: _metaTag(_claimTag!, color, rightAligned: true),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+                if (widget.showFakeBadge)
+                  Positioned(
+                    top: -1,
+                    right: -1,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: AppColors.kGoldAmber,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: AppColors.kGoldAmberDark, width: 1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.kGoldAmber.withValues(alpha: 0.34),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '!',
+                        style: TextStyle(
+                          color: AppColors.black.withValues(alpha: 0.85),
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-          ],
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  String? get _costTag {
+    switch (widget.action) {
+      case CoupActionType.income:
+        return '+1';
+      case CoupActionType.foreignAid:
+        return '+2';
+      case CoupActionType.duke:
+        return '+3';
+      case CoupActionType.assassin:
+        return '-3';
+      case CoupActionType.coup:
+        return '-7';
+      default:
+        return null;
+    }
+  }
+
+  String? get _needTargetTag => CoupFunction.isNeedPlayerTarget(widget.action) ? 'Target' : null;
+
+  String? get _claimTag {
+    final role = widget.action.claimedRole;
+    if (role == null) return null;
+    return role.localizedName;
+  }
+
+  Widget _metaTag(String text, Color color, {bool rightAligned = false}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2.5),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withValues(alpha: 0.42)),
+      ),
+      child: Text(
+        text,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        textAlign: rightAligned ? TextAlign.right : TextAlign.left,
+        style: GoogleFonts.nunito(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+          height: 1,
         ),
       ),
     );
@@ -650,7 +1076,7 @@ class _PhaseActionButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 textAlign: TextAlign.center,
-                style: GoogleFonts.rajdhani(
+                style: GoogleFonts.nunito(
                   color: textColor,
                   fontSize: 10.5,
                   fontWeight: FontWeight.w700,

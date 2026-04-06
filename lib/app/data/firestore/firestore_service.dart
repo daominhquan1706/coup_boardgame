@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,8 +13,7 @@ import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
 import 'package:get/get.dart';
 
 class FirestoreService extends GetxService {
-  static const String _revealReasonChallengeActorLost =
-      'challenge_actor_lost';
+  static const String _revealReasonChallengeActorLost = 'challenge_actor_lost';
   static const String _revealReasonChallengeChallengerLost =
       'challenge_challenger_lost';
   static const String _revealReasonBlockChallengeBlockerLost =
@@ -143,7 +143,53 @@ class FirestoreService extends GetxService {
   }
 
   Stream<CoupRoomModel> getRoomStream(String roomId) {
-    return _games.doc(roomId).snapshots().asyncMap((_) => getRoom(roomId));
+    return Stream<CoupRoomModel>.multi((controller) {
+      StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? gameSub;
+      StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? playersSub;
+      var isFetching = false;
+      var hasPending = false;
+
+      Future<void> emitLatest() async {
+        if (isFetching) {
+          hasPending = true;
+          return;
+        }
+
+        isFetching = true;
+        do {
+          hasPending = false;
+          try {
+            final latest = await getRoom(roomId);
+            controller.add(latest);
+          } catch (e, st) {
+            controller.addError(e, st);
+          }
+        } while (hasPending);
+        isFetching = false;
+      }
+
+      void scheduleEmit() {
+        unawaited(emitLatest());
+      }
+
+      gameSub = _games.doc(roomId).snapshots().listen(
+            (_) => scheduleEmit(),
+            onError: controller.addError,
+          );
+
+      playersSub = _playersRef(roomId).snapshots().listen(
+            (_) => scheduleEmit(),
+            onError: controller.addError,
+          );
+
+      // Emit immediately so UI has initial data before first snapshot event.
+      scheduleEmit();
+
+      controller.onCancel = () async {
+        await gameSub?.cancel();
+        await playersSub?.cancel();
+      };
+    });
   }
 
   Stream<List<GameHistoryEntry>> getActionHistoryStream(String roomId) {
@@ -318,21 +364,8 @@ class FirestoreService extends GetxService {
           throw JoinRoomError('Game already started');
         }
 
-        final count = (game['playersCount'] as int?) ?? 0;
-        if (count >= Constant.maxPlayersPerRoom) {
-          throw JoinRoomError('Room is full');
-        }
-
         final existingPlayer = await tx.get(playerRef);
-        if (!existingPlayer.exists) {
-          tx.update(gameRef, {
-            'playersCount': count + 1,
-            'playerOrder': FieldValue.arrayUnion(<String>[player.name]),
-          });
-
-          tx.set(
-              playerRef, _playerToFirestore(player), SetOptions(merge: true));
-        } else {
+        if (existingPlayer.exists) {
           final updateData = <String, dynamic>{};
           final display = player.displayName?.trim();
           if (display != null && display.isNotEmpty) {
@@ -341,7 +374,19 @@ class FirestoreService extends GetxService {
           if (updateData.isNotEmpty) {
             tx.update(playerRef, updateData);
           }
+          return;
         }
+
+        final count = (game['playersCount'] as int?) ?? 0;
+        if (count >= Constant.maxPlayersPerRoom) {
+          throw JoinRoomError('Room is full');
+        }
+
+        tx.update(gameRef, {
+          'playersCount': count + 1,
+          'playerOrder': FieldValue.arrayUnion(<String>[player.name]),
+        });
+        tx.set(playerRef, _playerToFirestore(player), SetOptions(merge: true));
       });
 
       return true;
@@ -405,14 +450,16 @@ class FirestoreService extends GetxService {
       throw JoinRoomError('Game already started');
     }
 
+    final playerDoc = await _playersRef(roomId).doc(userName).get();
+    if (playerDoc.exists) {
+      // Player already exists in this room - allow rejoin if game is still waiting
+      // This handles the case where user was disconnected or redirected unexpectedly
+      return true;
+    }
+
     final count = (game.data()!['playersCount'] as int?) ?? 0;
     if (count >= Constant.maxPlayersPerRoom) {
       throw JoinRoomError('Room is full');
-    }
-
-    final playerDoc = await _playersRef(roomId).doc(userName).get();
-    if (playerDoc.exists) {
-      throw JoinRoomError('Name is already exist');
     }
 
     return true;
@@ -531,8 +578,15 @@ class FirestoreService extends GetxService {
         throw JoinRoomError('Need at least 2 players');
       }
 
-      final playerIds = playersSnap.docs.map((e) => e.id).toList()
-        ..shuffle(_random);
+      final playerIds = playersSnap.docs.map((e) => e.id).toList();
+      final roundRandom = Random(
+        DateTime.now().microsecondsSinceEpoch ^
+            roomId.hashCode ^
+            playersSnap.docs.length,
+      );
+      playerIds.shuffle(roundRandom);
+      final firstTurnPlayerId =
+          playerIds[roundRandom.nextInt(playerIds.length)];
       final deck = _generateStandardDeck();
 
       for (final playerDoc in playersSnap.docs) {
@@ -553,7 +607,7 @@ class FirestoreService extends GetxService {
         'startedAt': FieldValue.serverTimestamp(),
         'deck': deck,
         'playerOrder': playerIds,
-        'currentTurnPlayerId': playerIds.first,
+        'currentTurnPlayerId': firstTurnPlayerId,
         'winnerId': null,
         'currentActionId': null,
         'currentBlockId': null,
@@ -2233,8 +2287,8 @@ class FirestoreService extends GetxService {
         (playerData['influences'] as List<dynamic>? ?? <dynamic>[])
             .map((e) => e.toString())
             .toList(growable: false);
-    final isBot = _isBotPlayerId(playerId) ||
-        ((playerData['isBot'] as bool?) ?? false);
+    final isBot =
+        _isBotPlayerId(playerId) || ((playerData['isBot'] as bool?) ?? false);
     return !isBot && influences.isNotEmpty;
   }
 

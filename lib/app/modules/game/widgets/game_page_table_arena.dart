@@ -34,7 +34,9 @@ class _GameBoardTab extends StatelessWidget {
     final showActionPanel = _shouldShowActionPanel();
 
     final board = E2ETag(
-      label: viewport.isCompact ? 'e2e-game-layout-compact' : 'e2e-game-layout-wide',
+      label: viewport.isCompact
+          ? 'e2e-game-layout-compact'
+          : 'e2e-game-layout-wide',
       child: Padding(
         padding: EdgeInsets.fromLTRB(
           viewport.isPhone ? 10 : 14,
@@ -44,14 +46,17 @@ class _GameBoardTab extends StatelessWidget {
         ),
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: viewport.isCompact ? 940 : 1220),
+            constraints:
+                BoxConstraints(maxWidth: viewport.isCompact ? 940 : 1220),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
                   child: SingleChildScrollView(
                     child: _TableArena(
-                        room: room, controller: controller, compact: viewport.isCompact),
+                        room: room,
+                        controller: controller,
+                        compact: viewport.isCompact),
                   ),
                 ),
                 if (showActionPanel) ...[
@@ -85,7 +90,8 @@ class _TableArena extends StatelessWidget {
   final GameStartController controller;
   final bool compact;
 
-  const _TableArena({required this.room, required this.controller, this.compact = false});
+  const _TableArena(
+      {required this.room, required this.controller, this.compact = false});
 
   List<CoupPlayerModel> _orderedPlayers(CoupPlayerModel? me) {
     if (room.players.isEmpty) return const [];
@@ -115,14 +121,13 @@ class _TableArena extends StatelessWidget {
         final availableWidth = lc.maxWidth;
         final topSpacing = viewport.isPhone ? 8.0 : 10.0;
         final seatCount = math.max(1, opponents.length);
-        final opponentMaxWidth = seatCount >= 5
+        final opponentBaseWidth = seatCount >= 5
             ? (compact ? 164.0 : 172.0)
             : seatCount >= 4
                 ? (compact ? 178.0 : 196.0)
                 : (compact ? 224.0 : 244.0);
-        final opponentTileWidth = ((availableWidth - ((seatCount - 1) * topSpacing)) / seatCount)
-            .clamp(compact ? 128.0 : 138.0, opponentMaxWidth)
-            .toDouble();
+        final opponentsRowWidth =
+            (seatCount * opponentBaseWidth) + ((seatCount - 1) * topSpacing);
         final meCardWidth = ((availableWidth - 48) / 2)
             .clamp(viewport.isPhone ? 96.0 : 110.0, compact ? 140.0 : 160.0)
             .toDouble();
@@ -156,25 +161,30 @@ class _TableArena extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (opponents.isNotEmpty)
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minWidth: availableWidth),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        for (var i = 0; i < opponents.length; i++) ...[
-                          if (i > 0) SizedBox(width: topSpacing),
-                          SizedBox(
-                            width: opponentTileWidth,
-                            child: _OpponentSeat(
-                              player: opponents[i],
-                              compact: compact,
-                              isCurrentTurn: opponents[i].name == room.currentTurn,
+                SizedBox(
+                  width: availableWidth,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.topCenter,
+                    child: SizedBox(
+                      width: opponentsRowWidth,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          for (var i = 0; i < opponents.length; i++) ...[
+                            if (i > 0) SizedBox(width: topSpacing),
+                            SizedBox(
+                              width: opponentBaseWidth,
+                              child: _OpponentSeat(
+                                player: opponents[i],
+                                compact: compact,
+                                isCurrentTurn:
+                                    opponents[i].name == room.currentTurn,
+                              ),
                             ),
-                          ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 )
@@ -189,7 +199,7 @@ class _TableArena extends StatelessWidget {
                   ),
                   child: Text(
                     'msgWaitingForPlayers'.tr,
-                    style: GoogleFonts.rajdhani(
+                    style: GoogleFonts.nunito(
                       color: _kTextSecondary,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -208,7 +218,7 @@ class _TableArena extends StatelessWidget {
                 Center(
                   child: Text(
                     'msgLoadingGame'.tr,
-                    style: GoogleFonts.rajdhani(
+                    style: GoogleFonts.nunito(
                       color: _kTextSecondary,
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -249,7 +259,9 @@ class _OpponentSeat extends StatelessWidget {
               : [AppColors.kBlue, AppColors.kBlueDark],
         ),
         border: Border.all(
-          color: isCurrentTurn ? _kGold : AppColors.white.withValues(alpha: (0.22)),
+          color: isCurrentTurn
+              ? _kGold
+              : AppColors.white.withValues(alpha: (0.22)),
           width: isCurrentTurn ? 1.8 : 1,
         ),
       ),
@@ -261,8 +273,10 @@ class _OpponentSeat extends StatelessWidget {
               size: avatarSize * 0.5,
             )
           : Text(
-              player.shownName.isNotEmpty ? player.shownName[0].toUpperCase() : '?',
-              style: GoogleFonts.rajdhani(
+              player.shownName.isNotEmpty
+                  ? player.shownName[0].toUpperCase()
+                  : '?',
+              style: GoogleFonts.nunito(
                 color: AppColors.white,
                 fontSize: avatarSize * 0.44,
                 fontWeight: FontWeight.w800,
@@ -279,9 +293,11 @@ class _OpponentSeat extends StatelessWidget {
     final totalCards = player.cards.isNotEmpty ? player.cards.length : 2;
     final seat = AnimatedContainer(
       duration: _kEmphasisMotion,
-      padding: EdgeInsets.symmetric(horizontal: compact ? 8 : 9, vertical: compact ? 9 : 11),
+      padding: EdgeInsets.symmetric(
+          horizontal: compact ? 8 : 9, vertical: compact ? 9 : 11),
       decoration: BoxDecoration(
-        color: isCurrentTurn ? _kSurfaceHigh : _kSurface.withValues(alpha: (0.72)),
+        color:
+            isCurrentTurn ? _kSurfaceHigh : _kSurface.withValues(alpha: (0.72)),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
           color: isCurrentTurn ? _kGold.withValues(alpha: (0.88)) : _kBorder,
@@ -316,7 +332,7 @@ class _OpponentSeat extends StatelessWidget {
                       player.shownName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.rajdhani(
+                      style: GoogleFonts.nunito(
                         color: isCurrentTurn ? _kGoldLight : _kTextPrimary,
                         fontSize: compact ? 13 : 14,
                         fontWeight: FontWeight.w700,
@@ -363,7 +379,8 @@ class _OpponentSeat extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: List.generate(totalCards, (index) {
-              final card = index < player.cards.length ? player.cards[index] : null;
+              final card =
+                  index < player.cards.length ? player.cards[index] : null;
               return Padding(
                 padding: EdgeInsets.only(left: index == 0 ? 0 : 5),
                 child: SizedBox(
@@ -455,16 +472,19 @@ class _MeSeat extends StatelessWidget {
                   return Transform.scale(
                     scale: emphasisScale,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 9, vertical: 4),
                       decoration: BoxDecoration(
                         color: _kGold.withValues(alpha: (0.18)),
                         borderRadius: BorderRadius.circular(999),
-                        border: Border.all(color: _kGold.withValues(alpha: (0.55))),
+                        border:
+                            Border.all(color: _kGold.withValues(alpha: (0.55))),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.monetization_on_rounded, color: _kGold, size: 14),
+                          const Icon(Icons.monetization_on_rounded,
+                              color: _kGold, size: 14),
                           const SizedBox(width: 3),
                           Text(
                             '$displayCoins ${'coins'.tr}',
@@ -488,7 +508,7 @@ class _MeSeat extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: GoogleFonts.rajdhani(
+            style: GoogleFonts.nunito(
               color: _kTextPrimary,
               fontSize: compact ? 14 : 16,
               fontWeight: FontWeight.w700,
@@ -501,7 +521,8 @@ class _MeSeat extends StatelessWidget {
             spacing: compact ? 10 : 14,
             runSpacing: 8,
             children: List.generate(totalCards, (index) {
-              final card = index < player.cards.length ? player.cards[index] : null;
+              final card =
+                  index < player.cards.length ? player.cards[index] : null;
               return _MeInfluenceCard(card: card, width: cardWidth);
             }),
           ),

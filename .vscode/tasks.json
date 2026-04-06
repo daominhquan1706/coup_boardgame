@@ -27,6 +27,16 @@
             ],
             "group": "build"
         },
+        {
+            "type": "shell",
+            "label": "Deploy Web on Firebase Hosting",
+            "command": "npm",
+            "args": [
+                "run",
+                "deploy:hosting"
+            ],
+            "group": "build"
+        },
         // Generate Models
         {
             "type": "flutter",

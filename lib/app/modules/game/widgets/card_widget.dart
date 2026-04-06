@@ -231,7 +231,7 @@ class CardWidget extends StatelessWidget {
                                       title,
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: GoogleFonts.rajdhani(
+                                      style: GoogleFonts.nunito(
                                         color: Colors.white,
                                         fontSize: titleSize,
                                         fontWeight: FontWeight.w700,
@@ -264,7 +264,7 @@ class CardWidget extends StatelessWidget {
                         ),
                         child: Text(
                           'cardStatusLost'.tr,
-                          style: GoogleFonts.rajdhani(
+                          style: GoogleFonts.nunito(
                             color: palette.ink.withValues(alpha: 0.78),
                             fontSize: small ? 8 : 9,
                             fontWeight: FontWeight.w800,

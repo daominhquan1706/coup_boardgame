@@ -55,6 +55,33 @@ class _GameViewport {
 
 enum _GameScreenTab { game, history, rules, settings }
 
+class _WaitingIndicator extends StatelessWidget {
+  final String? message;
+
+  const _WaitingIndicator({this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(
+            width: 12,
+            height: 12,
+            child: CircularProgressIndicator(strokeWidth: 1.4, color: _kTextSecondary),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            message ?? 'gameWaitingOthersResponse'.tr,
+            style: GoogleFonts.nunito(color: _kTextSecondary, fontSize: 12),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 // ─── Main page ───────────────────────────────────────────────────────────────
 class GamePage extends StatefulWidget {
   const GamePage({super.key});
@@ -91,6 +118,38 @@ class _GamePageState extends State<GamePage> {
       case _GameScreenTab.settings:
         return Icons.tune_rounded;
     }
+  }
+
+  bool _shouldShowWaitingBar(CoupRoomModel room) {
+    if (room.roomState != GameState.playing) return false;
+
+    switch (room.phase) {
+      case GamePhase.challenge:
+        return !controller.canRespondChallenge(room);
+      case GamePhase.block:
+        return !controller.canRespondBlock(room);
+      case GamePhase.blockChallenge:
+        return !controller.canRespondBlockChallenge(room);
+      default:
+        return false;
+    }
+  }
+
+  String _getWaitingMessageForPhase(CoupRoomModel room) {
+    switch (room.phase) {
+      case GamePhase.challenge:
+        return 'gameWaitingChallenge'.tr;
+      case GamePhase.block:
+        return 'gameWaitingBlock'.tr;
+      case GamePhase.blockChallenge:
+        return 'gameWaitingBlockChallenge'.tr;
+      default:
+        return 'gameWaitingOthersResponse'.tr;
+    }
+  }
+
+  Widget _buildWaitingIndicatorForPhase(CoupRoomModel room) {
+    return _WaitingIndicator(message: _getWaitingMessageForPhase(room));
   }
 
   Widget _tabViewFor(
@@ -145,7 +204,7 @@ class _GamePageState extends State<GamePage> {
                     const CircularProgressIndicator(color: _kGold, strokeWidth: 2),
                     const SizedBox(height: 16),
                     Text('msgLoadingGame'.tr,
-                        style: GoogleFonts.rajdhani(color: _kTextSecondary, fontSize: 14)),
+                        style: GoogleFonts.nunito(color: _kTextSecondary, fontSize: 14)),
                   ],
                 ),
               )
@@ -173,12 +232,12 @@ class _GamePageState extends State<GamePage> {
                                         labelType: NavigationRailLabelType.all,
                                         minWidth: 68,
                                         minExtendedWidth: 96,
-                                        selectedLabelTextStyle: GoogleFonts.rajdhani(
+                                        selectedLabelTextStyle: GoogleFonts.nunito(
                                           color: _kGold,
                                           fontSize: 12,
                                           fontWeight: FontWeight.w700,
                                         ),
-                                        unselectedLabelTextStyle: GoogleFonts.rajdhani(
+                                        unselectedLabelTextStyle: GoogleFonts.nunito(
                                           color: _kTextSecondary,
                                           fontSize: 11.5,
                                           fontWeight: FontWeight.w600,
@@ -213,30 +272,41 @@ class _GamePageState extends State<GamePage> {
               ),
         bottomNavigationBar: room == null || useRailNav
             ? null
-            : E2ETag(
-                label: 'e2e-game-nav-bottom',
-                child: NavigationBar(
-                  height: 74,
-                  backgroundColor: _kSurface,
-                  indicatorColor: _kGold.withValues(alpha: (0.16)),
-                  surfaceTintColor: Colors.transparent,
-                  selectedIndex: _currentTab.index,
-                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                  onDestinationSelected: (index) {
-                    setState(() {
-                      _currentTab = _GameScreenTab.values[index];
-                    });
-                  },
-                  destinations: _GameScreenTab.values
-                      .map(
-                        (tab) => NavigationDestination(
-                          icon: Icon(_iconForTab(tab), color: _kTextSecondary),
-                          selectedIcon: Icon(_iconForTab(tab), color: _kGold),
-                          label: _labelForTab(tab),
-                        ),
-                      )
-                      .toList(),
-                ),
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_shouldShowWaitingBar(room))
+                    Container(
+                      height: 32,
+                      color: _kSurfaceHigh,
+                      child: _buildWaitingIndicatorForPhase(room),
+                    ),
+                  E2ETag(
+                    label: 'e2e-game-nav-bottom',
+                    child: NavigationBar(
+                      height: 74,
+                      backgroundColor: _kSurface,
+                      indicatorColor: _kGold.withValues(alpha: (0.16)),
+                      surfaceTintColor: Colors.transparent,
+                      selectedIndex: _currentTab.index,
+                      labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+                      onDestinationSelected: (index) {
+                        setState(() {
+                          _currentTab = _GameScreenTab.values[index];
+                        });
+                      },
+                      destinations: _GameScreenTab.values
+                          .map(
+                            (tab) => NavigationDestination(
+                              icon: Icon(_iconForTab(tab), color: _kTextSecondary),
+                              selectedIcon: Icon(_iconForTab(tab), color: _kGold),
+                              label: _labelForTab(tab),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                ],
               ),
       );
     });
