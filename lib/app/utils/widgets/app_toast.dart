@@ -7,16 +7,17 @@ class AppToast {
   AppToast._();
 
   static const Color _surface = AppColors.kSurface;
-  static const Color _border = AppColors.kBorder;
   static const Color _success = AppColors.greenSuccess;
   static const Color _error = AppColors.redError;
   static const Color _info = AppColors.kGold;
 
-  static final _toastTextStyle = AppThemes.themData.textTheme.bodyLarge?.copyWith(
+  static final _toastTextStyle =
+      AppThemes.themData.textTheme.bodyLarge?.copyWith(
     fontWeight: FontWeight.w700,
   );
 
-  static void success(String message, {Duration duration = const Duration(milliseconds: 1400)}) {
+  static void success(String message,
+      {Duration duration = const Duration(milliseconds: 1400)}) {
     _show(
       message: message,
       icon: Icons.check_circle_rounded,
@@ -25,7 +26,8 @@ class AppToast {
     );
   }
 
-  static void error(String message, {Duration duration = const Duration(milliseconds: 1800)}) {
+  static void error(String message,
+      {Duration duration = const Duration(milliseconds: 1800)}) {
     _show(
       message: message,
       icon: Icons.error_rounded,
@@ -34,7 +36,8 @@ class AppToast {
     );
   }
 
-  static void info(String message, {Duration duration = const Duration(milliseconds: 1500)}) {
+  static void info(String message,
+      {Duration duration = const Duration(milliseconds: 1500)}) {
     _show(
       message: message,
       icon: Icons.info_rounded,
@@ -49,38 +52,67 @@ class AppToast {
     required Color accent,
     required Duration duration,
   }) {
-    final screenWidth = Get.width;
-    final toastMaxWidth =
-        screenWidth < 520 ? ((screenWidth - 24).clamp(240, screenWidth)).toDouble() : 420.0;
+    if (_tryShowMaterialSnackBar(
+      message: message,
+      icon: icon,
+      accent: accent,
+      duration: duration,
+    )) {
+      return;
+    }
 
-    Get.closeAllSnackbars();
-    Get.showSnackbar(
-      GetSnackBar(
-        snackPosition: SnackPosition.BOTTOM,
-        maxWidth: toastMaxWidth,
-        margin: const EdgeInsets.fromLTRB(12, 0, 12, 14),
-        borderRadius: 14,
-        backgroundColor: _surface,
-        borderColor: _border,
-        borderWidth: 1,
-        duration: duration,
-        animationDuration: const Duration(milliseconds: 180),
-        isDismissible: true,
-        messageText: Row(
-          children: [
-            Icon(icon, size: 18, color: accent),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                message,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: _toastTextStyle,
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        _tryShowMaterialSnackBar(
+          message: message,
+          icon: icon,
+          accent: accent,
+          duration: duration,
+        );
+      } catch (_) {
+        // Intentionally swallow toast failures so app flows never crash.
+      }
+    });
+  }
+
+  static bool _tryShowMaterialSnackBar({
+    required String message,
+    required IconData icon,
+    required Color accent,
+    required Duration duration,
+  }) {
+    final context = Get.overlayContext ?? Get.context;
+    if (context == null) return false;
+
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) return false;
+
+    try {
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          duration: duration,
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: _surface,
+          content: Row(
+            children: [
+              Icon(icon, size: 18, color: accent),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  message,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: _toastTextStyle,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-    );
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 }

@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:89031302087:android:8f931c7ed2992a045c57e2",
         "android_client_info": {
-          "package_name": "com.example.coup_boardgame"
+          "package_name": "com.coup.boardgame"
         }
       },
       "oauth_client": [],

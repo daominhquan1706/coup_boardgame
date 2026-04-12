@@ -40,7 +40,7 @@ test.describe("Full Game Flow - Play to End", () => {
 
       // Step 2: Add 2 bots (minimum 3 players for interesting game)
       await addBotsInLobby(hostPage, 2);
-      await page.waitForTimeout(500);
+      await hostPage.waitForTimeout(500);
 
       // Step 3: Start game
       await startGameFromLobby(hostPage);

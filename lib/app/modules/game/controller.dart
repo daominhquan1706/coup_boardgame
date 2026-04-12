@@ -7,6 +7,7 @@ import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
 import 'package:coup_boardgame/app/modules/game/widgets/card_widget.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
+import 'package:coup_boardgame/app/services/crashlytics_service.dart';
 import 'package:coup_boardgame/app/constants/local_storage_keys.dart';
 import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
@@ -219,7 +220,8 @@ class GameStartController extends GetxController {
         } else if (latest.phase == GamePhase.blockChallenge && canRespondBlockChallenge(latest)) {
           await passBlockChallenge();
         }
-      } catch (_) {
+      } catch (e, stack) {
+        CrashlyticsService.to.recordError(e, stack, reason: 'Auto decision failed');
         // ignore auto decision errors; room stream will drive the next state
       }
     });
@@ -300,7 +302,8 @@ class GameStartController extends GetxController {
         roomCode,
         actionModel,
       );
-    } catch (e) {
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'performAction failed');
       AppToast.error(e.toString());
     }
   }
@@ -493,7 +496,8 @@ class GameStartController extends GetxController {
           userName,
           revealedInfluence: revealedInfluence,
         );
-      } catch (e) {
+      } catch (e, stack) {
+        CrashlyticsService.to.recordError(e, stack, reason: 'Pending reveal selection failed');
         AppToast.error(e.toString());
         _handledRevealSelectionActionId = null;
       } finally {
@@ -547,7 +551,8 @@ class GameStartController extends GetxController {
           userName,
           keepInfluences: keepInfluences,
         );
-      } catch (e) {
+      } catch (e, stack) {
+        CrashlyticsService.to.recordError(e, stack, reason: 'Pending exchange selection failed');
         AppToast.error(e.toString());
         _handledExchangeSelectionActionId = null;
       } finally {

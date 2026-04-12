@@ -43,5 +43,5 @@ class JoinRoomError extends ApiErrors {
   @override
   // ignore: overridden_fields
   final String message;
-  JoinRoomError(this.message) : super(name: 'CoupRoomIsFull');
+  JoinRoomError(this.message) : super(name: 'JoinRoomError');
 }

@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
+import 'package:coup_boardgame/app/services/crashlytics_service.dart';
 import 'package:coup_boardgame/firebase_options.dart';
+import 'dart:ui';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -16,6 +20,20 @@ void main() async {
   await GetStorage.init();
   //set up firebase
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  
+  // Pass all uncaught "fatal" errors from the framework to Crashlytics
+  if (!kIsWeb) {
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+    
+    // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
+
   runApp(const MyApp());
 }
 
@@ -56,5 +74,6 @@ class AppBinding extends Bindings {
   @override
   void dependencies() {
     Get.put(FirestoreService());
+    Get.put(CrashlyticsService());
   }
 }

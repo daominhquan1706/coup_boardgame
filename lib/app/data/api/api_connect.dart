@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:get/get_connect/http/src/status/http_status.dart';
 import 'package:coup_boardgame/app/data/api/api_error.dart';
+import 'package:coup_boardgame/app/services/crashlytics_service.dart';
 import 'package:coup_boardgame/app/utils/constants.dart';
 
 class ApiConnect extends GetConnect {
@@ -200,9 +201,11 @@ extension ResErr<T> on Response<T> {
       }
 
       return body!;
-    } on TimeoutException catch (_) {
+    } on TimeoutException catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'API response timeout decode');
       throw TimeoutError();
-    } catch (_) {
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'API response decode unknown error');
       throw UnknownError();
     }
   }

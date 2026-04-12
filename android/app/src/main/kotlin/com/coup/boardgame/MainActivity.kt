@@ -1,4 +1,4 @@
-package com.example.coup_boardgame
+package com.coup.boardgame
 
 import io.flutter.embedding.android.FlutterActivity
 

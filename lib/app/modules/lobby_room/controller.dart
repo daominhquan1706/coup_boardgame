@@ -5,6 +5,7 @@ import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_player_model.dart';
 import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
+import 'package:coup_boardgame/app/services/crashlytics_service.dart';
 import 'package:coup_boardgame/app/utils/widgets/app_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -140,7 +141,8 @@ class LobbyRoomController extends GetxController {
         final fresh = await _firestoreService.getPlayer(roomCode, userName);
         currentReady = fresh.isReady;
         isBot = fresh.isBot;
-      } catch (_) {
+      } catch (e, stack) {
+        CrashlyticsService.to.recordError(e, stack, reason: 'Failed to get fresh player data in toggleReady');
         AppToast.error('msgReadyUpdateFailed'.tr);
         return;
       }
@@ -164,7 +166,8 @@ class LobbyRoomController extends GetxController {
         }
       });
       room.refresh();
-    } catch (_) {
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'Failed to update player ready status');
       AppToast.error('msgReadyUpdateFailed'.tr);
     }
   }
@@ -253,7 +256,8 @@ class LobbyRoomController extends GetxController {
         ),
       );
       _hasJoinedRoom = true;
-    } catch (_) {
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'Failed to join room in initializeLobby');
       AppToast.error('msgFailedJoinRoom'.tr);
       Get.offAllNamed(AppRoutes.home);
       return;
@@ -261,7 +265,8 @@ class LobbyRoomController extends GetxController {
 
     try {
       room.value = await _firestoreService.getRoom(roomCode);
-    } catch (_) {
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'Failed to fetch room initially in initializeLobby');
       // Stream below remains the source of truth.
     }
 
@@ -317,7 +322,8 @@ class LobbyRoomController extends GetxController {
     try {
       await _firestoreService.getPlayer(roomCode, userName);
       stillInRoom = true;
-    } catch (_) {
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'Player verification failed before redirect');
       stillInRoom = false;
     } finally {
       _isVerifyingMembership = false;

@@ -12,16 +12,22 @@ import 'package:coup_boardgame/app/themes/app_theme.dart';
 extension _ThemeAccess on ThemeData {
   TextStyle get dialogTitle =>
       textTheme.headlineMedium?.copyWith(color: AppColors.white) ??
-      const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w700);
+      const TextStyle(
+          color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w700);
   TextStyle get dialogBody =>
       textTheme.bodyMedium?.copyWith(color: AppColors.white) ??
-      const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w400);
+      const TextStyle(
+          color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w400);
   TextStyle get snackbarMessage =>
       textTheme.bodyMedium?.copyWith(color: AppColors.white) ??
-      const TextStyle(color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w700);
+      const TextStyle(
+          color: AppColors.white, fontSize: 16, fontWeight: FontWeight.w700);
   TextStyle get successMessage =>
       textTheme.bodyMedium?.copyWith(color: AppColors.kTextPrimary) ??
-      const TextStyle(color: AppColors.kTextPrimary, fontSize: 16, fontWeight: FontWeight.w400);
+      const TextStyle(
+          color: AppColors.kTextPrimary,
+          fontSize: 16,
+          fontWeight: FontWeight.w400);
 }
 
 class Common {
@@ -30,18 +36,36 @@ class Common {
   static final _theme = AppThemes.themData;
 
   static void showError(String error) {
-    Get.showSnackbar(
-      GetSnackBar(
-        messageText: Text(
-          error,
-          style: _theme.snackbarMessage,
+    final context = Get.overlayContext ?? Get.context;
+    if (context == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => showError(error));
+      return;
+    }
+
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    if (messenger == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => showError(error));
+      return;
+    }
+
+    try {
+      messenger.hideCurrentSnackBar();
+      messenger.showSnackBar(
+        SnackBar(
+          duration: const Duration(milliseconds: 2000),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.red,
+          margin: const EdgeInsets.all(20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          content: Text(
+            error,
+            style: _theme.snackbarMessage,
+          ),
         ),
-        margin: const EdgeInsets.all(20),
-        borderRadius: 24,
-        backgroundColor: AppColors.red,
-        duration: const Duration(milliseconds: 2000),
-      ),
-    );
+      );
+    } catch (_) {}
   }
 
   static void showLoading() {

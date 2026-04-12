@@ -11,6 +11,7 @@ import 'package:coup_boardgame/app/data/model/firestore_model/coup_room_model.da
 import 'package:coup_boardgame/app/utils/constants.dart';
 import 'package:coup_boardgame/app/utils/functions/coup_function.dart';
 import 'package:get/get.dart';
+import 'package:coup_boardgame/app/services/crashlytics_service.dart';
 
 class FirestoreService extends GetxService {
   static const String _revealReasonChallengeActorLost = 'challenge_actor_lost';
@@ -77,7 +78,8 @@ class FirestoreService extends GetxService {
       }
 
       return true;
-    } catch (e) {
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'Failed to create room');
       Get.log('Failed to create room: $e');
       return false;
     }
@@ -162,6 +164,7 @@ class FirestoreService extends GetxService {
             final latest = await getRoom(roomId);
             controller.add(latest);
           } catch (e, st) {
+            CrashlyticsService.to.recordError(e, st, reason: 'Stream fetching latest room failed');
             controller.addError(e, st);
           }
         } while (hasPending);
@@ -390,7 +393,8 @@ class FirestoreService extends GetxService {
       });
 
       return true;
-    } catch (e) {
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'Failed to add player to room (joinRoom)');
       Get.log('Failed to add player to room: $e');
       rethrow;
     }

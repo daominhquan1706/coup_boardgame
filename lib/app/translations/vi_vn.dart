@@ -114,7 +114,8 @@ const Map<String, String> viVN = {
   "settingsHeaderSubtitle": "Điều chỉnh trải nghiệm chơi và ngôn ngữ hiển thị.",
   "settingsAutoActionTitle": "Tự động hành động",
   "settingsAutoActionEnable": "Bật phản hồi tự động",
-  "settingsAutoActionSubtitle": "Game sẽ tự pass hoặc phản hồi khi hết thời gian.",
+  "settingsAutoActionSubtitle":
+      "Game sẽ tự pass hoặc phản hồi khi hết thời gian.",
   "settingsTableInfoTitle": "Thông tin bàn chơi",
   "settingsRoomCode": "Mã phòng",
   "settingsPlayers": "Người chơi",
@@ -157,11 +158,13 @@ const Map<String, String> viVN = {
   "gameActionAvailable": "Hành động có thể làm",
   "gameActionDisabled": "Hành động đang bị khóa",
   "gameActionSectionHint": "Các hành động bị khóa sẽ mở khi bạn đủ điều kiện.",
-  "gameRespondChallengePrompt": "Phản hồi: challenge hành động @action của @actor?",
+  "gameRespondChallengePrompt":
+      "Phản hồi: challenge hành động @action của @actor?",
   "gameRespondChallengePromptTarget":
       "Phản hồi: challenge hành động @action của @actor lên @target?",
   "gameRespondBlockPrompt": "Phản hồi: chặn hành động @action của @actor?",
-  "gameRespondBlockChallengePrompt": "Phản hồi: challenge lượt chặn của @actor cho @action?",
+  "gameRespondBlockChallengePrompt":
+      "Phản hồi: challenge lượt chặn của @actor cho @action?",
   "gameWaitingOthersResponse": "Đang chờ người chơi khác phản hồi...",
   "gameWaitingOthersChallenge": "Đang chờ người chơi khác challenge...",
   "gameWaitingChallenge": "Đang chờ phản hồi challenge...",
@@ -233,6 +236,9 @@ const Map<String, String> viVN = {
   "msgFailedCreateRoom": "Tạo phòng thất bại",
   "msgEnterRoomCode": "Vui lòng nhập mã phòng",
   "msgFailedJoinRoom": "Vào phòng thất bại",
+  "msgRoomNotFound": "Phòng không tồn tại",
+  "msgRoomIsFull": "Phòng đã đầy",
+  "msgGameAlreadyStarted": "Ván chơi đã bắt đầu",
   "msgOnlyHostStart": "Chỉ chủ phòng mới được bắt đầu",
   "msgAllPlayersReady": "Tất cả người chơi phải sẵn sàng",
   "msgOnlyHostAddBot": "Chỉ chủ phòng mới được thêm bot",

@@ -640,21 +640,22 @@ class _ActionTileState extends State<_ActionTile> {
   bool _hovered = false;
 
   String get _label {
+    final isCompact = MediaQuery.sizeOf(context).width < 640;
     switch (widget.action) {
       case CoupActionType.income:
         return 'actionIncome'.tr;
       case CoupActionType.foreignAid:
-        return 'actionForeignAid'.tr;
+        return isCompact ? 'Aid' : 'actionForeignAid'.tr;
       case CoupActionType.coup:
         return 'actionCoup'.tr;
       case CoupActionType.duke:
         return 'actionTax'.tr;
       case CoupActionType.assassin:
-        return 'actionAssassinate'.tr;
+        return isCompact ? 'Assassin' : 'actionAssassinate'.tr;
       case CoupActionType.captain:
         return 'actionSteal'.tr;
       case CoupActionType.ambassador:
-        return 'actionExchange'.tr;
+        return isCompact ? 'Swap' : 'actionExchange'.tr;
       default:
         return widget.action.firestoreType;
     }

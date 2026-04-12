@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:coup_boardgame/app/data/api/api_error.dart';
 import 'package:coup_boardgame/app/data/firestore/firestore_service.dart';
 import 'package:coup_boardgame/app/routes/app_pages.dart';
+import 'package:coup_boardgame/app/services/crashlytics_service.dart';
 import 'package:coup_boardgame/app/constants/local_storage_keys.dart';
 import 'package:coup_boardgame/app/utils/widgets/app_toast.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -25,13 +26,25 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     selectedLanguage.value = Get.locale?.languageCode == 'vi' ? 'vi' : 'en';
-    playerId = _storage.read<String>(LocalStorageKeys.userName) ??
-        _generatePlayerId();
+    playerId =
+        _storage.read<String>(LocalStorageKeys.userName) ?? _generatePlayerId();
     _storage.write(LocalStorageKeys.userName, playerId);
 
     defaultDisplayName = _storage.read<String>(LocalStorageKeys.displayName) ??
         'Player ${playerId.substring(playerId.length - 4)}';
     _storage.write(LocalStorageKeys.displayName, defaultDisplayName);
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    if (_storage.read('has_crashed_once') != true) {
+      _storage.write('has_crashed_once', true);
+      Future.delayed(const Duration(seconds: 4), () {
+        Get.log('Triggering auto-crash for testing...');
+        CrashlyticsService.to.forceCrash();
+      });
+    }
   }
 
   void changeLanguage(String languageCode) {
@@ -57,7 +70,8 @@ class HomeController extends GetxController {
       } else {
         AppToast.error('msgFailedCreateRoom'.tr);
       }
-    } catch (e) {
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'Failed to create room');
       AppToast.error('msgFailedCreateRoom'.tr);
     }
   }
@@ -71,20 +85,40 @@ class HomeController extends GetxController {
   }
 
   Future<void> onTapJoinRoom() async {
-    if (roomCode.value.isEmpty) {
+    final enteredRoomCode = roomCode.value.trim();
+
+    if (enteredRoomCode.isEmpty) {
       AppToast.info('msgEnterRoomCode'.tr);
       return;
     }
+
     try {
       final isCanJoinRoom = await Get.find<FirestoreService>()
-          .isCanJoinRoom(roomCode.value, playerId);
+          .isCanJoinRoom(enteredRoomCode, playerId);
       if (isCanJoinRoom) {
-        Get.toNamed(AppRoutes.lobbyRoomPath(roomCode.value));
+        Get.toNamed(AppRoutes.lobbyRoomPath(enteredRoomCode));
+      } else {
+        AppToast.error('msgRoomNotFound'.tr);
       }
-    } on JoinRoomError catch (e) {
-      AppToast.error(e.message);
-    } catch (e) {
+    } on JoinRoomError catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'Join room error');
+      AppToast.error(_joinRoomErrorMessage(e.message).tr);
+    } catch (e, stack) {
+      CrashlyticsService.to.recordError(e, stack, reason: 'Failed to join room');
       AppToast.error('msgFailedJoinRoom'.tr);
+    }
+  }
+
+  String _joinRoomErrorMessage(String message) {
+    switch (message) {
+      case 'Room not found':
+        return 'msgRoomNotFound';
+      case 'Room is full':
+        return 'msgRoomIsFull';
+      case 'Game already started':
+        return 'msgGameAlreadyStarted';
+      default:
+        return 'msgFailedJoinRoom';
     }
   }
 

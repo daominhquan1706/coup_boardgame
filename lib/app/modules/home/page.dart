@@ -2,6 +2,7 @@ import 'package:coup_boardgame/app/themes/app_colors.dart';
 import 'package:coup_boardgame/app/themes/app_text_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:coup_boardgame/app/services/crashlytics_service.dart';
 import 'package:coup_boardgame/app/utils/widgets/e2e_tag.dart';
 import 'controller.dart';
 
@@ -25,11 +26,11 @@ class HomePage extends GetView<HomeController> {
                   const SizedBox(height: 20),
                   _buildLanguageSelector(context),
                   const SizedBox(height: 20),
-                  _buildCreateSection(context),
+                  _buildJoinSection(context),
                   const SizedBox(height: 28),
                   _buildDivider(context),
                   const SizedBox(height: 28),
-                  _buildJoinSection(context),
+                  _buildCreateSection(context),
                 ],
               ),
             ),
@@ -60,6 +61,12 @@ class HomePage extends GetView<HomeController> {
           'appSubtitle'.tr,
           textAlign: TextAlign.center,
           style: AppTextStyles.title.s11.w500.ls(4),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: () => CrashlyticsService.to.forceCrash(),
+          style: ElevatedButton.styleFrom(backgroundColor: Colors.red.withValues(alpha: 0.8)),
+          child: const Text('FORCE CRASH (TEST)', style: TextStyle(color: Colors.white)),
         ),
       ],
     );
